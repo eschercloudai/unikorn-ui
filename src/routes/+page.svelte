@@ -1,8 +1,10 @@
 <script>
+	import { token } from '../credentials.js';
+
 	import Menu from '../Menu.svelte';
 	import MenuItem from '../MenuItem.svelte';
 	import SubMenu from '../SubMenu.svelte';
-	import Modal from '../Modal.svelte';
+	import LoginModal from '../LoginModal.svelte';
 
 	let showmenu = false;
 
@@ -10,29 +12,73 @@
 		showmenu = !showmenu;
 	}
 
-	/*
-function modalDismiss(e) {
-  if(e.target.id == 'modal-backdrop') {
-	  element = document.getElementById('modal-backdrop');
-	  element.style.visibility = 'hidden';
-	  element.style.opacity = '0%';
+	// logout flushes the token.
+	function logout() {
+		token.remove();
 	}
-}
-addEventListener('click', modalDismiss);
-*/
+
+	// Watch for the token being set, then we can trigger a projects
+	// update.
+	let projects = [];
+	let project = null;
+
+	token.subscribe(async (value, kind) => {
+		// If this is the initial call and the value is set, or it's a creation
+		// then update the project list.  Setting the project will trigger a
+		// token scope update, and end up in a loop.
+		if (!['initial', 'create'].includes(kind) || value == null) {
+			return;
+		}
+
+		try {
+			let headers = new Headers();
+			headers.set('Authorization', 'Bearer ' + value);
+
+			const response = await fetch('/api/v1/providers/openstack/projects', {
+				headers: headers
+			});
+
+			const result = await response.json();
+
+			projects = result;
+
+			// This will not get done automatically.
+			project = projects[0];
+			changeProject();
+		} catch (e) {
+			console.log(e);
+		}
+	});
+
+	// When the project updates, rescope the token.
+	async function changeProject() {
+		try {
+			let headers = new Headers();
+			headers.set('Authorization', 'Bearer ' + token.get());
+			headers.set('Content-Type', 'application/json');
+
+			let body = {
+				project: {
+					id: project.id
+				}
+			};
+
+			const response = await fetch('/api/v1/auth/tokens/token', {
+				method: 'POST',
+				headers: headers,
+				body: JSON.stringify(body)
+			});
+
+			const result = await response.json();
+
+			token.set(result.token);
+		} catch (e) {
+			console.log(e);
+		}
+	}
 </script>
 
-<!--
-<Modal>
-	<div class="login-modal-header">
-		<img id="logo" src="img/Horizontal_AI.png"/>
-	</div>
-	<h2>Login</h2>
-	<input type="text" id="username" placeholder="Username" autocomplete="username"/>
-	<input type="password" id="password" placeholder="Password" autocomplete="current-password"/>
-	<button type="submit">Submit</button>
-</Modal>
--->
+<LoginModal />
 
 <header>
 	<span id="hamburger" on:click={toggleMenu}>
@@ -49,13 +95,15 @@ addEventListener('click', modalDismiss);
 			alt="User Gravatar"
 		/>
 		s.murray@eschercloud.ai
-		<iconify-icon icon="material-symbols:logout" />
+		<iconify-icon icon="material-symbols:logout" on:click={logout} />
 	</div>
 
 	<div class="nav-group project">
 		<label for="project-select">Project:</label>
-		<select id="project-select" name="project">
-			<option>simon</option>
+		<select id="project-select" name="project" bind:value={project} on:change={changeProject}>
+			{#each projects as choice}
+				<option value={choice}>{choice.name}</option>
+			{/each}
 		</select>
 	</div>
 
@@ -191,6 +239,7 @@ addEventListener('click', modalDismiss);
 		color: var(--mid-grey);
 		padding: var(--padding);
 		list-style: none;
+		cursor: default;
 	}
 	:global(nav ul li:hover) {
 		color: var(--dark-grey);
@@ -284,30 +333,6 @@ addEventListener('click', modalDismiss);
 	}
 	nav.showmenu {
 		width: 100%;
-	}
-
-	/* Login modal styling */
-	.login-modal-header {
-		width: 100%;
-		display: flex;
-		flex-direction: column;
-		align-items: center;
-		margin-bottom: 1em;
-		background-color: white;
-		border-bottom: 5px solid var(--brand);
-		border-radius: var(--radius) var(--radius) 0 0;
-		box-shadow: 0 0 var(--shadow-radius) var(--mid-grey);
-	}
-
-	.login-modal {
-		background-color: var(--light-grey);
-		padding-bottom: 1em;
-	}
-
-	.login-modal-header > img {
-		padding: 2em 5em;
-		width: 15em;
-		max-width: 20em;
 	}
 
 	/* Desktop overrides */

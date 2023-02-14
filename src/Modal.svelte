@@ -1,4 +1,8 @@
-<div class="modal-backdrop">
+<script>
+	export let active = false;
+</script>
+
+<div class="modal-backdrop" class:active>
 	<div class="modal">
 		<slot />
 	</div>
@@ -6,7 +10,20 @@
 
 <style>
 	.modal-backdrop {
+		position: fixed;
+		top: 0;
+		left: 0;
+		width: 100vw;
+		height: 100vh;
 		z-index: 100;
+		visibility: hidden;
+		opacity: 0;
+		transition: opacity 0.3s ease-in-out, visibility 0.3s ease-in-out;
+	}
+
+	.modal-backdrop.active {
+		visibility: visible;
+		opacity: 100%;
 	}
 
 	.modal {
@@ -21,14 +38,10 @@
 	/* Desktop overrides */
 	@media only screen and (min-width: 720px) {
 		.modal-backdrop {
-			position: fixed;
-			width: 100vw;
-			height: 100vh;
 			backdrop-filter: blur(5px);
 			display: flex;
 			align-items: center;
 			justify-content: center;
-			transition: opacity 0.3s ease-in-out, visibility 0s ease-in 0.3s;
 		}
 
 		.modal {
