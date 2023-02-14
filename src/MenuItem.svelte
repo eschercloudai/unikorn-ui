@@ -1,13 +1,30 @@
 <script>
+	import { selected } from './menu.js';
+	import { get } from 'svelte/store';
+
+	export let id;
 	export let label;
-	export let icon;
+	export let icon = null;
+
+	let highlight = get(selected) == id;
+
+	selected.subscribe((value) => {
+		if (value != id) {
+			highlight = false;
+		}
+	});
+
+	function select() {
+		selected.set(id);
+		highlight = true;
+	}
 </script>
 
-<li>
+<li class:highlight on:click={select}>
 	{#if icon}
 		<iconify-icon {icon} />
 	{/if}
-	<label class:no-icon={!icon}>{label}</label>
+	<span class:no-icon={!icon}>{label}</span>
 </li>
 
 <style>
@@ -15,32 +32,23 @@
 		display: flex;
 		justify-content: space-between;
 		align-items: center;
-		padding: 0.5em;
-		list-style: none;
 		transition: all 0.3s ease-in-out;
 	}
 
-	li:hover {
-		background-color: var(--light-grey);
+	li.highlight {
+		color: white;
+		background-color: var(--brand);
 	}
 
-	label {
+	li.highlight iconify-icon:first-child {
+		color: white;
+	}
+
+	span {
 		flex: 1;
-		color: var(--mid-grey);
-	}
-
-	label:hover {
-		color: var(--dark-grey);
-	}
-
-	iconify-icon {
-		color: var(--brand);
-		font-size: 2em;
-		font-weight: bold;
-		margin-right: 0.5em;
 	}
 
 	.no-icon {
-		margin-left: 3em;
+		padding-left: calc(var(--icon-size) + var(--padding));
 	}
 </style>

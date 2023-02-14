@@ -1,6 +1,4 @@
 <script>
-	import Menu from './Menu.svelte';
-
 	export let label;
 	export let icon;
 
@@ -13,20 +11,18 @@
 
 <li on:click={toggle}>
 	<iconify-icon {icon} />
-	<label>{label}</label>
+	<span>{label}</span>
 	<iconify-icon class:expanded icon="material-symbols:arrow-drop-down" />
 </li>
-<Menu expanded={expanded}>
-	<slot/>
-</Menu>
+<ul class:expanded>
+	<slot />
+</ul>
 
 <style>
 	li {
 		display: flex;
 		justify-content: space-between;
 		align-items: center;
-		padding: 0.5em;
-		list-style: none;
 		transition: all 0.3s ease-in-out;
 	}
 
@@ -34,23 +30,26 @@
 		background-color: var(--light-grey);
 	}
 
-	label {
+	span {
 		flex: 1;
-		color: var(--mid-grey);
 	}
 
-	label:hover {
-		color: var(--dark-grey);
-	}
-
-	iconify-icon {
-		color: var(--brand);
-		font-size: 2em;
-		font-weight: bold;
-		margin-right: 0.5em;
+	iconify-icon:last-child {
+		transition: all 0.3s ease-in-out;
 	}
 
 	iconify-icon.expanded {
-		transform: rotate(180deg);
+		transform: rotate(-180deg);
+	}
+
+	ul {
+		max-height: 0;
+		overflow: hidden;
+		transition: all 0.3s ease-in-out;
+	}
+
+	ul.expanded {
+		max-height: 20em;
+		overflow: scroll;
 	}
 </style>

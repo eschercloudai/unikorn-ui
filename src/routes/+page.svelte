@@ -39,12 +39,15 @@ addEventListener('click', modalDismiss);
 		<iconify-icon id="hamburger-icon" icon="material-symbols:menu" />
 		<label for="hamburger-icon">Menu</label>
 	</span>
-	<img id="logo" src="img/Horizontal_AI.png" />
+	<img src="img/Horizontal_AI.png" alt="EscherCloud AI Logo" />
 </header>
 
 <nav class:showmenu>
 	<div class="nav-group user">
-		<img src="https://www.gravatar.com/avatar/4be664eabb39ff7d1ac5085bfa19cada" />
+		<img
+			src="https://www.gravatar.com/avatar/4be664eabb39ff7d1ac5085bfa19cada"
+			alt="User Gravatar"
+		/>
 		s.murray@eschercloud.ai
 		<iconify-icon icon="material-symbols:logout" />
 	</div>
@@ -56,11 +59,11 @@ addEventListener('click', modalDismiss);
 		</select>
 	</div>
 
-	<Menu expanded="true">
-		<MenuItem label="Dashboard" icon="ri:dashboard-3-line" />
+	<Menu>
+		<MenuItem id="dashboard" label="Dashboard" icon="ri:dashboard-3-line" />
 		<SubMenu label="Kubetnetes" icon="mdi:kubernetes">
-			<MenuItem label="Control Planes" />
-			<MenuItem label="Clusters" />
+			<MenuItem id="kubernetes-control-planes" label="Control Planes" />
+			<MenuItem id="kubernetes-clusters" label="Clusters" />
 		</SubMenu>
 	</Menu>
 </nav>
@@ -114,9 +117,11 @@ addEventListener('click', modalDismiss);
 		--dark-grey: rgb(96, 96, 96);
 
 		/* Various stylings to keep consistency */
-		--radius: 0.5em;
-		--shadow-radius: 0.5em;
-		--padding: 1em;
+		--radius: 0.5rem;
+		--shadow-radius: 0.5rem;
+		--padding: 0.75rem;
+		--padding-header: 4rem;
+		--icon-size: 2rem;
 	}
 
 	/* Global styles */
@@ -128,7 +133,7 @@ addEventListener('click', modalDismiss);
 	}
 	:global(h1, h2, h3, h4, h5, h6) {
 		color: var(--brand);
-		margin-top: 0;
+		margin-top: 0.5em;
 	}
 	:global(a:link, a:visited) {
 		color: var(--brand);
@@ -141,7 +146,7 @@ addEventListener('click', modalDismiss);
 		margin: 0.5em;
 		font-size: 1em;
 		border: 1px solid var(--mid-grey);
-		padding: 10px;
+		padding: var(--padding);
 		border-radius: var(--radius);
 	}
 	:global(input:focus) {
@@ -151,7 +156,7 @@ addEventListener('click', modalDismiss);
 	:global(button) {
 		color: white;
 		background-color: var(--brand);
-		padding: 0.5em;
+		padding: var(--padding);
 		margin: 0.5em;
 		border-radius: var(--radius);
 		border: 1px outset var(--brand);
@@ -169,14 +174,34 @@ addEventListener('click', modalDismiss);
 	:global(select) {
 		color: var(--mid-grey);
 		background-color: var(--light-grey);
-		padding: 0.5em;
+		padding: var(--padding);
 		font-size: 1em;
 		border: 1px solid var(--mid-grey);
 		border-radius: var(--radius);
 		width: auto;
 	}
 	:global(iconify-icon) {
-		font-size: 2em;
+		font-size: var(--icon-size);
+	}
+	:global(nav ul) {
+		margin: 0;
+		padding: 0;
+	}
+	:global(nav ul li) {
+		color: var(--mid-grey);
+		padding: var(--padding);
+		list-style: none;
+	}
+	:global(nav ul li:hover) {
+		color: var(--dark-grey);
+	}
+	:global(nav ul li iconify-icon:first-child) {
+		color: var(--brand);
+		margin-right: var(--padding);
+	}
+	iconify-icon {
+		color: var(--brand);
+		font-weight: bold;
 	}
 
 	/* Main layout - standard "Holy Grail" */
@@ -189,7 +214,7 @@ addEventListener('click', modalDismiss);
 		position: fixed;
 		top: 0;
 		width: 100%;
-		padding: 0.5em;
+		padding: var(--padding);
 		background-color: white;
 		border-bottom: 0.25em solid var(--brand);
 		z-index: 2;
@@ -197,7 +222,7 @@ addEventListener('click', modalDismiss);
 	}
 	nav {
 		position: fixed;
-		padding-top: 3.25em;
+		padding-top: var(--padding-header);
 		width: 0;
 		height: 100vh;
 		overflow-x: hidden;
@@ -210,7 +235,7 @@ addEventListener('click', modalDismiss);
 	}
 	main {
 		background-color: var(--light-grey);
-		padding: 4.25em 1em;
+		padding: var(--padding-header) var(--padding);
 		flex: 1;
 		transition: all 0.3s ease-in-out;
 		box-shadow: inset 0 0 var(--shadow-radius) var(--mid-grey);
@@ -218,10 +243,12 @@ addEventListener('click', modalDismiss);
 
 	/* Header/masthead styling */
 	#hamburger {
+		position: absolute;
 		display: flex;
 		flex-direction: column;
 		align-items: center;
 		float: left;
+		color: var(--brand);
 	}
 	#hamburger > iconify-icon {
 		font-size: 1.5em;
@@ -238,7 +265,7 @@ addEventListener('click', modalDismiss);
 	.nav-group {
 		display: flex;
 		align-items: center;
-		padding: 1em;
+		padding: var(--padding);
 		border-bottom: 1px solid var(--brand);
 	}
 	nav > .user {
@@ -247,7 +274,7 @@ addEventListener('click', modalDismiss);
 	}
 	nav > .user img {
 		max-height: 2em;
-		margin-right: 10px;
+		margin-right: var(--padding);
 		border-radius: 1em;
 		border: 1px solid black;
 	}
