@@ -110,7 +110,7 @@
 			alt="User Gravatar"
 		/>
 		s.murray@eschercloud.ai
-		<iconify-icon icon="material-symbols:logout" on:click={logout} on:keypress={logout}/>
+		<iconify-icon icon="material-symbols:logout" on:click={logout} on:keypress={logout} />
 	</div>
 
 	<div class="nav-group project">
@@ -218,7 +218,11 @@
 		font-size: 1em;
 		border: 1px solid var(--mid-grey);
 		border-radius: var(--radius);
-		width: auto;
+		width: 100%;
+	}
+	:global(select:focus) {
+		outline: none;
+		box-shadow: 0 0 var(--shadow-radius) var(--brand);
 	}
 	:global(iconify-icon) {
 		font-size: var(--icon-size);
