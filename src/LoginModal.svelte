@@ -1,4 +1,5 @@
 <script>
+	import { onMount, onDestroy } from 'svelte';
 	import { token } from './credentials.js';
 	import Modal from './Modal.svelte';
 
@@ -7,9 +8,17 @@
 	//let showlogin = sessionStorage.get('token') == null;
 	let showlogin = token.get() == null;
 
-	token.subscribe((value) => {
-		showlogin = value == null;
+	onMount(() => {
+		token.subscribe('login-modal', changeToken);
 	});
+
+	onDestroy(() => {
+		token.unsubscribe('login-modal', changeToken);
+	});
+
+	function changeToken(value) {
+		showlogin = value == null;
+	}
 
 	let username = '';
 	let password = '';
@@ -30,7 +39,7 @@
 
 			token.set(result.token);
 		} catch (e) {
-			console.table(e);
+			console.log(e);
 		}
 	}
 </script>

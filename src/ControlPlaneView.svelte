@@ -1,5 +1,5 @@
 <script>
-	import { onMount } from 'svelte';
+	import { onMount, onDestroy } from 'svelte';
 	import { token } from './credentials.js';
 
 	import Breadcrumbs from './Breadcrumbs.svelte';
@@ -9,9 +9,23 @@
 
 	let controlPlanes = [];
 
-	token.subscribe(async (value, kind) => {
+	function reset() {
+		controlPlanes = [];
+	}
+
+	onMount(() => {
+		token.subscribe('control-plane-view', changeToken);
+	});
+
+	onDestroy(() => {
+		token.unsubscribe('control-plane-view', changeToken);
+	});
+
+	// TODO: this is copied in the cluster view, we should cache and share.
+	async function changeToken(value, kind) {
 		if (kind == 'remove') {
-			controlPlanes = [];
+			reset();
+			return;
 		}
 
 		try {
@@ -22,14 +36,29 @@
 				headers: headers
 			});
 
+			// Check the response code, an unauthorized means we need to re-log.
+			// Remove the token and let this propagate to subscribers, not found
+			// is raised when the project hasn't been created.
+			if (!response.ok) {
+				if (response.status == 401) {
+					token.remove();
+					return;
+				} else if (response.status == 404) {
+					reset();
+					return;
+				}
+
+				console.log(response);
+				return;
+			}
+
 			const result = await response.json();
 
 			controlPlanes = result;
 		} catch (e) {
-			// A 404 here indicates the project hasn't been provisioned.
-			controlPlanes = [];
+			console.log(e);
 		}
-	});
+	}
 
 	function statusFromResource(status) {
 		if (status.status == 'Provisioned') {

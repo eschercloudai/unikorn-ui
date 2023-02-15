@@ -1,4 +1,5 @@
 <script>
+	import { onMount, onDestroy } from 'svelte';
 	import { token } from '../credentials.js';
 	import { selected } from '../menu.js';
 
@@ -26,7 +27,25 @@
 	let projects = [];
 	let project = null;
 
-	token.subscribe(async (value, kind) => {
+	function reset() {
+		projects = [];
+		project = null;
+	}
+
+	onMount(() => {
+		token.subscribe('main', changeToken);
+	});
+
+	onDestroy(() => {
+		token.unsubscribe('main', changeToken);
+	});
+
+	async function changeToken(value, kind) {
+		if (kind == 'remove') {
+			reset();
+			return;
+		}
+
 		// If this is the initial call and the value is set, or it's a creation
 		// then update the project list.  Setting the project will trigger a
 		// token scope update, and end up in a loop.
@@ -52,7 +71,7 @@
 		} catch (e) {
 			console.log(e);
 		}
-	});
+	}
 
 	// When the project updates, rescope the token.
 	async function changeProject() {
@@ -72,6 +91,18 @@
 				headers: headers,
 				body: JSON.stringify(body)
 			});
+
+			// Check the response code, an unauthorized means we need to re-log.
+			// Remove the token and let this propagate to subscribers.
+			if (!response.ok) {
+				if (response.status == 401) {
+					token.remove();
+					return;
+				}
+
+				console.log(response);
+				return;
+			}
 
 			const result = await response.json();
 

@@ -9,7 +9,7 @@ export function writable(key) {
 	}
 
 	// Keep a set of subscribers.
-	const subscribers = new Set();
+	const subscribers = new Map();
 
 	// get gets the initial value.
 	function get() {
@@ -26,28 +26,42 @@ export function writable(key) {
 			window.sessionStorage.setItem(key, value);
 		}
 
-		for (const subscriber of subscribers) {
-			subscriber(value, kind);
-		}
+		subscribers.forEach((run) => {
+			run(value, kind);
+		});
 	}
 
 	// remove unsets the session storage and notifies subscribers.
 	function remove() {
 		window.sessionStorage.removeItem(key);
 
-		for (const subscriber of subscribers) {
-			subscriber(null, 'remove');
-		}
+		subscribers.forEach((run) => {
+			run(value, 'remove');
+		});
 	}
 
 	// subscribe registers the new callback and notifies
 	// it of the current value.
-	function subscribe(run) {
-		subscribers.add(run);
+	function subscribe(id, run) {
+		if (subscribers.has(id)) {
+			console.log(`subscriber ${id} already subscribed`);
+			return;
+		}
+
+		subscribers.set(id, run);
 		run(value, 'initial');
 	}
 
-	return { get, set, remove, subscribe };
+	function unsubscribe(id) {
+		if (!subscribers.has(id)) {
+			console.log(`subscriber ${id} not subscribed`);
+			return;
+		}
+
+		subscribers.delete(id);
+	}
+
+	return { get, set, remove, subscribe, unsubscribe };
 }
 
 // token is the main token storage.

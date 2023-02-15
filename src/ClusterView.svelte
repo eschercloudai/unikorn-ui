@@ -1,5 +1,5 @@
 <script>
-	import { onMount } from 'svelte';
+	import { onMount, onDestroy } from 'svelte';
 	import { token } from './credentials.js';
 
 	import Breadcrumbs from './Breadcrumbs.svelte';
@@ -11,11 +11,23 @@
 	let controlPlane = null;
 	let clusters = [];
 
-	token.subscribe(async (value, kind) => {
+	function reset() {
+		controlPlanes = [];
+		controlPlane = null;
+		clusters = [];
+	}
+
+	onMount(() => {
+		token.subscribe('cluster-view', changeToken);
+	});
+
+	onDestroy(() => {
+		token.unsubscribe('cluster-view', changeToken);
+	});
+
+	async function changeToken(value, kind) {
 		if (kind == 'remove') {
-			controlPlanes = [];
-			controlPlane = null;
-			clusters = [];
+			reset();
 			return;
 		}
 
@@ -27,6 +39,22 @@
 				headers: headers
 			});
 
+			// Check the response code, an unauthorized means we need to re-log.
+			// Remove the token and let this propagate to subscribers, not found
+			// is raised when the project hasn't been created.
+			if (!response.ok) {
+				if (response.status == 401) {
+					token.remove();
+					return;
+				} else if (response.status == 404) {
+					reset();
+					return;
+				}
+
+				console.log(response);
+				return;
+			}
+
 			const result = await response.json();
 
 			controlPlanes = result;
@@ -36,31 +64,36 @@
 				changeControlPlane();
 			}
 		} catch (e) {
-			// A 404 here indicates the project hasn't been provisioned.
-			controlPlanes = [];
-			controlPlane = null;
-			clusters = [];
+			console.log(e);
 		}
-	});
+	}
 
 	async function changeControlPlane() {
 		try {
 			let headers = new Headers();
 			headers.set('Authorization', 'Bearer ' + token.get());
 
-			const response = await fetch(
-				'/api/v1/controlplanes/' + controlPlane.status.name + '/clusters',
-				{
-					headers: headers
+			const response = await fetch(`/api/v1/controlplanes/${controlPlane.status.name}/clusters`, {
+				headers: headers
+			});
+
+			// Check the response code, an unauthorized means we need to re-log.
+			// Remove the token and let this propagate to subscribers.
+			if (!response.ok) {
+				if (response.status == 401) {
+					token.remove();
+					return;
 				}
-			);
+
+				console.log(response);
+				return;
+			}
 
 			const result = await response.json();
 
 			clusters = result;
 		} catch (e) {
-			// A 404 here indicates the project hasn't been provisioned.
-			clusters = [];
+			console.log(e);
 		}
 	}
 
