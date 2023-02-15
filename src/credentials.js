@@ -18,7 +18,7 @@ export function writable(key) {
 
 	// set sets the value and notifies all subscribers.
 	function set(new_value) {
-		let kind = (value == null) ? 'create' : 'update';
+		let kind = value == null ? 'create' : 'update';
 
 		value = new_value;
 
