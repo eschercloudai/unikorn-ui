@@ -1,38 +1,33 @@
-# create-svelte
+# Unikorn-UI
 
-Everything you need to build a Svelte project, powered by [`create-svelte`](https://github.com/sveltejs/kit/tree/master/packages/create-svelte).
+A badass, opinionated, deployer of souls!
 
-## Creating a project
+![Unikorn](https://i.stack.imgur.com/EzZiD.png)
 
-If you're seeing this, you've probably already done this step. Congrats!
+## Overview
 
-```bash
-# create a new project in the current directory
-npm create svelte@latest
+This is a user-friendly user interface built on top of [Unikorn](https://github.com/eschercloudai/unikorn) server.
 
-# create a new project in my-app
-npm create svelte@latest my-app
+## Building the Container
+
+```shell
+make image
 ```
 
-## Developing
+## Developemnt
 
-Once you've created a project and installed dependencies with `npm install` (or `pnpm install` or `yarn`), start a development server:
+### Installing
 
-```bash
-npm run dev
+Install a modern version of Node.js and add the `/bin` directory to your path.
 
-# or start the server and open the app in a new browser tab
-npm run dev -- --open
+### Linting
+
+```shell
+npm run lint
 ```
 
-## Building
+### Code Formatting
 
-To create a production version of your app:
-
-```bash
-npm run build
+```shell
+npm run format
 ```
-
-You can preview the production build with `npm run preview`.
-
-> To deploy your app, you may need to install an [adapter](https://kit.svelte.dev/docs/adapters) for your target environment.
