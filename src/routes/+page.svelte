@@ -7,6 +7,9 @@
 	import SubMenu from '../SubMenu.svelte';
 	import LoginModal from '../LoginModal.svelte';
 
+	import ControlPlaneView from '../ControlPlaneView.svelte';
+	import ClusterView from '../ClusterView.svelte';
+
 	let showmenu = false;
 
 	function toggleMenu() {
@@ -92,7 +95,7 @@
 <LoginModal />
 
 <header>
-	<span id="hamburger" on:click={toggleMenu}>
+	<span id="hamburger" on:click={toggleMenu} on:keypress={toggleMenu}>
 		<iconify-icon id="hamburger-icon" icon="material-symbols:menu" />
 		<label for="hamburger-icon">Menu</label>
 	</span>
@@ -107,7 +110,7 @@
 			alt="User Gravatar"
 		/>
 		s.murray@eschercloud.ai
-		<iconify-icon icon="material-symbols:logout" on:click={logout} />
+		<iconify-icon icon="material-symbols:logout" on:click={logout} on:keypress={logout}/>
 	</div>
 
 	<div class="nav-group project">
@@ -132,9 +135,9 @@
 	{#if content == 'dashboard'}
 		<h1>Dashboard</h1>
 	{:else if content == 'kubernetes-control-planes'}
-		<h1>Kubernetes Control Planes</h1>
+		<ControlPlaneView />
 	{:else if content == 'kubernetes-clusters'}
-		<h1>Kubernetes Clusters</h1>
+		<ClusterView />
 	{:else}
 		<h1>Fail</h1>
 	{/if}
@@ -250,7 +253,7 @@
 	/* Main layout */
 	main {
 		background-color: var(--light-grey);
-		padding: var(--padding-header) var(--padding);
+		padding-top: var(--padding-header);
 		flex: 1;
 		transition: all 0.3s ease-in-out;
 		box-shadow: inset 0 0 var(--shadow-radius) var(--mid-grey);

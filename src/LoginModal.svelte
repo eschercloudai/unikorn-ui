@@ -37,7 +37,7 @@
 
 <Modal active={showlogin}>
 	<div class="login-modal-header">
-		<img id="logo" src="img/Horizontal_AI.png" />
+		<img id="logo" src="img/Horizontal_AI.png" alt="EscherCloud AI Logo" />
 	</div>
 	<h2>Login</h2>
 	<form on:submit={login}>

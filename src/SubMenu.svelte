@@ -9,7 +9,7 @@
 	}
 </script>
 
-<li on:click={toggle}>
+<li on:click={toggle} on:keypress={toggle}>
 	<iconify-icon {icon} />
 	<span>{label}</span>
 	<iconify-icon class:expanded icon="material-symbols:arrow-drop-down" />

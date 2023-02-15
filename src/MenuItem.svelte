@@ -20,7 +20,7 @@
 	}
 </script>
 
-<li class:highlight on:click={select}>
+<li class:highlight on:click={select} on:keypress={select}>
 	{#if icon}
 		<iconify-icon {icon} />
 	{/if}
