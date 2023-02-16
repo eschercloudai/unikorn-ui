@@ -4,7 +4,7 @@
 
 	let expanded = false;
 
-	function toggle(event) {
+	function toggle() {
 		expanded = !expanded;
 	}
 </script>
