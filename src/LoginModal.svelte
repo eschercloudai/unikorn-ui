@@ -40,7 +40,7 @@
 
 			const result = await response.json();
 
-			token.set(result.token);
+			token.set(result.token, token.unscoped);
 		} catch (e) {
 			console.log(e);
 		}

@@ -28,8 +28,8 @@
 		token.unsubscribe(id);
 	});
 
-	async function changeToken(value) {
-		if (value == null) {
+	async function changeToken(value, scope) {
+		if (value == null || scope == token.unscoped) {
 			reset();
 			return;
 		}

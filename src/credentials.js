@@ -11,30 +11,42 @@ export function writable(key) {
 	// Keep a set of subscribers.
 	const subscribers = new Map();
 
+	// Provide some constants so we know what type of token this is.
+	let scope = null;
+
+	let scoped = Symbol();
+	let unscoped = Symbol();
+
 	// get gets the initial value.
 	function get() {
 		return value;
 	}
 
 	// set sets the value and notifies all subscribers.
-	function set(new_value) {
+	function set(new_value, kind) {
 		value = new_value;
+		scope = kind;
 
 		if (browser) {
 			window.sessionStorage.setItem(key, value);
 		}
 
 		subscribers.forEach((run) => {
-			run(value);
+			run(value, scope);
 		});
 	}
 
 	// remove unsets the session storage and notifies subscribers.
 	function remove() {
-		window.sessionStorage.removeItem(key);
+		value = null;
+		scope = null;
+
+		if (browser) {
+			window.sessionStorage.removeItem(key);
+		}
 
 		subscribers.forEach((run) => {
-			run(value);
+			run(value, scope);
 		});
 	}
 
@@ -45,7 +57,7 @@ export function writable(key) {
 
 		// Only notify the subscriber of an initial value if there is one.
 		if (value != null) {
-			run(value);
+			run(value, scope);
 		}
 	}
 
@@ -54,7 +66,7 @@ export function writable(key) {
 		subscribers.delete(id);
 	}
 
-	return { get, set, remove, subscribe, unsubscribe };
+	return { get, set, remove, subscribe, unsubscribe, scoped, unscoped };
 }
 
 // token is the main token storage.
