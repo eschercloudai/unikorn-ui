@@ -28,5 +28,5 @@ images:
 	if [ -n "$(RELEASE)" ]; then docker buildx rm unikorn; fi
 
 .PHONY: images-kind-load
-image-kind-load: image
+images-kind-load: images
 	kind load docker-image $(DOCKER_ORG)/unikorn-ui:$(VERSION)

@@ -17,16 +17,19 @@
 		clusters = [];
 	}
 
+	// id is a unique identifier for the component instance.
+	let id = Symbol();
+
 	onMount(() => {
-		token.subscribe('cluster-view', changeToken);
+		token.subscribe(id, changeToken);
 	});
 
 	onDestroy(() => {
-		token.unsubscribe('cluster-view', changeToken);
+		token.unsubscribe(id);
 	});
 
-	async function changeToken(value, kind) {
-		if (kind == 'remove') {
+	async function changeToken(value) {
+		if (value == null) {
 			reset();
 			return;
 		}
@@ -138,8 +141,6 @@
 
 <style>
 	article {
-		margin: var(--padding);
-		padding: var(--padding);
 		border: 1px outset var(--brand);
 		border-radius: var(--radius);
 		box-shadow: 0.25em 0.25em var(--shadow-radius) var(--mid-grey);
@@ -161,5 +162,15 @@
 	}
 	.selection select {
 		margin-left: 0.5em;
+	}
+	@media only screen and (min-width: 720px) {
+		dl {
+			display: grid;
+			grid-auto-flow: column;
+			grid-template-rows: auto auto;
+		}
+		dd:not(:last-child) {
+			margin-bottom: 0;
+		}
 	}
 </style>

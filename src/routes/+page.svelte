@@ -8,6 +8,7 @@
 	import SubMenu from '../SubMenu.svelte';
 	import LoginModal from '../LoginModal.svelte';
 
+	import DashboardView from '../DashboardView.svelte';
 	import ControlPlaneView from '../ControlPlaneView.svelte';
 	import ClusterView from '../ClusterView.svelte';
 
@@ -32,24 +33,27 @@
 		project = null;
 	}
 
+	// id is a unique identifier for the component instance.
+	let id = Symbol();
+
 	onMount(() => {
-		token.subscribe('main', changeToken);
+		token.subscribe(id, changeToken);
 	});
 
 	onDestroy(() => {
-		token.unsubscribe('main', changeToken);
+		token.unsubscribe(id);
 	});
 
-	async function changeToken(value, kind) {
-		if (kind == 'remove') {
+	async function changeToken(value) {
+		if (value == null) {
 			reset();
 			return;
 		}
 
-		// If this is the initial call and the value is set, or it's a creation
-		// then update the project list.  Setting the project will trigger a
-		// token scope update, and end up in a loop.
-		if (!['initial', 'create'].includes(kind) || value == null) {
+		// If the projects are already set, then a token re-issue will not
+		// alter that view, let any caching/refresh logic handle updates
+		// or we will get into an infinite loop.
+		if (projects.length != 0) {
 			return;
 		}
 
@@ -164,7 +168,7 @@
 
 <main class:showmenu>
 	{#if content == 'dashboard'}
-		<h1>Dashboard</h1>
+		<DashboardView />
 	{:else if content == 'kubernetes-control-planes'}
 		<ControlPlaneView />
 	{:else if content == 'kubernetes-clusters'}
@@ -177,6 +181,9 @@
 <style>
 	/* Global constants */
 	:global(:root) {
+		/* Font size setting the relative sizing of all the things. */
+		font-size: 15px;
+
 		/* Brand color palette */
 		--brand: hsl(295, 21%, 48%);
 		--brand-light: hsl(295, 21%, 60%);
@@ -274,6 +281,17 @@
 	:global(nav ul li iconify-icon:first-child) {
 		color: var(--brand);
 		margin-right: var(--padding);
+	}
+	:global(section) {
+		margin: var(--padding);
+	}
+	:global(article) {
+		margin: var(--padding);
+		padding: var(--padding);
+	}
+	:global(summary) {
+		font-weight: bold;
+		color: var(--brand);
 	}
 	:global(.container) {
 		height: 100vh;
