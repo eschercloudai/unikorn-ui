@@ -18,8 +18,6 @@ export function writable(key) {
 
 	// set sets the value and notifies all subscribers.
 	function set(new_value) {
-		let kind = value == null ? 'create' : 'update';
-
 		value = new_value;
 
 		if (browser) {
@@ -27,7 +25,7 @@ export function writable(key) {
 		}
 
 		subscribers.forEach((run) => {
-			run(value, kind);
+			run(value);
 		});
 	}
 
@@ -36,28 +34,23 @@ export function writable(key) {
 		window.sessionStorage.removeItem(key);
 
 		subscribers.forEach((run) => {
-			run(value, 'remove');
+			run(value);
 		});
 	}
 
 	// subscribe registers the new callback and notifies
 	// it of the current value.
 	function subscribe(id, run) {
-		if (subscribers.has(id)) {
-			console.log(`subscriber ${id} already subscribed`);
-			return;
-		}
-
 		subscribers.set(id, run);
-		run(value, 'initial');
+
+		// Only notify the subscriber of an initial value if there is one.
+		if (value != null) {
+			run(value);
+		}
 	}
 
+	// unsubscribe removes the subscription on unmount.
 	function unsubscribe(id) {
-		if (!subscribers.has(id)) {
-			console.log(`subscriber ${id} not subscribed`);
-			return;
-		}
-
 		subscribers.delete(id);
 	}
 

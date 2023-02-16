@@ -8,12 +8,15 @@
 	//let showlogin = sessionStorage.get('token') == null;
 	let showlogin = token.get() == null;
 
+	// id is a unique identifier for the component instance.
+	let id = Symbol();
+
 	onMount(() => {
-		token.subscribe('login-modal', changeToken);
+		token.subscribe(id, changeToken);
 	});
 
 	onDestroy(() => {
-		token.unsubscribe('login-modal', changeToken);
+		token.unsubscribe(id);
 	});
 
 	function changeToken(value) {

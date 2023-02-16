@@ -13,17 +13,20 @@
 		controlPlanes = [];
 	}
 
+	// id is a unique identifier for the component instance.
+	let id = Symbol();
+
 	onMount(() => {
-		token.subscribe('control-plane-view', changeToken);
+		token.subscribe(id, changeToken);
 	});
 
 	onDestroy(() => {
-		token.unsubscribe('control-plane-view', changeToken);
+		token.unsubscribe(id);
 	});
 
 	// TODO: this is copied in the cluster view, we should cache and share.
-	async function changeToken(value, kind) {
-		if (kind == 'remove') {
+	async function changeToken(value) {
+		if (value == null) {
 			reset();
 			return;
 		}
@@ -75,6 +78,23 @@
 
 <Breadcrumbs {trail} />
 
+<section>
+	<p>Kubernetes control planes manage the lifecycle of Kubernetes clusters.</p>
+	<details>
+		<summary>Details</summary>
+		<p>
+			Kubernetes control planes manage Kubernetes cluster creation, updates, upgrades, and deletion.
+			A Kubernetes cluster is managed by a single control plane, providing groupings of Kubernetes
+			clusters.
+		</p>
+		<p>
+			You may group clusters based on stability e.g. prodiction, staging, development. This allows
+			upgrades to be tested in a staging control plane before applying those changes to a production
+			one.
+		</p>
+	</details>
+</section>
+
 {#each controlPlanes as cp}
 	<article>
 		<StatusHeader name={cp.status.name} status={statusFromResource(cp.status)}>
@@ -90,8 +110,6 @@
 
 <style>
 	article {
-		margin: var(--padding);
-		padding: var(--padding);
 		border: 1px outset var(--brand);
 		border-radius: var(--radius);
 		box-shadow: 0.25em 0.25em var(--shadow-radius) var(--mid-grey);

@@ -2,29 +2,23 @@
 	export let trail = [];
 </script>
 
-<section>
+<div class="breadcrumbs">
 	{#each trail as crumb, i}
-		<div class="crumb">
-			<div>{crumb}</div>
-			{#if i < trail.length - 1}
-				<iconify-icon icon="material-symbols:chevron-right" />
-			{/if}
-		</div>
+		<div>{crumb}</div>
+		{#if i < trail.length - 1}
+			<iconify-icon icon="material-symbols:chevron-right" />
+		{/if}
 	{/each}
-</section>
+</div>
 
 <style>
-	section {
-		width: 100%;
+	div.breadcrumbs {
+		flex: 1;
 		color: white;
 		background-color: var(--brand);
 		padding: var(--padding);
 		display: flex;
-		flex-wrap: wrap;
-		align-content: center;
-	}
-	div.crumb {
-		display: flex;
 		align-items: center;
+		overflow: scroll;
 	}
 </style>
