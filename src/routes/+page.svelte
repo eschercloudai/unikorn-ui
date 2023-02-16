@@ -44,16 +44,15 @@
 		token.unsubscribe(id);
 	});
 
-	async function changeToken(value) {
+	async function changeToken(value, scope) {
 		if (value == null) {
 			reset();
 			return;
 		}
 
-		// If the projects are already set, then a token re-issue will not
-		// alter that view, let any caching/refresh logic handle updates
-		// or we will get into an infinite loop.
-		if (projects.length != 0) {
+		// Only run this for unscoped tokens, we only need to load the projects
+		// once, and doing so would trigger an infinite loop.
+		if (scope == token.scoped) {
 			return;
 		}
 
@@ -64,6 +63,18 @@
 			const response = await fetch('/api/v1/providers/openstack/projects', {
 				headers: headers
 			});
+
+			// Check the response code, an unauthorized means we need to re-log.
+			// Remove the token and let this propagate to subscribers.
+			if (!response.ok) {
+				if (response.status == 401) {
+					token.remove();
+					return;
+				}
+
+				console.log(response);
+				return;
+			}
 
 			const result = await response.json();
 
@@ -110,7 +121,7 @@
 
 			const result = await response.json();
 
-			token.set(result.token);
+			token.set(result.token, token.scoped);
 		} catch (e) {
 			console.log(e);
 		}
