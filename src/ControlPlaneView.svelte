@@ -1,6 +1,7 @@
 <script>
 	import { onMount, onDestroy } from 'svelte';
 	import { token } from './credentials.js';
+	import { listControlPlanes } from './client.js';
 
 	import Breadcrumbs from './Breadcrumbs.svelte';
 	import StatusHeader from './StatusHeader.svelte';
@@ -31,36 +32,21 @@
 			return;
 		}
 
-		try {
-			let headers = new Headers();
-			headers.set('Authorization', 'Bearer ' + value);
-
-			const response = await fetch('/api/v1/controlplanes', {
-				headers: headers
-			});
-
-			// Check the response code, an unauthorized means we need to re-log.
-			// Remove the token and let this propagate to subscribers, not found
-			// is raised when the project hasn't been created.
-			if (!response.ok) {
-				if (response.status == 401) {
-					token.remove();
-					return;
-				} else if (response.status == 404) {
-					reset();
-					return;
-				}
-
-				console.log(response);
-				return;
+		let result = await listControlPlanes({
+			token: token.get(),
+			onUnauthorized: () => {
+				token.remove();
+			},
+			onNotFound: () => {
+				reset();
 			}
+		});
 
-			const result = await response.json();
-
-			controlPlanes = result;
-		} catch (e) {
-			console.log(e);
+		if (result == null) {
+			return;
 		}
+
+		controlPlanes = result;
 	}
 
 	function statusFromResource(status) {
