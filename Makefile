@@ -30,3 +30,8 @@ images:
 .PHONY: images-kind-load
 images-kind-load: images
 	kind load docker-image $(DOCKER_ORG)/unikorn-ui:$(VERSION)
+
+
+.PHONY: lint
+lint:
+	npm run lint

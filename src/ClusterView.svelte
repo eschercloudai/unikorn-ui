@@ -20,11 +20,16 @@
 	// id is a unique identifier for the component instance.
 	let id = Symbol();
 
+	// ticker does periodic updates.
+	let ticker = null;
+
 	onMount(() => {
 		token.subscribe(id, changeToken);
+		ticker = setInterval(changeControlPlane, 10000);
 	});
 
 	onDestroy(() => {
+		clearInterval(ticker);
 		token.unsubscribe(id);
 	});
 
@@ -72,6 +77,10 @@
 	}
 
 	async function changeControlPlane() {
+		if (controlPlane == null) {
+			return;
+		}
+
 		try {
 			let headers = new Headers();
 			headers.set('Authorization', 'Bearer ' + token.get());

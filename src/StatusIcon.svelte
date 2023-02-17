@@ -19,7 +19,7 @@
 		color: green;
 	}
 	.warning {
-		color: yellow;
+		color: orange;
 	}
 	.error {
 		color: red;
