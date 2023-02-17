@@ -2,6 +2,7 @@
 	import { onMount, onDestroy } from 'svelte';
 	import { token } from '../credentials.js';
 	import { selected } from '../menu.js';
+	import { createToken, listProjects } from '../client.js';
 
 	import Menu from '../Menu.svelte';
 	import MenuItem from '../MenuItem.svelte';
@@ -56,75 +57,47 @@
 			return;
 		}
 
-		try {
-			let headers = new Headers();
-			headers.set('Authorization', 'Bearer ' + value);
-
-			const response = await fetch('/api/v1/providers/openstack/projects', {
-				headers: headers
-			});
-
-			// Check the response code, an unauthorized means we need to re-log.
-			// Remove the token and let this propagate to subscribers.
-			if (!response.ok) {
-				if (response.status == 401) {
-					token.remove();
-					return;
-				}
-
-				console.log(response);
-				return;
+		let result = await listProjects({
+			token: value,
+			onUnauthorized: () => {
+				token.remove();
 			}
+		});
 
-			const result = await response.json();
-
-			projects = result;
-
-			// This will not get done automatically.
-			project = projects[0];
-			changeProject();
-		} catch (e) {
-			console.log(e);
+		if (result == null) {
+			return;
 		}
+
+		// Set the projects, and select one.
+		projects = result;
+		project = projects[0];
+
+		// onChange will not get raised automatically.
+		// TODO: is there another event that will trigger this?
+		changeProject();
 	}
 
 	// When the project updates, rescope the token.
 	async function changeProject() {
-		try {
-			let headers = new Headers();
-			headers.set('Authorization', 'Bearer ' + token.get());
-			headers.set('Content-Type', 'application/json');
-
-			let body = {
-				project: {
-					id: project.id
-				}
-			};
-
-			const response = await fetch('/api/v1/auth/tokens/token', {
-				method: 'POST',
-				headers: headers,
-				body: JSON.stringify(body)
-			});
-
-			// Check the response code, an unauthorized means we need to re-log.
-			// Remove the token and let this propagate to subscribers.
-			if (!response.ok) {
-				if (response.status == 401) {
-					token.remove();
-					return;
-				}
-
-				console.log(response);
-				return;
+		let body = {
+			project: {
+				id: project.id
 			}
+		};
 
-			const result = await response.json();
+		let result = await createToken({
+			token: token.get(),
+			body: body,
+			onUnauthorized: () => {
+				token.remove();
+			}
+		});
 
-			token.set(result.token, token.scoped);
-		} catch (e) {
-			console.log(e);
+		if (result == null) {
+			return;
 		}
+
+		token.set(result.token, token.scoped);
 	}
 
 	// When a menu item is selected, hide the menu and update the

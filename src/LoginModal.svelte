@@ -1,6 +1,7 @@
 <script>
 	import { onMount, onDestroy } from 'svelte';
 	import { token } from './credentials.js';
+	import { createToken } from './client.js';
 	import Modal from './Modal.svelte';
 
 	// showlogin depends on the value of the token, get the initial value
@@ -29,21 +30,19 @@
 	// login does just that, extracts the form data using binding and sends the
 	// request, updating the token on success.
 	async function login() {
-		try {
-			let headers = new Headers();
-			headers.set('Authorization', 'Basic ' + btoa(username + ':' + password));
+		let result = await createToken({
+			username: username,
+			password: password,
+			onUnauthorized: () => {
+				/* TODO: User feedback */
+			}
+		});
 
-			const response = await fetch('/api/v1/auth/tokens/password', {
-				method: 'POST',
-				headers: headers
-			});
-
-			const result = await response.json();
-
-			token.set(result.token, token.unscoped);
-		} catch (e) {
-			console.log(e);
+		if (token == null) {
+			return;
 		}
+
+		token.set(result.token, token.unscoped);
 	}
 </script>
 
