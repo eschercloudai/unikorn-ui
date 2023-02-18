@@ -1,22 +1,18 @@
 <script>
 	import { selected } from './menu.js';
-	import { get } from 'svelte/store';
 
 	export let id;
 	export let label;
 	export let icon = null;
 
-	let highlight = get(selected) == id;
+	let highlight = false;
 
 	selected.subscribe((value) => {
-		if (value != id) {
-			highlight = false;
-		}
+		highlight = value == id;
 	});
 
 	function select() {
 		selected.set(id);
-		highlight = true;
 	}
 </script>
 

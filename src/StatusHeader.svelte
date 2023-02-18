@@ -18,8 +18,6 @@
 <style>
 	.header {
 		color: var(--brand);
-		font-weight: bold;
-		font-size: 1.5rem;
 		display: flex;
 		align-items: center;
 		justify-content: space-between;
@@ -30,6 +28,7 @@
 		align-items: center;
 	}
 	.name {
+		font-weight: bold;
 		margin-left: var(--padding);
 	}
 </style>

@@ -45,20 +45,19 @@
 		token.unsubscribe(id);
 	});
 
-	async function changeToken(value, scope) {
+	async function changeToken(value) {
 		if (value == null) {
 			reset();
 			return;
 		}
 
-		// Only run this for unscoped tokens, we only need to load the projects
-		// once, and doing so would trigger an infinite loop.
-		if (scope == token.scoped) {
+		// Already set, don't do it again, we only do this on initial load.
+		if (projects.length != 0) {
 			return;
 		}
 
-		let result = await listProjects({
-			token: value,
+		const result = await listProjects({
+			token: value.token,
 			onUnauthorized: () => {
 				token.remove();
 			}
@@ -68,25 +67,46 @@
 			return;
 		}
 
-		// Set the projects, and select one.
+		// Set the projects.
 		projects = result;
-		project = projects[0];
+
+		// If the project is present for the token, select that one
+		// e.g. reload a session.
+		if (value.project) {
+			for (const p of projects) {
+				if (p.id == value.project) {
+					project = p;
+					break;
+				}
+			}
+		}
+
+		// If nothing is found, pick one.
+		if (project == null) {
+			project = projects[0];
+		}
 
 		// onChange will not get raised automatically.
 		// TODO: is there another event that will trigger this?
-		changeProject();
+		await changeProject();
 	}
 
 	// When the project updates, rescope the token.
 	async function changeProject() {
+		let t = token.get();
+
+		if (t.scope == token.scoped && t.project == project.id) {
+			return;
+		}
+
 		let body = {
 			project: {
 				id: project.id
 			}
 		};
 
-		let result = await createToken({
-			token: token.get(),
+		const result = await createToken({
+			token: t.token,
 			body: body,
 			onUnauthorized: () => {
 				token.remove();
@@ -97,7 +117,7 @@
 			return;
 		}
 
-		token.set(result.token, token.scoped);
+		token.set(result.token, token.scoped, project.id);
 	}
 
 	// When a menu item is selected, hide the menu and update the

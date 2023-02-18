@@ -26,14 +26,14 @@
 	});
 
 	// TODO: this is copied in the cluster view, we should cache and share.
-	async function changeToken(value, scope) {
-		if (value == null || scope == token.unscoped) {
+	async function changeToken(value) {
+		if (value == null || value.scope == token.unscoped) {
 			reset();
 			return;
 		}
 
-		let result = await listControlPlanes({
-			token: token.get(),
+		const result = await listControlPlanes({
+			token: value.token,
 			onUnauthorized: () => {
 				token.remove();
 			},

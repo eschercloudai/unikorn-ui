@@ -34,14 +34,14 @@
 		token.unsubscribe(id);
 	});
 
-	async function changeToken(value, scope) {
-		if (value == null || scope == token.unscoped) {
+	async function changeToken(value) {
+		if (value == null || value.scope == token.unscoped) {
 			reset();
 			return;
 		}
 
-		let result = await listControlPlanes({
-			token: value,
+		const result = await listControlPlanes({
+			token: value.token,
 			onUnauthorized: () => {
 				token.remove();
 			},
@@ -68,8 +68,8 @@
 			return;
 		}
 
-		let result = await listClusters(controlPlane.status.name, {
-			token: token.get(),
+		const result = await listClusters(controlPlane.status.name, {
+			token: token.get().token,
 			onUnauthorized: () => {
 				token.remove();
 			}
