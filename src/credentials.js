@@ -5,17 +5,15 @@ export function writable(key) {
 	let value = null;
 
 	if (browser) {
-		value = window.sessionStorage.getItem(key);
+		value = JSON.parse(window.sessionStorage.getItem(key));
 	}
 
 	// Keep a set of subscribers.
 	const subscribers = new Map();
 
 	// Provide some constants so we know what type of token this is.
-	let scope = null;
-
-	let scoped = Symbol();
-	let unscoped = Symbol();
+	const scoped = 'scoped';
+	const unscoped = 'unscoped';
 
 	// get gets the initial value.
 	function get() {
@@ -23,30 +21,32 @@ export function writable(key) {
 	}
 
 	// set sets the value and notifies all subscribers.
-	function set(new_value, kind) {
-		value = new_value;
-		scope = kind;
+	function set(new_value, kind, project = null) {
+		value = {
+			token: new_value,
+			scope: kind,
+			project: project
+		};
 
 		if (browser) {
-			window.sessionStorage.setItem(key, value);
+			window.sessionStorage.setItem(key, JSON.stringify(value));
 		}
 
 		subscribers.forEach((run) => {
-			run(value, scope);
+			run(value);
 		});
 	}
 
 	// remove unsets the session storage and notifies subscribers.
 	function remove() {
 		value = null;
-		scope = null;
 
 		if (browser) {
 			window.sessionStorage.removeItem(key);
 		}
 
 		subscribers.forEach((run) => {
-			run(value, scope);
+			run(null);
 		});
 	}
 
@@ -57,7 +57,7 @@ export function writable(key) {
 
 		// Only notify the subscriber of an initial value if there is one.
 		if (value != null) {
-			run(value, scope);
+			run(value);
 		}
 	}
 
