@@ -1,10 +1,10 @@
 <script>
 	import { onMount, onDestroy } from 'svelte';
-	import { token } from './credentials.js';
-	import { listControlPlanes, listClusters } from './client.js';
+	import { token } from '$lib/credentials.js';
+	import { listControlPlanes, listClusters } from '$lib/client.js';
 
-	import Breadcrumbs from './Breadcrumbs.svelte';
-	import StatusHeader from './StatusHeader.svelte';
+	import Breadcrumbs from '$lib/Breadcrumbs.svelte';
+	import StatusHeader from '$lib/StatusHeader.svelte';
 
 	let trail = ['Kubernetes', 'Clusters'];
 

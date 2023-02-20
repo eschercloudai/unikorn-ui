@@ -1,5 +1,5 @@
 <script>
-	import { selected } from './menu.js';
+	import { selected } from '$lib/menu.js';
 
 	export let id;
 	export let label;

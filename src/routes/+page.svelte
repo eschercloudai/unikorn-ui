@@ -1,17 +1,17 @@
 <script>
 	import { onMount, onDestroy } from 'svelte';
-	import { token } from '../credentials.js';
-	import { selected } from '../menu.js';
-	import { createToken, listProjects } from '../client.js';
+	import { token } from '$lib/credentials.js';
+	import { selected } from '$lib/menu.js';
+	import { createToken, listProjects } from '$lib/client.js';
 
-	import Menu from '../Menu.svelte';
-	import MenuItem from '../MenuItem.svelte';
-	import SubMenu from '../SubMenu.svelte';
-	import LoginModal from '../LoginModal.svelte';
+	import Menu from '$lib/Menu.svelte';
+	import MenuItem from '$lib/MenuItem.svelte';
+	import SubMenu from '$lib/SubMenu.svelte';
+	import LoginModal from '$lib/LoginModal.svelte';
 
-	import DashboardView from '../DashboardView.svelte';
-	import ControlPlaneView from '../ControlPlaneView.svelte';
-	import ClusterView from '../ClusterView.svelte';
+	import DashboardView from '$lib/DashboardView.svelte';
+	import ControlPlaneView from '$lib/ControlPlaneView.svelte';
+	import ClusterView from '$lib/ClusterView.svelte';
 
 	let showmenu = false;
 

@@ -1,5 +1,5 @@
 <script>
-	import StatusIcon from './StatusIcon.svelte';
+	import StatusIcon from '$lib/StatusIcon.svelte';
 
 	export let name;
 	export let status;
