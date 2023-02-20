@@ -1,0 +1,16 @@
+<script>
+	import { createEventDispatcher } from 'svelte';
+
+	// id is a unique identifier within the menu.
+	export let id;
+
+	const dispatch = createEventDispatcher();
+
+	function click() {
+		dispatch('select', { id: id });
+	}
+</script>
+
+<li on:click={click} on:keypress={click}>
+	<slot />
+</li>

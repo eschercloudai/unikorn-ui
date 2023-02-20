@@ -32,6 +32,10 @@ async function request(method, path, opts) {
 			return null;
 		}
 
+		if (['DELETE'].includes(method)) {
+			return null;
+		}
+
 		const result = await response.json();
 
 		return result;
@@ -58,6 +62,14 @@ export function listControlPlanes(opts) {
 	return request('GET', '/api/v1/controlplanes', opts);
 }
 
+export function deleteControlPlane(controlPlane, opts) {
+	return request('DELETE', `/api/v1/controlplanes/${controlPlane}`, opts);
+}
+
 export function listClusters(controlPlane, opts) {
 	return request('GET', `/api/v1/controlplanes/${controlPlane}/clusters`, opts);
+}
+
+export function deleteCluster(controlPlane, cluster, opts) {
+	return request('DELETE', `/api/v1/controlplanes/${controlPlane}/clusters/${cluster}`, opts);
 }

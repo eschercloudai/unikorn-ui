@@ -1,10 +1,12 @@
 <script>
 	import { onMount, onDestroy } from 'svelte';
 	import { token } from '$lib/credentials.js';
-	import { listControlPlanes, listClusters } from '$lib/client.js';
+	import { age } from '$lib/time.js';
+	import { listControlPlanes, listClusters, deleteCluster } from '$lib/client.js';
 
 	import Breadcrumbs from '$lib/Breadcrumbs.svelte';
 	import StatusHeader from '$lib/StatusHeader.svelte';
+	import DropDownIcon from '$lib/DropDownIcon.svelte';
 
 	let trail = ['Kubernetes', 'Clusters'];
 
@@ -25,8 +27,8 @@
 	let ticker = null;
 
 	onMount(() => {
-		token.subscribe(id, changeToken);
-		ticker = setInterval(changeControlPlane, 10000);
+		token.subscribe(id, updateControlPlanes);
+		ticker = setInterval(updateClusters, 10000);
 	});
 
 	onDestroy(() => {
@@ -34,14 +36,16 @@
 		token.unsubscribe(id);
 	});
 
-	async function changeToken(value) {
-		if (value == null || value.scope == token.unscoped) {
+	async function updateControlPlanes() {
+		let t = token.get();
+
+		if (t == null || t.scope == token.unscoped) {
 			reset();
 			return;
 		}
 
 		const result = await listControlPlanes({
-			token: value.token,
+			token: token.get().token,
 			onUnauthorized: () => {
 				token.remove();
 			},
@@ -59,11 +63,11 @@
 		if (controlPlanes.length != 0) {
 			controlPlane = controlPlanes[0];
 
-			changeControlPlane();
+			updateClusters();
 		}
 	}
 
-	async function changeControlPlane() {
+	async function updateClusters() {
 		if (controlPlane == null) {
 			return;
 		}
@@ -93,13 +97,32 @@
 			return 'error';
 		}
 	}
+
+	// Define the per-control plane drop down menu.
+	let dropdownItems = [
+		{ id: 'detail', value: 'Show Details' },
+		{ id: 'delete', value: 'Delete' }
+	];
+
+	async function selected(event) {
+		if (event.detail.item.id == 'delete') {
+			await deleteCluster(controlPlane.status.name, event.detail.id, {
+				token: token.get().token,
+				onUnauthorized: () => {
+					token.remove();
+				}
+			});
+
+			updateClusters();
+		}
+	}
 </script>
 
 <Breadcrumbs {trail} />
 
 <div class="selection">
 	<label for="control-plane-select">Control Plane:</label>
-	<select id="control-plane-select" bind:value={controlPlane} on:change={changeControlPlane}>
+	<select id="control-plane-select" bind:value={controlPlane} on:change={updateClusters}>
 		{#each controlPlanes as choice}
 			<option value={choice}>{choice.status.name}</option>
 		{/each}
@@ -110,11 +133,18 @@
 	<article>
 		<StatusHeader name={cl.status.name} status={statusFromResource(cl.status)}>
 			<iconify-icon icon="mdi:favorite-border" />
-			<iconify-icon icon="mdi:dots-vertical" />
+			<DropDownIcon
+				icon="mdi:dots-vertical"
+				id={cl.status.name}
+				items={dropdownItems}
+				on:select={selected}
+			/>
 		</StatusHeader>
 		<dl>
 			<dt>Creation Time</dt>
-			<dd>{cl.status.creationTime}</dd>
+			<dd>{age(cl.status.creationTime)}</dd>
+			<dt>Status</dt>
+			<dd>{cl.status.status}</dd>
 			<dt>Kubernetes Version</dt>
 			<dd>{cl.controlPlane.version}</dd>
 		</dl>

@@ -269,20 +269,21 @@
 	:global(iconify-icon) {
 		font-size: var(--icon-size);
 	}
-	:global(nav ul) {
+	:global(ul) {
 		margin: 0;
 		padding: 0;
 	}
-	:global(nav ul li) {
+	:global(ul li) {
 		color: var(--mid-grey);
 		padding: var(--padding);
 		list-style: none;
 		cursor: default;
 	}
-	:global(nav ul li:hover) {
+	:global(ul li:hover) {
 		color: var(--dark-grey);
+		background-color: var(--light-grey);
 	}
-	:global(nav ul li iconify-icon:first-child) {
+	:global(ul li iconify-icon:first-child) {
 		color: var(--brand);
 		margin-right: var(--padding);
 	}
@@ -324,7 +325,7 @@
 		padding: var(--padding);
 		background-color: white;
 		border-bottom: 0.25em solid var(--brand);
-		z-index: 2;
+		z-index: 20;
 		text-align: center;
 	}
 	header > img {
@@ -353,7 +354,7 @@
 		width: 0;
 		height: 100vh;
 		overflow-x: hidden;
-		z-index: 1;
+		z-index: 10;
 		display: flex;
 		flex-direction: column;
 		color: var(--mid-grey);
