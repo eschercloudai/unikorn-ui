@@ -8,8 +8,6 @@
 	import StatusHeader from '$lib/StatusHeader.svelte';
 	import DropDownIcon from '$lib/DropDownIcon.svelte';
 
-	let trail = ['Kubernetes', 'Clusters'];
-
 	let controlPlanes = [];
 	let controlPlane = null;
 	let clusters = [];
@@ -118,7 +116,7 @@
 	}
 </script>
 
-<Breadcrumbs {trail} />
+<Breadcrumbs />
 
 <div class="selection">
 	<label for="control-plane-select">Control Plane:</label>
@@ -141,7 +139,7 @@
 			/>
 		</StatusHeader>
 		<dl>
-			<dt>Creation Time</dt>
+			<dt>Age</dt>
 			<dd>{age(cl.status.creationTime)}</dd>
 			<dt>Status</dt>
 			<dd>{cl.status.status}</dd>
