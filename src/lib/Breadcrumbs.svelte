@@ -1,12 +1,20 @@
 <script>
-	export let trail = [];
+	import { selected, getBreadcrumbs } from '$lib/menu.js';
+
+	let trail = [];
+
+	selected.subscribe((value) => {
+		trail = getBreadcrumbs(value);
+	});
 </script>
 
 <div class="breadcrumbs">
 	{#each trail as crumb, i}
-		<div>{crumb}</div>
-		{#if i < trail.length - 1}
-			<iconify-icon icon="material-symbols:chevron-right" />
+		{#if crumb.value}
+			<div>{crumb.value}</div>
+			{#if i < trail.length - 1}
+				<iconify-icon icon="material-symbols:chevron-right" />
+			{/if}
 		{/if}
 	{/each}
 </div>

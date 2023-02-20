@@ -1,12 +1,10 @@
 <script>
 	import { onMount, onDestroy } from 'svelte';
 	import { token } from '$lib/credentials.js';
-	import { selected } from '$lib/menu.js';
+	import { getMenu, selected } from '$lib/menu.js';
 	import { createToken, listProjects } from '$lib/client.js';
 
 	import Menu from '$lib/Menu.svelte';
-	import MenuItem from '$lib/MenuItem.svelte';
-	import SubMenu from '$lib/SubMenu.svelte';
 	import LoginModal from '$lib/LoginModal.svelte';
 
 	import DashboardView from '$lib/DashboardView.svelte';
@@ -123,11 +121,13 @@
 	// When a menu item is selected, hide the menu and update the
 	// main view.
 	let content;
+	let menu;
 
 	selected.subscribe((value) => {
 		// TODO: we should only dismiss this in mobile mode.
 		showmenu = false;
 		content = value;
+		menu = getMenu(value);
 	});
 </script>
 
@@ -161,13 +161,9 @@
 		</select>
 	</div>
 
-	<Menu>
-		<MenuItem id="dashboard" label="Dashboard" icon="ri:dashboard-3-line" />
-		<SubMenu label="Kubetnetes" icon="mdi:kubernetes">
-			<MenuItem id="kubernetes-control-planes" label="Control Planes" />
-			<MenuItem id="kubernetes-clusters" label="Clusters" />
-		</SubMenu>
-	</Menu>
+	{#if menu}
+		<Menu {...menu} />
+	{/if}
 </nav>
 
 <main class:showmenu>
@@ -177,8 +173,6 @@
 		<ControlPlaneView />
 	{:else if content == 'kubernetes-clusters'}
 		<ClusterView />
-	{:else}
-		<h1>Fail</h1>
 	{/if}
 </main>
 

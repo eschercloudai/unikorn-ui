@@ -8,8 +8,6 @@
 	import StatusHeader from '$lib/StatusHeader.svelte';
 	import DropDownIcon from '$lib/DropDownIcon.svelte';
 
-	let trail = ['Kubernetes', 'Control Planes'];
-
 	let controlPlanes = [];
 
 	function reset() {
@@ -88,7 +86,7 @@
 	}
 </script>
 
-<Breadcrumbs {trail} />
+<Breadcrumbs />
 
 <section>
 	<p>Kubernetes control planes manage the lifecycle of Kubernetes clusters.</p>
@@ -119,7 +117,7 @@
 			/>
 		</StatusHeader>
 		<dl>
-			<dt>Creation Time</dt>
+			<dt>Age</dt>
 			<dd>{age(cp.status.creationTime)}</dd>
 			<dt>Status</dt>
 			<dd>{cp.status.status}</dd>
