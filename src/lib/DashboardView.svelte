@@ -1,5 +1,5 @@
 <script>
-	import Breadcrumbs from './Breadcrumbs.svelte';
+	import Breadcrumbs from '$lib/Breadcrumbs.svelte';
 
 	let trail = ['Dashboard'];
 </script>

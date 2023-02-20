@@ -1,8 +1,8 @@
 <script>
 	import { onMount, onDestroy } from 'svelte';
-	import { token } from './credentials.js';
-	import { createToken } from './client.js';
-	import Modal from './Modal.svelte';
+	import { token } from '$lib/credentials.js';
+	import { createToken } from '$lib/client.js';
+	import Modal from '$lib/Modal.svelte';
 
 	// showlogin depends on the value of the token, get the initial value
 	// from the store and update accordingly.
