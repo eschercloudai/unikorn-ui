@@ -1,10 +1,12 @@
 <script>
 	import { onMount, onDestroy } from 'svelte';
 	import { token } from '$lib/credentials.js';
-	import { listControlPlanes } from '$lib/client.js';
+	import { age } from '$lib/time.js';
+	import { listControlPlanes, deleteControlPlane } from '$lib/client.js';
 
 	import Breadcrumbs from '$lib/Breadcrumbs.svelte';
 	import StatusHeader from '$lib/StatusHeader.svelte';
+	import DropDownIcon from '$lib/DropDownIcon.svelte';
 
 	let trail = ['Kubernetes', 'Control Planes'];
 
@@ -17,23 +19,28 @@
 	// id is a unique identifier for the component instance.
 	let id = Symbol();
 
+	let ticker = null;
+
 	onMount(() => {
-		token.subscribe(id, changeToken);
+		token.subscribe(id, updateControlPlanes);
+		ticker = setInterval(updateControlPlanes, 10000);
 	});
 
 	onDestroy(() => {
+		clearInterval(ticker);
 		token.unsubscribe(id);
 	});
 
-	// TODO: this is copied in the cluster view, we should cache and share.
-	async function changeToken(value) {
-		if (value == null || value.scope == token.unscoped) {
+	async function updateControlPlanes() {
+		let t = token.get();
+
+		if (t == null || t.scope == token.unscoped) {
 			reset();
 			return;
 		}
 
 		const result = await listControlPlanes({
-			token: value.token,
+			token: token.get().token,
 			onUnauthorized: () => {
 				token.remove();
 			},
@@ -58,6 +65,25 @@
 			return 'warning';
 		} else {
 			return 'error';
+		}
+	}
+
+	// Define the per-control plane drop down menu.
+	let dropdownItems = [
+		{ id: 'detail', value: 'Show Details' },
+		{ id: 'delete', value: 'Delete' }
+	];
+
+	async function selected(event) {
+		if (event.detail.item.id == 'delete') {
+			await deleteControlPlane(event.detail.id, {
+				token: token.get().token,
+				onUnauthorized: () => {
+					token.remove();
+				}
+			});
+
+			updateControlPlanes();
 		}
 	}
 </script>
@@ -85,11 +111,18 @@
 	<article>
 		<StatusHeader name={cp.status.name} status={statusFromResource(cp.status)}>
 			<iconify-icon icon="mdi:favorite-border" />
-			<iconify-icon icon="mdi:dots-vertical" />
+			<DropDownIcon
+				icon="mdi:dots-vertical"
+				id={cp.status.name}
+				items={dropdownItems}
+				on:select={selected}
+			/>
 		</StatusHeader>
 		<dl>
 			<dt>Creation Time</dt>
-			<dd>{cp.status.creationTime}</dd>
+			<dd>{age(cp.status.creationTime)}</dd>
+			<dt>Status</dt>
+			<dd>{cp.status.status}</dd>
 		</dl>
 	</article>
 {/each}
