@@ -2,8 +2,9 @@
 	import { onMount, onDestroy } from 'svelte';
 	import { token } from '$lib/credentials.js';
 	import { age } from '$lib/time.js';
-	import { listControlPlanes, deleteControlPlane } from '$lib/client.js';
+	import { listControlPlanes, createControlPlane, deleteControlPlane } from '$lib/client.js';
 
+	import Modal from '$lib/Modal.svelte';
 	import Breadcrumbs from '$lib/Breadcrumbs.svelte';
 	import StatusHeader from '$lib/StatusHeader.svelte';
 	import DropDownIcon from '$lib/DropDownIcon.svelte';
@@ -84,7 +85,57 @@
 			updateControlPlanes();
 		}
 	}
+
+	let createModalActive = false;
+
+	function toggleCreateModal() {
+		createModalActive = !createModalActive;
+	}
+
+	let newControlPlaneName = null;
+
+	async function submitCreateControlPlane() {
+		const body = {
+			name: newControlPlaneName
+		};
+
+		await createControlPlane({
+			token: token.get().token,
+			body: body,
+			onBadRequest: () => {
+				console.log('you have made a mistake');
+			},
+			onUnauthorized: () => {
+				token.remove();
+			},
+			onConflict: () => {
+				console.log('visual feedback on name clash');
+			}
+		});
+
+		newControlPlaneName = null;
+
+		createModalActive = false;
+	}
 </script>
+
+<Modal active={createModalActive}>
+	<div class="modal-content">
+		<h2>Create New Control Plane</h2>
+		<form>
+			<input id="name" placeholder="Name (required)" bind:value={newControlPlaneName} />
+			<label for="name">Must be unique, contain only characters, numbers and dashes.</label>
+			<div>
+				<button
+					type="submit"
+					on:click={submitCreateControlPlane}
+					on:keydown={submitCreateControlPlane}>Submit</button
+				>
+				<button on:click={toggleCreateModal}>Cancel</button>
+			</div>
+		</form>
+	</div>
+</Modal>
 
 <Breadcrumbs />
 
@@ -104,6 +155,8 @@
 		</p>
 	</details>
 </section>
+
+<button on:click={toggleCreateModal}>Create</button>
 
 {#each controlPlanes as cp}
 	<article>
@@ -127,8 +180,7 @@
 
 <style>
 	article {
-		border: 1px outset var(--brand);
-		border-radius: var(--radius);
+		border: 2px solid var(--brand);
 		box-shadow: 0.25em 0.25em var(--shadow-radius) var(--mid-grey);
 	}
 	dt {
@@ -139,5 +191,22 @@
 	}
 	dd:not(:last-child) {
 		margin-bottom: var(--padding);
+	}
+	form {
+		display: flex;
+		flex-direction: column;
+		align-items: center;
+		padding: var(--padding);
+	}
+	label {
+		display: block;
+		font-style: italic;
+		font-size: 0.75rem;
+	}
+	div.modal-content {
+		padding: var(--padding);
+	}
+	input {
+		flex: 1;
 	}
 </style>

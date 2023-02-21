@@ -25,6 +25,8 @@ async function request(method, path, opts) {
 				opts.onUnauthorized();
 			} else if (response.status == 404 && opts.onNotFound) {
 				opts.onNotFound();
+			} else if (response.status == 409 && opts.onConflict) {
+				opts.onConflict();
 			} else {
 				console.log('unhandled status', response.status, 'method', method, 'path', path);
 			}
@@ -60,6 +62,10 @@ export function listProjects(opts) {
 
 export function listControlPlanes(opts) {
 	return request('GET', '/api/v1/controlplanes', opts);
+}
+
+export function createControlPlane(opts) {
+	return request('POST', `/api/v1/controlplanes`, opts);
 }
 
 export function deleteControlPlane(controlPlane, opts) {

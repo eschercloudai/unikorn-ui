@@ -183,9 +183,17 @@
 		font-size: 15px;
 
 		/* Brand color palette */
+		/* CURRENT ECAI PURPLE */
+		/*
 		--brand: hsl(295, 21%, 48%);
 		--brand-light: hsl(295, 21%, 60%);
 		--brand-dark: hsl(295, 21%, 36%);
+		*/
+
+		/* INEVITABLE GREEN */
+		--brand: hsl(125, 30%, 30%);
+		--brand-light: hsl(125, 21%, 15%);
+		--brand-dark: hsl(125, 21%, 45%);
 
 		/* Generic colors */
 		--light-grey: rgb(245, 245, 245);
@@ -220,45 +228,45 @@
 	:global(input) {
 		transition: all 0.2s ease-in;
 		margin: 0.5em;
-		font-size: 1em;
-		border: 1px solid var(--mid-grey);
+		border: none;
+		border-bottom: 2px solid var(--brand);
 		padding: var(--padding);
-		border-radius: var(--radius);
+		width: 100%;
+		font-weight: bold;
+		font-size: 1rem;
 	}
 	:global(input:focus) {
 		outline: none;
 		box-shadow: 0 0 var(--shadow-radius) var(--brand);
 	}
 	:global(button) {
-		color: white;
-		background-color: var(--brand);
+		color: var(--brand);
+		background: none;
 		padding: var(--padding);
-		margin: 0.5em;
-		border-radius: var(--radius);
-		border: 1px outset var(--brand);
-		box-shadow: 0.25em 0.25em var(--shadow-radius) var(--mid-grey);
-		font-size: 1em;
+		margin: var(--padding);
+		border: 2px solid var(--brand);
+		font-weight: bold;
+		font-size: 1rem;
 	}
 	:global(button:hover) {
-		background-color: var(--brand-light);
+		color: var(--brand-light);
 		border-color: var(--brand-light);
 	}
 	:global(button:focus) {
-		background-color: var(--brand-dark);
+		color: var(--brand-dark);
 		border-color: var(--brand-dark);
 	}
 	:global(select) {
-		color: var(--mid-grey);
-		background-color: var(--light-grey);
 		padding: var(--padding);
-		font-size: 1em;
-		border: 1px solid var(--mid-grey);
-		border-radius: var(--radius);
+		background: none;
+		border: none;
+		border-bottom: 2px solid var(--brand);
 		width: 100%;
+		font-weight: bold;
+		font-size: 1rem;
 	}
 	:global(select:focus) {
 		outline: none;
-		box-shadow: 0 0 var(--shadow-radius) var(--brand);
 	}
 	:global(iconify-icon) {
 		font-size: var(--icon-size);
