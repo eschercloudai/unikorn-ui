@@ -151,8 +151,7 @@
 
 <style>
 	article {
-		border: 1px outset var(--brand);
-		border-radius: var(--radius);
+		border: 2px solid var(--brand);
 		box-shadow: 0.25em 0.25em var(--shadow-radius) var(--mid-grey);
 	}
 	dt {
