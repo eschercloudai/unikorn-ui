@@ -1,9 +1,10 @@
 <script>
 	export let active = false;
+	export let fixed = false;
 </script>
 
 <div class="modal-backdrop" class:active>
-	<div class="modal">
+	<div class="modal" class:fixed>
 		<slot />
 	</div>
 </div>
@@ -33,6 +34,7 @@
 		flex-direction: column;
 		align-items: center;
 		background-color: var(--light-grey);
+		overflow: scroll;
 	}
 
 	/* Desktop overrides */
@@ -47,9 +49,15 @@
 		.modal {
 			width: auto;
 			height: auto;
+			max-height: 80vh;
 			border: 1px outset var(--brand);
 			border-radius: var(--radius);
 			box-shadow: 0.25em 0.25em var(--shadow-radius) var(--mid-grey);
+		}
+
+		.modal.fixed {
+			align-items: stretch;
+			width: 720px;
 		}
 	}
 </style>
