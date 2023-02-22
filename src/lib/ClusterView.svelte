@@ -151,6 +151,7 @@
 	let version;
 
 	// Images are a one size fits all for simplicity.
+	let allImages = [];
 	let images = [];
 	let image;
 
@@ -195,6 +196,8 @@
 		workloadPools = workloadPools;
 	}
 
+	// Get a list of images from the origin, and derive a list of
+	// Kubernetes versions.
 	async function updateImages() {
 		const results = await listImages({
 			token: token.get().token,
@@ -214,13 +217,21 @@
 		versions = Array.from(v.values()).sort().reverse();
 		version = versions[0];
 
-		// Now that is done group the images by version.
+		// Sort by date, newest first.
+		results.sort((a, b) => a.creationTime < b.creationTime);
+		console.log(results);
+
+		allImages = results;
+	}
+
+	// When images update, or the version, then trigger an update to the
+	// version filtered view of images.
+	$: if (allImages.length > 0 && version != null) {
 		let i = [];
 
-		for (const result of results) {
-			// TODO: sorted by date.
-			if (result.versions.kubernetes == version) {
-				i.push(result);
+		for (const image of allImages) {
+			if (image.versions.kubernetes == version) {
+				i.push(image);
 			}
 		}
 
@@ -236,9 +247,7 @@
 			}
 		});
 
-		results.sort((a, b) => {
-			a.name < b.name;
-		});
+		results.sort((a, b) => a.name < b.name);
 
 		const cpf = [];
 
