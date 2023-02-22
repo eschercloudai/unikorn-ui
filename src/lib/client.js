@@ -60,6 +60,18 @@ export function listProjects(opts) {
 	return request('GET', '/api/v1/providers/openstack/projects', opts);
 }
 
+export function listFlavors(opts) {
+	return request('GET', '/api/v1/providers/openstack/flavors', opts);
+}
+
+export function listImages(opts) {
+	return request('GET', '/api/v1/providers/openstack/images', opts);
+}
+
+export function listKeyPairs(opts) {
+	return request('GET', '/api/v1/providers/openstack/key-pairs', opts);
+}
+
 export function listControlPlanes(opts) {
 	return request('GET', '/api/v1/controlplanes', opts);
 }

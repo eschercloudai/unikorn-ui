@@ -6,6 +6,7 @@
 
 	import Menu from '$lib/Menu.svelte';
 	import LoginModal from '$lib/LoginModal.svelte';
+	import LabeledInput from '$lib/LabeledInput.svelte';
 
 	import DashboardView from '$lib/DashboardView.svelte';
 	import ControlPlaneView from '$lib/ControlPlaneView.svelte';
@@ -152,14 +153,13 @@
 		<iconify-icon icon="material-symbols:logout" on:click={logout} on:keypress={logout} />
 	</div>
 
-	<div class="nav-group project">
-		<label for="project-select">Project:</label>
+	<LabeledInput id="project-select" value="Project">
 		<select id="project-select" name="project" bind:value={project} on:change={changeProject}>
 			{#each projects as choice}
 				<option value={choice}>{choice.name}</option>
 			{/each}
 		</select>
-	</div>
+	</LabeledInput>
 
 	{#if menu}
 		<Menu {...menu} />
@@ -183,17 +183,9 @@
 		font-size: 15px;
 
 		/* Brand color palette */
-		/* CURRENT ECAI PURPLE */
-		/*
 		--brand: hsl(295, 21%, 48%);
 		--brand-light: hsl(295, 21%, 60%);
 		--brand-dark: hsl(295, 21%, 36%);
-		*/
-
-		/* INEVITABLE GREEN */
-		--brand: hsl(125, 30%, 30%);
-		--brand-light: hsl(125, 21%, 15%);
-		--brand-dark: hsl(125, 21%, 45%);
 
 		/* Generic colors */
 		--light-grey: rgb(245, 245, 245);
@@ -225,19 +217,25 @@
 	:global(a:hover) {
 		color: var(--brand-light);
 	}
-	:global(input) {
-		transition: all 0.2s ease-in;
-		margin: 0.5em;
+	:global(input, select) {
+		padding: var(--padding);
+		box-sizing: border-box;
+		background: none;
 		border: none;
 		border-bottom: 2px solid var(--brand);
-		padding: var(--padding);
 		width: 100%;
-		font-weight: bold;
 		font-size: 1rem;
+		transition: all 0.2s ease-in;
 	}
-	:global(input:focus) {
+	:global(input:focus, select:focus) {
 		outline: none;
 		box-shadow: 0 0 var(--shadow-radius) var(--brand);
+	}
+	:global(input[type='range']::-moz-range-track) {
+		background-color: var(--brand);
+	}
+	:global(input[type='range']::-webkit-slider-runnable-track) {
+		background-color: var(--brand);
 	}
 	:global(button) {
 		color: var(--brand);
@@ -255,18 +253,6 @@
 	:global(button:focus) {
 		color: var(--brand-dark);
 		border-color: var(--brand-dark);
-	}
-	:global(select) {
-		padding: var(--padding);
-		background: none;
-		border: none;
-		border-bottom: 2px solid var(--brand);
-		width: 100%;
-		font-weight: bold;
-		font-size: 1rem;
-	}
-	:global(select:focus) {
-		outline: none;
 	}
 	:global(iconify-icon) {
 		font-size: var(--icon-size);

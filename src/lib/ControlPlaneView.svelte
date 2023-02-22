@@ -198,15 +198,12 @@
 		align-items: center;
 		padding: var(--padding);
 	}
-	label {
+	form label {
 		display: block;
 		font-style: italic;
 		font-size: 0.75rem;
 	}
 	div.modal-content {
 		padding: var(--padding);
-	}
-	input {
-		flex: 1;
 	}
 </style>
