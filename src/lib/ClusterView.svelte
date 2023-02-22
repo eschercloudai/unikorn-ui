@@ -8,6 +8,12 @@
 		listFlavors,
 		listImages,
 		listKeyPairs,
+		listComputeAvailabilityZones,
+		listBlockStorageAvailabilityZones,
+		listExternalNetworks,
+		createApplicationCredential,
+		deleteApplicationCredential,
+		createCluster,
 		deleteCluster
 	} from '$lib/client.js';
 
@@ -16,6 +22,7 @@
 	import StatusHeader from '$lib/StatusHeader.svelte';
 	import DropDownIcon from '$lib/DropDownIcon.svelte';
 	import LabeledInput from '$lib/LabeledInput.svelte';
+	import WorkloadPoolCreate from '$lib/WorkloadPoolCreate.svelte';
 
 	let controlPlanes = [];
 	let controlPlane = null;
@@ -72,6 +79,15 @@
 
 			updateClusters();
 		}
+
+		// Kick off other requests to hide the latency while
+		// we work out caching.
+		updateKeyPairs();
+		updateImages();
+		updateFlavors();
+		updateComputeAZs();
+		updateBlockStorageAZs();
+		updateExternalNetworks();
 	}
 
 	async function updateClusters() {
@@ -111,6 +127,10 @@
 		{ id: 'delete', value: 'Delete' }
 	];
 
+	function appCredName(clusterName) {
+		return `${controlPlane.status.name}-${clusterName}`;
+	}
+
 	async function selected(event) {
 		if (event.detail.item.id == 'delete') {
 			await deleteCluster(controlPlane.status.name, event.detail.id, {
@@ -124,31 +144,63 @@
 		}
 	}
 
-	let createModalActive = false;
+	let name;
 
-	// On creation we on;y consider a single version.
+	// On creation we only consider a single version.
 	let versions = [];
-	let version = null;
+	let version;
 
 	// Images are a one size fits all for simplicity.
 	let images = [];
-	let image = null;
+	let image;
 
 	// All flavors (for worker nodes).
 	let flavors = [];
 
 	// Control plane flavors are limited to non-GPU.
 	let cpFlavors = [];
-	let cpFlavor = null;
+	let flavor;
 
-	let cpReplicas = 3;
+	let replicas = 3;
 
 	let keyPairs = [];
-	let keyPair = null;
+	let keyPair;
+
+	let disk = 50;
+
+	// Network options.
+	let nodePrefix;
+	let podPrefix;
+	let servicePrefix;
+	let dnsNameservers;
+	let allowedPrefixes;
+	let sans;
+
+	let autoscaling = false;
+
+	let workloadPools = [];
+
+	addPool();
+
+	function addPool() {
+		// Create an object to bind the WorkloadPoolCreate component to.
+		let object = {};
+
+		workloadPools.push(object);
+		workloadPools = workloadPools;
+	}
+
+	function removePool(index) {
+		workloadPools.splice(index, 1);
+		workloadPools = workloadPools;
+	}
 
 	async function updateImages() {
 		const results = await listImages({
-			token: token.get().token
+			token: token.get().token,
+			onUnauthorized: () => {
+				token.remove();
+			}
 		});
 
 		// Find a unique set of versions...
@@ -174,18 +226,18 @@
 
 		images = i;
 		image = images[0];
-
-		for (const wp of workloadPools) {
-			wp.image = images[0];
-		}
-
-		// Trigger a refresh.
-		workloadPools = workloadPools;
 	}
 
 	async function updateFlavors() {
 		const results = await listFlavors({
-			token: token.get().token
+			token: token.get().token,
+			onUnauthorized: () => {
+				token.remove();
+			}
+		});
+
+		results.sort((a, b) => {
+			a.name < b.name;
 		});
 
 		const cpf = [];
@@ -197,54 +249,252 @@
 		}
 
 		cpFlavors = cpf;
-		cpFlavor = cpf[0];
+		flavor = cpf[0];
 
 		flavors = results;
-
-		for (const wp of workloadPools) {
-			wp.flavor = flavors[0];
-		}
-
-		// Trigger a refresh.
-		workloadPools = workloadPools;
 	}
 
 	async function updateKeyPairs() {
 		const results = await listKeyPairs({
-			token: token.get().token
+			token: token.get().token,
+			onUnauthorized: () => {
+				token.remove();
+			}
 		});
 
 		// Don't pick a value, it's secure by default.
 		keyPairs = results;
 	}
 
-	function toggleCreateModal() {
-		createModalActive = !createModalActive;
+	let computeAZs = [];
+	let blockStorageAZs = [];
+	let externalNetworks = [];
 
-		if (createModalActive) {
-			updateKeyPairs();
-			updateImages();
-			updateFlavors();
-		}
+	async function updateComputeAZs() {
+		const results = await listComputeAvailabilityZones({
+			token: token.get().token,
+			onUnauthorized: () => {
+				token.remove();
+			}
+		});
+
+		computeAZs = results;
 	}
 
-	let workloadPools = [
-		{
-			name: null,
-			image: null,
-			flavor: null,
-			replicas: 3,
-			labels: null
+	async function updateBlockStorageAZs() {
+		const results = await listBlockStorageAvailabilityZones({
+			token: token.get().token,
+			onUnauthorized: () => {
+				token.remove();
+			}
+		});
+
+		blockStorageAZs = results;
+	}
+
+	async function updateExternalNetworks() {
+		const results = await listExternalNetworks({
+			token: token.get().token,
+			onUnauthorized: () => {
+				token.remove();
+			}
+		});
+
+		externalNetworks = results;
+	}
+
+	let createModalActive = false;
+
+	function toggleCreateModal() {
+		createModalActive = !createModalActive;
+	}
+
+	async function submitCreateCluster() {
+		// TODO: sanity checking/validation before doing anything
+		// potentially destructive!
+
+		// Delete an existing application credential that may be
+		// in the way.
+		// TODO: we should garbage collect these after cluster deprovision
+		// but that's somewhat difficult.
+		await deleteApplicationCredential(appCredName(name), {
+			token: token.get().token,
+			onUnauthorized: () => {
+				token.remove();
+			},
+			onNotFound: () => {}
+		});
+
+		let ac = await createApplicationCredential({
+			token: token.get().token,
+			onUnauthorized: () => {
+				token.remove();
+			},
+			body: {
+				name: appCredName(name)
+			}
+		});
+
+		if (ac == null) {
+			return;
 		}
-	];
+
+		const body = {
+			name: name,
+			openstack: {
+				applicationCredentialID: ac.id,
+				applicationCredentialSecret: ac.secret,
+				computeAvailabilityZone: computeAZs[0].name,
+				volumeAvailabilityZone: blockStorageAZs[0].name,
+				externalNetworkID: externalNetworks[0].id
+			},
+			network: {
+				nodePrefix: nodePrefix ? nodePrefix : '192.168.0.0/16',
+				servicePrefix: servicePrefix ? servicePrefix : '172.16.0.0/12',
+				podPrefix: podPrefix ? podPrefix : '10.0.0.0/8',
+				dnsNameservers: dnsNameservers ? dnsNameservers.split(',') : ['8.8.8.8', '8.8.4.4']
+			},
+			controlPlane: {
+				replicas: replicas,
+				version: `v${version}`,
+				imageName: image.name,
+				flavorName: flavor.name,
+				disk: {
+					size: disk
+				}
+			},
+			workloadPools: []
+		};
+
+		if (sans || allowedPrefixes) {
+			body.api = {};
+
+			if (sans) {
+				body.api.sans = sans.split(',');
+			}
+
+			if (allowedPrefixes) {
+				body.api.allowedPrefixes = allowedPrefixes.split(',');
+			}
+		}
+
+		if (autoscaling) {
+			body.features = {
+				autoscaling: true
+			};
+		}
+
+		for (const wp of workloadPools) {
+			const pool = {
+				name: wp.name,
+				machine: {
+					replicas: wp.replicas,
+					// TODO: there is a mismatch between input and output
+					// that should be handled in the server.
+					version: `v${version}`,
+					imageName: wp.image.name,
+					flavorName: wp.flavor.name,
+					disk: {
+						size: wp.disk
+					}
+				}
+			};
+
+			if (wp.autoscaling) {
+				pool.autoscaling = {
+					minimumReplicas: wp.minReplicas,
+					maximumReplicas: wp.maxReplicas,
+					scheduler: {
+						cpus: wp.flavor.cpus,
+						memory: wp.flavor.memory
+					}
+				};
+
+				if (wp.flavor.gpus) {
+					pool.autoscaling.scheduler.gpu = {
+						type: 'nvidia.com/gpu',
+						count: wp.flavor.gpus
+					};
+				}
+			}
+
+			body.workloadPools.push(pool);
+		}
+
+		await createCluster(controlPlane.status.name, {
+			token: token.get().token,
+			onUnauthorized: () => {
+				token.remove();
+			},
+			body: body
+		});
+
+		updateClusters();
+		toggleCreateModal();
+	}
+
+	// TODO: this is just a bit of fun to prove how it could work, this
+	// data needs to come from an API, not a spreadsheet embedded in a
+	// presentation.
+	const prices = {
+		'g.48.highmem.a100.2': 10.12,
+		'g.24.highmem.a100.1': 5.06,
+		'g.12.highmem.a100.3g.40gb': 2.53,
+		'g.8.highmem.a100.2g.20gb': 1.51,
+		'g.4.highmem.a100.1g.10gb': 0.76,
+		'g.4.standard': 0.16,
+		'g.2.standard': 0.08
+	};
+
+	let cost = 0.0;
+	let costMax = 0.0;
+
+	function updateCost() {
+		if (flavor == null) {
+			return;
+		}
+
+		let c = prices[flavor.name] * replicas;
+		let e = 0.0;
+
+		for (const wp of workloadPools) {
+			if (wp.flavor == null) {
+				continue;
+			}
+
+			if (wp.autoscaling) {
+				c = c + prices[wp.flavor.name] * wp.minReplicas;
+				e = e + prices[wp.flavor.name] * (wp.maxReplicas - wp.minReplicas);
+			} else {
+				c = c + prices[wp.flavor.name] * wp.replicas;
+			}
+		}
+
+		cost = c;
+		costMax = c + e;
+	}
+
+	$: if (flavor != null) {
+		updateCost();
+	}
 </script>
 
 <Modal active={createModalActive} fixed="true">
 	<form>
 		<h1>Create New Cluster</h1>
 
-		<input id="name" placeholder="Name (required)" />
-		<label for="name">Must be unique, contain only characters, numbers and dashes.</label>
+		<input id="name" type="text" placeholder="Name (required)" required bind:value={name} />
+		<label for="name"
+			>Cluster name. Must be unique, contain only characters, numbers and dashes.</label
+		>
+
+		<div class="checkbox">
+			<input id="autoscaling" type="checkbox" bind:checked={autoscaling} />
+			<span>Autoscaling enabled</span>
+		</div>
+		<label for="autoscaling"
+			>Enables cluster autoscaling, this must be configured for each workload pool.</label
+		>
 
 		<details>
 			<summary>Networking (Advanced Options)</summary>
@@ -268,24 +518,39 @@
 				>SSH key pair to include on each node. It is advised this not be used to improve security.</label
 			>
 
-			<input id="dnsnameservers" placeholder="8.8.8.8,8.8.4.4" />
+			<input
+				id="dnsnameservers"
+				type="text"
+				placeholder="8.8.8.8,8.8.4.4"
+				bind:value={dnsNameservers}
+			/>
 			<label for="dnsnameservers">Comma separated list of DNS name servers to use.</label>
 
-			<input id="nodeNetwork" placeholder="192.168.0.0/16" />
+			<input id="nodeNetwork" type="text" placeholder="192.168.0.0/16" bind:value={nodePrefix} />
 			<label for="nodeNetwork">IPv4 CIDR to run Kubernetes nodes in.</label>
 
-			<input id="podNetwork" placeholder="10.0.0.0/8" />
+			<input id="podNetwork" type="text" placeholder="10.0.0.0/8" bind:value={podPrefix} />
 			<label for="podNetwork">IPv4 CIDR to run Kubernets pods in.</label>
 
-			<input id="serviceNetwork" placeholder="127.16.0.0/12" />
+			<input
+				id="serviceNetwork"
+				type="text"
+				placeholder="127.16.0.0/12"
+				bind:value={servicePrefix}
+			/>
 			<label for="serviceNetwork">IPv4 CIDR to run Kubernetes services in.</label>
 
-			<input id="allowedPrefixes" placeholder="1.2.3.4/32,7.8.0.0/16" />
+			<input
+				id="allowedPrefixes"
+				type="text"
+				placeholder="1.2.3.4/32,7.8.0.0/16"
+				bind:value={allowedPrefixes}
+			/>
 			<label for="allowedPrefixes"
 				>Comma separated list of IPv4 CIDR blocks to permit access to the Kubernetes API.</label
 			>
 
-			<input id="sans" placeholder="kubernetes.my-domain.com" />
+			<input id="sans" type="text" placeholder="kubernetes.my-domain.com" bind:value={sans} />
 			<label for="sans"
 				>Comma separated list of X.509 subject alterative names to add to the Kubernetes API
 				certificate.</label
@@ -294,21 +559,21 @@
 
 		<h2>Control Plane</h2>
 
-		<select id="version" bind:value={version}>
+		<select id="version" bind:value={version} required>
 			{#each versions as v}
 				<option value={v}>{v}</option>
 			{/each}
 		</select>
 		<label for="version">Kubernetes version to provision with.</label>
 
-		<select id="cpImage" bind:value={image}>
+		<select id="image" bind:value={image} required>
 			{#each images as i}
 				<option value={i}>{i.name}</option>
 			{/each}
 		</select>
-		<label for="cpImage">Virtual machine image to use.</label>
+		<label for="image">Virtual machine image to use.</label>
 
-		<select id="cpFlavor" bind:value={cpFlavor}>
+		<select id="flavor" bind:value={flavor} required>
 			{#each cpFlavors as f}
 				{#if f.gpus}
 					<option value={f}>{f.name} ({f.cpus} core, {f.memory}Gi, {f.gpus} GPU)</option>
@@ -317,21 +582,27 @@
 				{/if}
 			{/each}
 		</select>
-		<label for="cpFlavor">Virtual machine type to use.</label>
+		<label for="flavor">Virtual machine type to use.</label>
+
+		<div class="slider">
+			<input id="disk" type="range" min="50" max="2000" step="50" bind:value={disk} />
+			<span>{disk}GiB</span>
+		</div>
+		<label for="disk">The size of the root disk.</label>
 
 		<details>
 			<summary>Advanced Options</summary>
 
 			<div class="slider">
-				<input id="replicas" type="range" min="1" max="9" step="2" bind:value={cpReplicas} />
-				<span>{cpReplicas}</span>
+				<input id="replicas" type="range" min="1" max="9" step="2" bind:value={replicas} />
+				<span>{replicas}</span>
 			</div>
 			<label for="replicas"
 				>Number of virtual machines. The default (3) is generally cost effective while providing
 				high-availability.</label
 			>
 
-			<input id="labels" placeholder="key1=value1,key2=value2" />
+			<input id="labels" type="text" placeholder="key1=value1,key2=value2" />
 			<label for="labels"
 				>Comma separated set of labels to apply to Kubernetes nodes on creation.</label
 			>
@@ -339,51 +610,30 @@
 
 		<h2>Workload Pools</h2>
 
-		<section>
-			{#each workloadPools as pool}
-				<input id="wpName0" placeholder="default" bind:value={pool.name} />
-				<label for="wpName0">Unique name of the workload pool.</label>
+		{#each workloadPools as pool, index}
+			<section>
+				<WorkloadPoolCreate
+					{autoscaling}
+					{flavors}
+					{images}
+					bind:object={pool}
+					on:workload-update={updateCost}
+				/>
+				<button class="no-margin" on:click={() => removePool(index)}>Remove Pool</button>
+			</section>
+		{/each}
 
-				<select id="wpImage0" bind:value={pool.image}>
-					{#each images as i}
-						<option value={i}>{i.name}</option>
-					{/each}
-				</select>
-				<label for="wpImage0">Virtual machine image to use.</label>
+		<button class="no-margin" on:click={addPool}>Add New Pool</button>
 
-				<select id="wpFlavor0" bind:value={pool.flavor}>
-					{#each flavors as f}
-						{#if f.gpus}
-							<option value={f}>{f.name} ({f.cpus} core, {f.memory}Gi, {f.gpus} GPU)</option>
-						{:else}
-							<option value={f}>{f.name} ({f.cpus} core, {f.memory}Gi)</option>
-						{/if}
-					{/each}
-				</select>
-				<label for="wpFlavor0">Virtual machine type to use.</label>
+		<h2>Estimated Cost</h2>
+		<div>Fixed cost: &euro;{cost.toFixed(2)}/h</div>
 
-				<div class="slider">
-					<input id="wpReplicas0" type="range" min="1" max="50" bind:value={pool.replicas} />
-					<span>{pool.replicas}</span>
-				</div>
-				<label for="wpReplicas0">Number of virtual machines.</label>
-
-				<details>
-					<summary>Advanced Options</summary>
-					<input id="wpLabels0" placeholder="key1=value1,key2=value2" bind:value={pool.labels} />
-					<label for="wpLabels0"
-						>Comma separated set of labels to apply to Kubernetes nodes on creation.</label
-					>
-				</details>
-			{/each}
-
-			<button class="no-margin">Remove Pool</button>
-		</section>
-
-		<button class="no-margin">Add New Pool</button>
+		{#if autoscaling}
+			<div>Maximum burst cost: &euro;{costMax.toFixed(2)}/h</div>
+		{/if}
 
 		<div>
-			<button type="submit">Submit</button>
+			<button type="submit" on:click={submitCreateCluster}>Submit</button>
 			<button on:click={toggleCreateModal}>Cancel</button>
 		</div>
 	</form>
@@ -461,12 +711,15 @@
 	button.no-margin {
 		margin: 0;
 	}
+	div.checkbox {
+		display: flex;
+		align-items: center;
+		gap: var(--padding);
+	}
 	div.slider {
 		display: flex;
 		align-items: center;
-	}
-	div.slider span {
-		margin-left: var(--padding);
+		gap: var(--padding);
 	}
 	@media only screen and (min-width: 720px) {
 		dl {

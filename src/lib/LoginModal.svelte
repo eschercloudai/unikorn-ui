@@ -55,6 +55,7 @@
 		<input
 			type="text"
 			id="username"
+			required
 			placeholder="Username"
 			autocomplete="username"
 			bind:value={username}
@@ -62,6 +63,7 @@
 		<input
 			type="password"
 			id="password"
+			required
 			placeholder="Password"
 			autocomplete="current-password"
 			bind:value={password}
@@ -94,5 +96,6 @@
 		display: flex;
 		flex-direction: column;
 		align-items: center;
+		gap: var(--padding);
 	}
 </style>

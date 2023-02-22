@@ -217,25 +217,54 @@
 	:global(a:hover) {
 		color: var(--brand-light);
 	}
-	:global(input, select) {
-		padding: var(--padding);
+	:global(input[type='text'], input[type='password'], input[type='range'], select) {
 		box-sizing: border-box;
 		background: none;
 		border: none;
-		border-bottom: 2px solid var(--brand);
 		width: 100%;
 		font-size: 1rem;
 		transition: all 0.2s ease-in;
 	}
-	:global(input:focus, select:focus) {
+	:global(input[type='text'], input[type='password'], select) {
+		padding: var(--padding);
+		border-bottom: 2px solid var(--brand);
+	}
+	:global(
+			input[type='text']:focus,
+			input[type='password']:focus,
+			input[type='range']:focus,
+			select:focus
+		) {
 		outline: none;
-		box-shadow: 0 0 var(--shadow-radius) var(--brand);
+		box-shadow: 0 0 var(--shadow-radius) var(--brand-light);
+	}
+	:global(input[type='text']:invalid, input[type='password']:invalid, select:invalid) {
+		box-shadow: 0 0 var(--shadow-radius) red;
 	}
 	:global(input[type='range']::-moz-range-track) {
 		background-color: var(--brand);
 	}
 	:global(input[type='range']::-webkit-slider-runnable-track) {
 		background-color: var(--brand);
+	}
+	:global(input[type='checkbox']) {
+		appearance: none;
+		display: grid;
+		place-content: center;
+		width: 1.5em;
+		height: 1.5em;
+		border: 2px solid var(--brand);
+	}
+	:global(input[type='checkbox']::before) {
+		content: '';
+		width: 0.75em;
+		height: 0.75em;
+		transform: scale(0);
+		transition: all 0.2s ease-in;
+		background-color: var(--brand);
+	}
+	:global(input[type='checkbox']:checked::before) {
+		transform: scale(1);
 	}
 	:global(button) {
 		color: var(--brand);

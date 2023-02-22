@@ -34,7 +34,7 @@ async function request(method, path, opts) {
 			return null;
 		}
 
-		if (['DELETE'].includes(method)) {
+		if (response.headers.get('Content-Type') == null) {
 			return null;
 		}
 
@@ -72,6 +72,26 @@ export function listKeyPairs(opts) {
 	return request('GET', '/api/v1/providers/openstack/key-pairs', opts);
 }
 
+export function createApplicationCredential(opts) {
+	return request('POST', '/api/v1/providers/openstack/application-credentials', opts);
+}
+
+export function deleteApplicationCredential(name, opts) {
+	return request('DELETE', `/api/v1/providers/openstack/application-credentials/${name}`, opts);
+}
+
+export function listComputeAvailabilityZones(opts) {
+	return request('GET', '/api/v1/providers/openstack/availability-zones/compute', opts);
+}
+
+export function listBlockStorageAvailabilityZones(opts) {
+	return request('GET', '/api/v1/providers/openstack/availability-zones/block-storage', opts);
+}
+
+export function listExternalNetworks(opts) {
+	return request('GET', '/api/v1/providers/openstack/external-networks', opts);
+}
+
 export function listControlPlanes(opts) {
 	return request('GET', '/api/v1/controlplanes', opts);
 }
@@ -86,6 +106,10 @@ export function deleteControlPlane(controlPlane, opts) {
 
 export function listClusters(controlPlane, opts) {
 	return request('GET', `/api/v1/controlplanes/${controlPlane}/clusters`, opts);
+}
+
+export function createCluster(controlPlane, opts) {
+	return request('POST', `/api/v1/controlplanes/${controlPlane}/clusters`, opts);
 }
 
 export function deleteCluster(controlPlane, cluster, opts) {
