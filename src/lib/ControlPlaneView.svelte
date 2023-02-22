@@ -123,7 +123,7 @@
 	<div class="modal-content">
 		<h2>Create New Control Plane</h2>
 		<form>
-			<input id="name" placeholder="Name (required)" bind:value={newControlPlaneName} />
+			<input id="name" placeholder="Name" required bind:value={newControlPlaneName} />
 			<label for="name">Must be unique, contain only characters, numbers and dashes.</label>
 			<div>
 				<button
