@@ -47,7 +47,7 @@
 	}
 </script>
 
-<input id="name" type="text" placeholder="default" required bind:value={name} />
+<input id="name" type="text" placeholder="Workload pool name" required bind:value={name} />
 <label for="name"
 	>Workload pool name. Must be unique, contain only characters, numbers and dashes.</label
 >

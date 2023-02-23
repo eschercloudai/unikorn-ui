@@ -4,15 +4,22 @@
 </script>
 
 <div>
-	<label for={id}>{value}</label>
 	<slot />
+	<label for={id}>{value}</label>
 </div>
 
 <style>
 	div {
 		display: flex;
-		align-items: center;
+		flex-direction: column;
+		align-items: stretch;
 		padding: var(--padding);
+		gap: var(--padding);
 		border-bottom: 1px solid var(--brand);
+	}
+	label {
+		display: block;
+		font-style: italic;
+		font-size: 0.75rem;
 	}
 </style>

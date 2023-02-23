@@ -439,6 +439,10 @@
 				}
 			};
 
+			if (wp.labels) {
+				pool.labels = Object.fromEntries(wp.labels.split(',').map((x) => x.split('=')));
+			}
+
 			if (wp.autoscaling) {
 				pool.autoscaling = {
 					minimumReplicas: wp.minReplicas,
@@ -522,7 +526,7 @@
 	<form>
 		<h1>Create New Cluster</h1>
 
-		<input id="name" type="text" placeholder="Name (required)" required bind:value={name} />
+		<input id="name" type="text" placeholder="Cluster name" required bind:value={name} />
 		<label for="name"
 			>Cluster name. Must be unique, contain only characters, numbers and dashes.</label
 		>
@@ -640,11 +644,6 @@
 				>Number of virtual machines. The default (3) is generally cost effective while providing
 				high-availability.</label
 			>
-
-			<input id="labels" type="text" placeholder="key1=value1,key2=value2" />
-			<label for="labels"
-				>Comma separated set of labels to apply to Kubernetes nodes on creation.</label
-			>
 		</details>
 
 		<h2>Workload Pools</h2>
@@ -691,7 +690,7 @@
 <button on:click={toggleCreateModal}>Create</button>
 
 {#each clusters as cl}
-	<article class="cluster">
+	<article>
 		<StatusHeader name={cl.status.name} status={statusFromResource(cl.status)}>
 			<iconify-icon icon="mdi:favorite-border" />
 			<DropDownIcon
@@ -706,24 +705,25 @@
 			<dd>{age(cl.status.creationTime)}</dd>
 			<dt>Status</dt>
 			<dd>{cl.status.status}</dd>
-			<dt>Kubernetes Version</dt>
+			<dt>Kubernetes</dt>
 			<dd>{cl.controlPlane.version}</dd>
 		</dl>
 	</article>
 {/each}
 
 <style>
-	article {
-		border: 2px solid var(--brand);
+	dl {
+		margin-bottom: 0;
+		display: grid;
+		grid-auto-flow: column;
+		grid-gap: calc(var(--padding) / 2) var(--padding);
 	}
 	dt {
 		font-weight: bold;
+		grid-column-start: 1;
 	}
 	dd {
 		margin: 0;
-	}
-	dd:not(:last-child) {
-		margin-bottom: var(--padding);
 	}
 	form {
 		display: flex;
@@ -762,12 +762,12 @@
 	}
 	@media only screen and (min-width: 720px) {
 		dl {
-			display: grid;
-			grid-auto-flow: column;
-			grid-template-rows: auto auto;
+			display: inline-grid;
+			grid-auto-flow: row;
 		}
-		dd:not(:last-child) {
-			margin-bottom: 0;
+		dt {
+			grid-row-start: 1;
+			grid-column-start: unset;
 		}
 	}
 </style>
