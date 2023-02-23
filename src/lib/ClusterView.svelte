@@ -1,5 +1,6 @@
 <script>
 	import { onMount, onDestroy } from 'svelte';
+	import { browser } from '$app/environment';
 	import { token } from '$lib/credentials.js';
 	import { age } from '$lib/time.js';
 	import {
@@ -14,7 +15,8 @@
 		createApplicationCredential,
 		deleteApplicationCredential,
 		createCluster,
-		deleteCluster
+		deleteCluster,
+		getClusterKubeconfig
 	} from '$lib/client.js';
 
 	import Modal from '$lib/Modal.svelte';
@@ -124,6 +126,7 @@
 	// Define the per-control plane drop down menu.
 	let dropdownItems = [
 		{ id: 'detail', value: 'Show Details' },
+		{ id: 'kubeconfig', value: 'Download kubeconfig' },
 		{ id: 'delete', value: 'Delete' }
 	];
 
@@ -141,6 +144,34 @@
 			});
 
 			updateClusters();
+			return;
+		}
+
+		if (event.detail.item.id == 'kubeconfig') {
+			const blob = await getClusterKubeconfig(controlPlane.status.name, event.detail.id, {
+				token: token.get().token,
+				onUnauthorized: () => {
+					token.remove();
+				}
+			});
+
+			if (blob == null) {
+				return;
+			}
+
+			if (browser) {
+				const url = window.URL.createObjectURL(blob);
+
+				const a = document.createElement('a');
+				a.style.display = 'none';
+				a.href = url;
+				a.download = `kubeconfig-${event.detail.id}.yaml`;
+
+				document.body.appendChild(a);
+				a.click();
+
+				window.URL.revokeObjectURL(url);
+			}
 		}
 	}
 
