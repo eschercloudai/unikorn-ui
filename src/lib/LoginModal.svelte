@@ -42,7 +42,7 @@
 			return;
 		}
 
-		token.set(result.token, token.unscoped);
+		token.set(result.token, token.unscoped, result.email);
 	}
 </script>
 

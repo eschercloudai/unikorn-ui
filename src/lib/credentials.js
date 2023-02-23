@@ -21,11 +21,12 @@ export function writable(key) {
 	}
 
 	// set sets the value and notifies all subscribers.
-	function set(new_value, kind, project = null) {
+	function set(new_value, kind, email, project = null) {
 		value = {
 			token: new_value,
 			scope: kind,
-			project: project
+			project: project,
+			email: email
 		};
 
 		if (browser) {

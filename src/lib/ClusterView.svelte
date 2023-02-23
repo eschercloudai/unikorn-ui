@@ -219,7 +219,6 @@
 
 		// Sort by date, newest first.
 		results.sort((a, b) => a.creationTime < b.creationTime);
-		console.log(results);
 
 		allImages = results;
 	}
