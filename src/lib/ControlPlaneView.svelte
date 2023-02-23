@@ -123,7 +123,13 @@
 	<div class="modal-content">
 		<h2>Create New Control Plane</h2>
 		<form>
-			<input id="name" placeholder="Name" required bind:value={newControlPlaneName} />
+			<input
+				id="name"
+				type="text"
+				placeholder="Control plane name"
+				required
+				bind:value={newControlPlaneName}
+			/>
 			<label for="name">Must be unique, contain only characters, numbers and dashes.</label>
 			<div>
 				<button
@@ -179,18 +185,18 @@
 {/each}
 
 <style>
-	article {
-		border: 2px solid var(--brand);
-		box-shadow: 0.25em 0.25em var(--shadow-radius) var(--mid-grey);
+	dl {
+		margin-bottom: 0;
+		display: grid;
+		grid-auto-flow: column;
+		grid-gap: calc(var(--padding) / 2) var(--padding);
 	}
 	dt {
 		font-weight: bold;
+		grid-column-start: 1;
 	}
 	dd {
 		margin: 0;
-	}
-	dd:not(:last-child) {
-		margin-bottom: var(--padding);
 	}
 	form {
 		display: flex;
@@ -205,5 +211,15 @@
 	}
 	div.modal-content {
 		padding: var(--padding);
+	}
+	@media only screen and (min-width: 720px) {
+		dl {
+			display: inline-grid;
+			grid-auto-flow: row;
+		}
+		dt {
+			grid-row-start: 1;
+			grid-column-start: unset;
+		}
 	}
 </style>

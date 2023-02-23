@@ -230,8 +230,9 @@
 		transition: all 0.2s ease-in;
 	}
 	:global(input[type='text'], input[type='password'], select) {
-		padding: var(--padding);
+		padding: var(--padding) 0;
 		border-bottom: 2px solid var(--brand);
+		text-overflow: ellipsis;
 	}
 	:global(
 			input[type='text']:focus,
@@ -278,6 +279,7 @@
 		border: 2px solid var(--brand);
 		font-weight: bold;
 		font-size: 1rem;
+		background: white;
 	}
 	:global(button:hover) {
 		color: var(--brand-light);
@@ -314,6 +316,8 @@
 	:global(article) {
 		margin: var(--padding);
 		padding: var(--padding);
+		border: 2px solid var(--brand);
+		background: white;
 	}
 	:global(summary) {
 		font-weight: bold;
