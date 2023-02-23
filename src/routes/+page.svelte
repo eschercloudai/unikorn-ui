@@ -1,5 +1,7 @@
 <script>
 	import { onMount, onDestroy } from 'svelte';
+	import MD5 from 'crypto-js/md5';
+
 	import { token } from '$lib/credentials.js';
 	import { getMenu, selected } from '$lib/menu.js';
 	import { createToken, listProjects } from '$lib/client.js';
@@ -28,6 +30,9 @@
 	let projects = [];
 	let project = null;
 
+	// Email address from the token.
+	let email = '';
+
 	function reset() {
 		projects = [];
 		project = null;
@@ -54,6 +59,8 @@
 		if (projects.length != 0) {
 			return;
 		}
+
+		email = value.email;
 
 		const result = await listProjects({
 			token: value.token,
@@ -116,7 +123,7 @@
 			return;
 		}
 
-		token.set(result.token, token.scoped, project.id);
+		token.set(result.token, token.scoped, result.email, project.id);
 	}
 
 	// When a menu item is selected, hide the menu and update the
@@ -144,12 +151,8 @@
 
 <nav class:showmenu>
 	<div class="nav-group user">
-		<!-- TODO: An API to extract this jazz from oidc -->
-		<img
-			src="https://www.gravatar.com/avatar/4be664eabb39ff7d1ac5085bfa19cada"
-			alt="User Gravatar"
-		/>
-		s.murray@eschercloud.ai
+		<img src="https://www.gravatar.com/avatar/{MD5(email)}" alt="User Gravatar" />
+		{email}
 		<iconify-icon icon="material-symbols:logout" on:click={logout} on:keypress={logout} />
 	</div>
 

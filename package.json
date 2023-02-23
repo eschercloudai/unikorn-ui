@@ -22,6 +22,7 @@
 	},
 	"type": "module",
 	"dependencies": {
-		"@sveltejs/adapter-node": "^1.2.0"
+		"@sveltejs/adapter-node": "^1.2.0",
+		"crypto-js": "^4.1.1"
 	}
 }
