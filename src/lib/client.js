@@ -34,13 +34,21 @@ async function request(method, path, opts) {
 			return null;
 		}
 
-		if (response.headers.get('Content-Type') == null) {
+		const contentType = response.headers.get('Content-Type');
+
+		if (contentType == null) {
 			return null;
 		}
 
-		const result = await response.json();
+		if (contentType == 'application/json') {
+			return await response.json();
+		} else if (contentType == 'application/octet-stream') {
+			return await response.blob();
+		}
 
-		return result;
+		console.log('unhandled content type', contentType);
+
+		return null;
 	} catch (e) {
 		console.log('unhandled exception', e);
 
@@ -110,6 +118,14 @@ export function listClusters(controlPlane, opts) {
 
 export function createCluster(controlPlane, opts) {
 	return request('POST', `/api/v1/controlplanes/${controlPlane}/clusters`, opts);
+}
+
+export function getClusterKubeconfig(controlPlane, cluster, opts) {
+	return request(
+		'GET',
+		`/api/v1/controlplanes/${controlPlane}/clusters/${cluster}/kubeconfig`,
+		opts
+	);
 }
 
 export function deleteCluster(controlPlane, cluster, opts) {

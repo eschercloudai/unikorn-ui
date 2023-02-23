@@ -194,6 +194,7 @@
 		--light-grey: rgb(245, 245, 245);
 		--mid-grey: rgb(128, 128, 128);
 		--dark-grey: rgb(96, 96, 96);
+		--error: deeppink;
 
 		/* Various stylings to keep consistency */
 		--radius: 0.5rem;
@@ -242,7 +243,7 @@
 		box-shadow: 0 0 var(--shadow-radius) var(--brand-light);
 	}
 	:global(input[type='text']:invalid, input[type='password']:invalid, select:invalid) {
-		box-shadow: 0 0 var(--shadow-radius) red;
+		box-shadow: 0 0 var(--shadow-radius) var(--error);
 	}
 	:global(input[type='range']::-moz-range-track) {
 		background-color: var(--brand);
