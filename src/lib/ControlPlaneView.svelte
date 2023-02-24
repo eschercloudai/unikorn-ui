@@ -6,7 +6,7 @@
 
 	import Modal from '$lib/Modal.svelte';
 	import Breadcrumbs from '$lib/Breadcrumbs.svelte';
-	import StatusHeader from '$lib/StatusHeader.svelte';
+	import StatusIcon from '$lib/StatusIcon.svelte';
 	import DropDownIcon from '$lib/DropDownIcon.svelte';
 
 	let controlPlanes = [];
@@ -166,28 +166,57 @@
 
 {#each controlPlanes as cp}
 	<article>
-		<StatusHeader name={cp.status.name} status={statusFromResource(cp.status)}>
-			<iconify-icon icon="mdi:favorite-border" />
+		<div class="title">
+			<StatusIcon status={statusFromResource(cp.status)} />
+			<div class="name">{cp.status.name}</div>
+		</div>
+		<div class="widgets">
 			<DropDownIcon
 				icon="mdi:dots-vertical"
 				id={cp.status.name}
 				items={dropdownItems}
 				on:select={selected}
 			/>
-		</StatusHeader>
+		</div>
 		<dl>
-			<dt>Age</dt>
+			<dt>Age:</dt>
 			<dd>{age(cp.status.creationTime)}</dd>
-			<dt>Status</dt>
+			<dt>Status:</dt>
 			<dd>{cp.status.status}</dd>
 		</dl>
 	</article>
 {/each}
 
 <style>
-	dl {
-		margin-bottom: 0;
+	article {
 		display: grid;
+		grid-template-columns: 1fr auto;
+		grid-gap: var(--padding);
+	}
+	div.name {
+		color: var(--brand);
+		font-weight: bold;
+	}
+	div.title {
+		display: flex;
+		align-items: center;
+		gap: var(--padding);
+		grid-row: 1;
+		grid-column: 1;
+	}
+	div.widgets {
+		display: flex;
+		align-items: center;
+		gap: var(--padding);
+		grid-row: 1;
+		grid-column: 2;
+	}
+	dl {
+		grid-row: 2;
+		grid-column: 1 / -1;
+		margin: 0;
+		display: grid;
+		grid-template-columns: auto 1fr;
 		grid-auto-flow: column;
 		grid-gap: calc(var(--padding) / 2) var(--padding);
 	}
@@ -213,13 +242,17 @@
 		padding: var(--padding);
 	}
 	@media only screen and (min-width: 720px) {
-		dl {
-			display: inline-grid;
-			grid-auto-flow: row;
+		article {
+			grid-template-columns: auto 1fr auto;
 		}
-		dt {
-			grid-row-start: 1;
-			grid-column-start: unset;
+		div.widgets {
+			grid-column: 3;
+		}
+		dl {
+			grid-row: 1;
+			grid-column: 2;
+			display: flex;
+			align-items: center;
 		}
 	}
 </style>

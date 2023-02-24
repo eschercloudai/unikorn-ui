@@ -46,6 +46,9 @@
 <style>
 	div.dropdown {
 		position: relative;
+		display: flex;
+		align-items: center;
+		color: var(--mid-grey);
 	}
 	div.dropdown-menu {
 		display: none;

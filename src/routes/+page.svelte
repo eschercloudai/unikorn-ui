@@ -323,36 +323,61 @@
 		font-weight: bold;
 		color: var(--brand);
 	}
-	:global(.container) {
-		height: 100vh;
-		display: flex;
-		flex-direction: column;
-	}
 	iconify-icon {
 		color: var(--brand);
 		font-weight: bold;
 	}
 
-	/* Main layout */
-	main {
-		background-color: var(--light-grey);
-		padding-top: var(--padding-header);
-		flex: 1;
-		transition: all 0.3s ease-in-out;
-		box-shadow: inset 0 0 var(--shadow-radius) var(--mid-grey);
+	/*
+	   Main layout is a 2x2 grid, with header spanning the first row
+	   and nav/main in the second.  In normal view (mobile) the nav is fixed
+	   positioned in relation to the row/column, so the first column doesn't
+	   actually contain anything and the main spans the whole page.  In desktop
+	   view the nav reverts back to a grid cell.
+	 */
+	:global(.container) {
+		width: 100vw;
+		height: 100vh;
+		display: grid;
+		grid-template-columns: auto 1fr;
+		grid-template-rows: auto 1fr;
 	}
-
-	/* Header/masthead styling */
 	header {
-		position: fixed;
+		box-sizing: border-box;
+		grid-row: 1;
+		grid-column: 1 / -1;
+		position: sticky;
 		top: 0;
-		width: 100%;
 		padding: var(--padding);
-		background-color: white;
 		border-bottom: 0.25em solid var(--brand);
 		z-index: 20;
 		text-align: center;
+		background-color: white;
 	}
+	main {
+		background-color: var(--light-grey);
+		transition: all 0.3s ease-in-out;
+		box-shadow: inset 0 0 var(--shadow-radius) var(--mid-grey);
+		grid-row: 2;
+		grid-column: 2;
+	}
+	nav {
+		position: fixed;
+		top: 3.75em;
+		height: calc(100vh - 3.75em);
+		grid-column: 1;
+		grid-row: 2;
+		width: 0;
+		overflow-x: hidden;
+		z-index: 10;
+		display: flex;
+		flex-direction: column;
+		color: var(--mid-grey);
+		transition: all 0.3s ease-in-out;
+		background-color: white;
+	}
+
+	/* Header/masthead styling */
 	header > img {
 		max-height: 2em;
 		margin-right: 2em;
@@ -373,27 +398,14 @@
 	}
 
 	/* Nav styling */
-	nav {
-		position: fixed;
-		padding-top: var(--padding-header);
-		width: 0;
-		height: 100vh;
-		overflow-x: hidden;
-		z-index: 10;
-		display: flex;
-		flex-direction: column;
-		color: var(--mid-grey);
-		background-color: white;
-		transition: all 0.3s ease-in-out;
-	}
 	nav.showmenu {
-		width: 100%;
+		width: 100vw;
 	}
 	.nav-group {
 		display: flex;
 		align-items: center;
 		padding: var(--padding);
-		border-bottom: 1px solid var(--brand);
+		gap: var(--padding);
 	}
 	nav > .user {
 		font-size: 0.8em;
@@ -405,18 +417,14 @@
 		border-radius: 1em;
 		border: 1px solid black;
 	}
-	nav > .project select {
-		margin-left: 0.5em;
-		width: 100%;
-	}
 
 	/* Desktop overrides */
 	@media only screen and (min-width: 720px) {
+		nav {
+			position: static;
+		}
 		nav.showmenu {
 			width: 300px;
-		}
-		main.showmenu {
-			margin-left: 300px;
 		}
 	}
 </style>
