@@ -230,7 +230,7 @@
 		transition: all 0.2s ease-in;
 	}
 	:global(input[type='text'], input[type='password'], select) {
-		padding: var(--padding) 0;
+		padding: var(--padding);
 		border-bottom: 2px solid var(--brand);
 		text-overflow: ellipsis;
 	}

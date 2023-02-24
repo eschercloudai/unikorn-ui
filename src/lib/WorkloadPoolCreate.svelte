@@ -81,7 +81,7 @@
 		<input id="autoscaling" type="checkbox" bind:checked={autoscalingEnabled} />
 		<span>Autoscaling enabled</span>
 	</div>
-	<label for="autoscaling">Enables workkload pool autoscaling.</label>
+	<label for="autoscaling">Enables workload pool autoscaling.</label>
 {/if}
 
 {#if autoscaling && autoscalingEnabled}
