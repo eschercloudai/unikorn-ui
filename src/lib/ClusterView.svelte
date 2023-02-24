@@ -395,7 +395,7 @@
 			},
 			controlPlane: {
 				replicas: replicas,
-				version: `v${version}`,
+				version: version,
 				imageName: image.name,
 				flavorName: flavor.name,
 				disk: {
@@ -428,9 +428,7 @@
 				name: wp.name,
 				machine: {
 					replicas: wp.replicas,
-					// TODO: there is a mismatch between input and output
-					// that should be handled in the server.
-					version: `v${version}`,
+					version: version,
 					imageName: wp.image.name,
 					flavorName: wp.flavor.name,
 					disk: {
@@ -446,19 +444,8 @@
 			if (wp.autoscaling) {
 				pool.autoscaling = {
 					minimumReplicas: wp.minReplicas,
-					maximumReplicas: wp.maxReplicas,
-					scheduler: {
-						cpus: wp.flavor.cpus,
-						memory: wp.flavor.memory
-					}
+					maximumReplicas: wp.maxReplicas
 				};
-
-				if (wp.flavor.gpus) {
-					pool.autoscaling.scheduler.gpu = {
-						type: 'nvidia.com/gpu',
-						count: wp.flavor.gpus
-					};
-				}
 			}
 
 			body.workloadPools.push(pool);
