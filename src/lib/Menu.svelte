@@ -35,7 +35,7 @@
 			{/if}
 		</div>
 	{:else}
-		<div class="item" class:highlight on:click={select} on:keypress={select}>
+		<div class="item selectable" class:highlight on:click={select} on:keypress={select}>
 			{#if icon}
 				<iconify-icon {icon} />
 			{/if}

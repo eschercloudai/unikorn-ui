@@ -32,7 +32,7 @@
 	}
 </script>
 
-<div class="dropdown">
+<div class="dropdown selectable">
 	<iconify-icon {icon} on:click={toggle} on:keypress={toggle} />
 	<div class="dropdown-menu" class:show>
 		<ul>

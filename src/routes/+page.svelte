@@ -151,7 +151,7 @@
 <LoginModal />
 
 <header>
-	<span id="hamburger" on:click={toggleMenu} on:keypress={toggleMenu}>
+	<span id="hamburger" class="selectable" on:click={toggleMenu} on:keypress={toggleMenu}>
 		<iconify-icon id="hamburger-icon" icon="material-symbols:menu" />
 		<label for="hamburger-icon">Menu</label>
 	</span>
@@ -162,7 +162,12 @@
 	<div class="nav-group user">
 		<img src="https://www.gravatar.com/avatar/{MD5(email)}" alt="User Gravatar" />
 		{email}
-		<iconify-icon icon="material-symbols:logout" on:click={logout} on:keypress={logout} />
+		<iconify-icon
+			class="selectable"
+			icon="material-symbols:logout"
+			on:click={logout}
+			on:keypress={logout}
+		/>
 	</div>
 
 	<LabeledInput id="project-select" value="Project">
@@ -291,6 +296,7 @@
 		display: inline-flex;
 		align-items: center;
 		gap: var(--padding);
+		cursor: pointer;
 	}
 	:global(button:hover) {
 		background-color: var(--brand-light);
@@ -309,7 +315,6 @@
 		color: var(--mid-grey);
 		padding: var(--padding);
 		list-style: none;
-		cursor: default;
 	}
 	:global(ul li:hover) {
 		color: var(--dark-grey);
@@ -331,6 +336,9 @@
 	:global(summary) {
 		font-weight: bold;
 		color: var(--brand);
+	}
+	:global(.selectable) {
+		cursor: pointer;
 	}
 	iconify-icon {
 		color: var(--brand);
