@@ -37,7 +37,10 @@
 	<div class="dropdown-menu" class:show>
 		<ul>
 			{#each items as item}
-				<DropDownItem on:select={selected} id={item.id}>{item.value}</DropDownItem>
+				<DropDownItem on:select={selected} id={item.id}>
+					<iconify-icon icon={item.icon} />
+					<div>{item.value}</div>
+				</DropDownItem>
 			{/each}
 		</ul>
 	</div>
