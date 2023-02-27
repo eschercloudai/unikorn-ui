@@ -282,24 +282,21 @@
 		transform: scale(1);
 	}
 	:global(button) {
-		color: var(--brand);
-		background: none;
+		color: white;
 		padding: var(--padding);
 		border: 2px solid var(--brand);
 		font-weight: bold;
 		font-size: 1rem;
-		background: white;
+		background-color: var(--brand);
 		display: inline-flex;
 		align-items: center;
 		gap: var(--padding);
 	}
 	:global(button:hover) {
-		color: var(--brand-light);
-		border-color: var(--brand-light);
+		background-color: var(--brand-light);
 	}
 	:global(button:focus) {
-		color: var(--brand-dark);
-		border-color: var(--brand-dark);
+		background-color: var(--brand-light);
 	}
 	:global(iconify-icon) {
 		font-size: var(--icon-size);
