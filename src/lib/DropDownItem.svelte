@@ -11,7 +11,7 @@
 	}
 </script>
 
-<li on:click={click} on:keypress={click}>
+<li class="selectable" on:click={click} on:keypress={click}>
 	<slot />
 </li>
 
