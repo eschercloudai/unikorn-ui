@@ -1,0 +1,10 @@
+apiVersion: v2
+name: unikorn-ui
+description: A Helm chart for deploying Unikorn UI
+
+type: application
+
+version: 0.1.0
+appVersion: 0.1.0
+
+icon: https://raw.githubusercontent.com/eschercloudai/unikorn/main/icons/default.png

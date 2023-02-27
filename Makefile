@@ -35,3 +35,4 @@ images-kind-load: images
 .PHONY: lint
 lint:
 	npm run lint
+	helm lint --strict charts/unikorn-ui
