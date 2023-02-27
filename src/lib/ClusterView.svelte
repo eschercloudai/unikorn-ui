@@ -674,32 +674,38 @@
 	</select>
 </LabeledInput>
 
-<button on:click={toggleCreateModal}>Create</button>
+{#if controlPlanes.length == 0}
+	<section>
+		<p>No control planes found. Create one first to enable cluster creation.</p>
+	</section>
+{:else}
+	<button on:click={toggleCreateModal}>Create</button>
 
-{#each clusters as cl}
-	<article>
-		<div class="title">
-			<StatusIcon status={statusFromResource(cl.status)} />
-			<div class="name">{cl.status.name}</div>
-		</div>
-		<div class="widgets">
-			<DropDownIcon
-				icon="mdi:dots-vertical"
-				id={cl.status.name}
-				items={dropdownItems}
-				on:select={selected}
-			/>
-		</div>
-		<dl>
-			<dt>Age:</dt>
-			<dd>{age(cl.status.creationTime)}</dd>
-			<dt>Status:</dt>
-			<dd>{cl.status.status}</dd>
-			<dt>Kubernetes:</dt>
-			<dd>{cl.controlPlane.version}</dd>
-		</dl>
-	</article>
-{/each}
+	{#each clusters as cl}
+		<article>
+			<div class="title">
+				<StatusIcon status={statusFromResource(cl.status)} />
+				<div class="name">{cl.status.name}</div>
+			</div>
+			<div class="widgets">
+				<DropDownIcon
+					icon="mdi:dots-vertical"
+					id={cl.status.name}
+					items={dropdownItems}
+					on:select={selected}
+				/>
+			</div>
+			<dl>
+				<dt>Age:</dt>
+				<dd>{age(cl.status.creationTime)}</dd>
+				<dt>Status:</dt>
+				<dd>{cl.status.status}</dd>
+				<dt>Kubernetes:</dt>
+				<dd>{cl.controlPlane.version}</dd>
+			</dl>
+		</article>
+	{/each}
+{/if}
 
 <style>
 	article {

@@ -33,8 +33,8 @@
 		display: flex;
 		flex-direction: column;
 		align-items: center;
-		background-color: var(--light-grey);
 		overflow: scroll;
+		background-color: white;
 	}
 
 	/* Desktop overrides */
