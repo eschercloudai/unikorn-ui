@@ -80,10 +80,7 @@
 		flex-direction: column;
 		align-items: center;
 		margin-bottom: 1em;
-		background-color: white;
 		border-bottom: 5px solid var(--brand);
-		border-radius: var(--radius) var(--radius) 0 0;
-		box-shadow: 0 0 var(--shadow-radius) var(--mid-grey);
 	}
 
 	.login-modal-header > img {

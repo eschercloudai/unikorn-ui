@@ -2,7 +2,12 @@
 	import { onMount, onDestroy } from 'svelte';
 	import { token } from '$lib/credentials.js';
 	import { age } from '$lib/time.js';
-	import { listControlPlanes, createControlPlane, deleteControlPlane } from '$lib/client.js';
+	import {
+		createProject,
+		listControlPlanes,
+		createControlPlane,
+		deleteControlPlane
+	} from '$lib/client.js';
 
 	import Modal from '$lib/Modal.svelte';
 	import Breadcrumbs from '$lib/Breadcrumbs.svelte';
@@ -95,6 +100,16 @@
 	let newControlPlaneName = null;
 
 	async function submitCreateControlPlane() {
+		await createProject({
+			token: token.get().token,
+			onConflict: () => {
+				// this is fine.
+			},
+			onUnauthorized: () => {
+				token.remove();
+			}
+		});
+
 		const body = {
 			name: newControlPlaneName
 		};

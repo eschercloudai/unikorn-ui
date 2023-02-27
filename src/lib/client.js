@@ -100,6 +100,10 @@ export function listExternalNetworks(opts) {
 	return request('GET', '/api/v1/providers/openstack/external-networks', opts);
 }
 
+export function createProject(opts) {
+	return request('POST', `/api/v1/project`, opts);
+}
+
 export function listControlPlanes(opts) {
 	return request('GET', '/api/v1/controlplanes', opts);
 }
