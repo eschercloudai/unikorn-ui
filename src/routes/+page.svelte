@@ -201,7 +201,8 @@
 		--shadow-radius: 0.5rem;
 		--padding: 0.75rem;
 		--padding-header: 4rem;
-		--icon-size: 2rem;
+		--icon-size: 1.5rem;
+		--nav-icon-size: 2rem;
 	}
 
 	/* Global styles */
@@ -275,11 +276,13 @@
 		color: var(--brand);
 		background: none;
 		padding: var(--padding);
-		margin: var(--padding);
 		border: 2px solid var(--brand);
 		font-weight: bold;
 		font-size: 1rem;
 		background: white;
+		display: inline-flex;
+		align-items: center;
+		gap: var(--padding);
 	}
 	:global(button:hover) {
 		color: var(--brand-light);

@@ -74,8 +74,8 @@
 
 	// Define the per-control plane drop down menu.
 	let dropdownItems = [
-		{ id: 'detail', value: 'Show Details' },
-		{ id: 'delete', value: 'Delete' }
+		{ id: 'detail', value: 'Show Details', icon: 'bx:detail' },
+		{ id: 'delete', value: 'Delete', icon: 'mdi:delete' }
 	];
 
 	async function selected(event) {
@@ -135,27 +135,31 @@
 </script>
 
 <Modal active={createModalActive}>
-	<div class="modal-content">
+	<form>
 		<h2>Create New Control Plane</h2>
-		<form>
-			<input
-				id="name"
-				type="text"
-				placeholder="Control plane name"
-				required
-				bind:value={newControlPlaneName}
-			/>
-			<label for="name">Must be unique, contain only characters, numbers and dashes.</label>
-			<div>
-				<button
-					type="submit"
-					on:click={submitCreateControlPlane}
-					on:keydown={submitCreateControlPlane}>Submit</button
-				>
-				<button on:click={toggleCreateModal}>Cancel</button>
-			</div>
-		</form>
-	</div>
+		<input
+			id="name"
+			type="text"
+			placeholder="Control plane name"
+			required
+			bind:value={newControlPlaneName}
+		/>
+		<label for="name">Must be unique, contain only characters, numbers and dashes.</label>
+		<div class="buttons">
+			<button
+				type="submit"
+				on:click={submitCreateControlPlane}
+				on:keydown={submitCreateControlPlane}
+			>
+				<iconify-icon icon="mdi:tick" />
+				<div>Submit</div>
+			</button>
+			<button on:click={toggleCreateModal}>
+				<iconify-icon icon="mdi:close" />
+				<div>Cancel</div>
+			</button>
+		</div>
+	</form>
 </Modal>
 
 <Breadcrumbs />
@@ -177,7 +181,12 @@
 	</details>
 </section>
 
-<button on:click={toggleCreateModal}>Create</button>
+<section>
+	<button on:click={toggleCreateModal}>
+		<iconify-icon icon="material-symbols:add" />
+		<div>Create</div>
+	</button>
+</section>
 
 {#each controlPlanes as cp}
 	<article>
@@ -226,6 +235,11 @@
 		grid-row: 1;
 		grid-column: 2;
 	}
+	div.buttons {
+		display: flex;
+		justify-content: center;
+		gap: var(--padding);
+	}
 	dl {
 		grid-row: 2;
 		grid-column: 1 / -1;
@@ -245,16 +259,14 @@
 	form {
 		display: flex;
 		flex-direction: column;
-		align-items: center;
+		align-items: stretch;
 		padding: var(--padding);
+		gap: var(--padding);
 	}
 	form label {
 		display: block;
 		font-style: italic;
 		font-size: 0.75rem;
-	}
-	div.modal-content {
-		padding: var(--padding);
 	}
 	@media only screen and (min-width: 720px) {
 		article {

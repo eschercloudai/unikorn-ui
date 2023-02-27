@@ -125,9 +125,9 @@
 
 	// Define the per-control plane drop down menu.
 	let dropdownItems = [
-		{ id: 'detail', value: 'Show Details' },
-		{ id: 'kubeconfig', value: 'Download Kubeconfig' },
-		{ id: 'delete', value: 'Delete' }
+		{ id: 'detail', value: 'Show Details', icon: 'bx:detail' },
+		{ id: 'kubeconfig', value: 'Download Kubeconfig', icon: 'mdi:kubernetes' },
+		{ id: 'delete', value: 'Delete', icon: 'mdi:delete' }
 	];
 
 	function appCredName(clusterName) {
@@ -644,11 +644,17 @@
 					bind:object={pool}
 					on:workload-update={updateCost}
 				/>
-				<button class="no-margin" on:click={() => removePool(index)}>Remove Pool</button>
+				<button class="no-margin" on:click={() => removePool(index)}>
+					<iconify-icon icon="mdi:delete" />
+					<div>Remove Pool</div>
+				</button>
 			</section>
 		{/each}
 
-		<button class="no-margin" on:click={addPool}>Add New Pool</button>
+		<button class="no-margin" on:click={addPool}>
+			<iconify-icon icon="material-symbols:add" />
+			<div>Add New Pool</div>
+		</button>
 
 		<h2>Estimated Cost</h2>
 		<div>Fixed cost: &euro;{cost.toFixed(2)}/h</div>
@@ -657,9 +663,15 @@
 			<div>Maximum burst cost: &euro;{costMax.toFixed(2)}/h</div>
 		{/if}
 
-		<div>
-			<button type="submit" on:click={submitCreateCluster}>Submit</button>
-			<button on:click={toggleCreateModal}>Cancel</button>
+		<div class="buttons">
+			<button type="submit" on:click={submitCreateCluster}>
+				<iconify-icon icon="mdi:tick" />
+				<div>Submit</div>
+			</button>
+			<button on:click={toggleCreateModal}>
+				<iconify-icon icon="mdi:close" />
+				<div>Cancel</div>
+			</button>
 		</div>
 	</form>
 </Modal>
@@ -675,11 +687,17 @@
 </LabeledInput>
 
 {#if controlPlanes.length == 0}
-	<section>
+	<section class="sad-kitty">
+		<iconify-icon icon="emojione:crying-cat-face" />
 		<p>No control planes found. Create one first to enable cluster creation.</p>
 	</section>
 {:else}
-	<button on:click={toggleCreateModal}>Create</button>
+	<section>
+		<button on:click={toggleCreateModal}>
+			<iconify-icon icon="material-symbols:add" />
+			<div>Create</div>
+		</button>
+	</section>
 
 	{#each clusters as cl}
 		<article>
@@ -729,6 +747,22 @@
 		align-items: center;
 		gap: var(--padding);
 		grid-row: 1;
+	}
+	div.buttons {
+		display: flex;
+		justify-content: center;
+		gap: var(--padding);
+	}
+	section.sad-kitty {
+		display: flex;
+		flex-direction: column;
+		align-items: center;
+	}
+	section.sad-kitty iconify-icon {
+		font-size: 5rem;
+	}
+	section.sad-kitty p {
+		color: var(--mid-grey);
 	}
 	dl {
 		grid-row: 2;

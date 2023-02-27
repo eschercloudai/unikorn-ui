@@ -94,5 +94,6 @@
 		flex-direction: column;
 		align-items: center;
 		gap: var(--padding);
+		padding: var(--padding);
 	}
 </style>

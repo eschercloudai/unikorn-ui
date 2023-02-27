@@ -71,6 +71,9 @@
 	div.item span {
 		flex: 1;
 	}
+	iconify-icon {
+		font-size: var(--nav-icon-size);
+	}
 	iconify-icon:first-child {
 		color: var(--brand);
 		margin-right: var(--padding);
@@ -91,7 +94,7 @@
 		overflow: scroll;
 	}
 	.no-icon {
-		padding-left: calc(var(--icon-size) + var(--padding));
+		padding-left: calc(var(--nav-icon-size) + var(--padding));
 	}
 	div.item.highlight {
 		color: white;

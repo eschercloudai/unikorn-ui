@@ -14,3 +14,11 @@
 <li on:click={click} on:keypress={click}>
 	<slot />
 </li>
+
+<style>
+	li {
+		display: flex;
+		align-items: center;
+		gap: var(--padding);
+	}
+</style>
