@@ -8,4 +8,7 @@ RUN npm install
 COPY . .
 RUN npm run build
 
+# Run as the node user.
+USER 1000
+
 ENTRYPOINT ["node", "build"]
