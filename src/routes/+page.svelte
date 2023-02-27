@@ -1,4 +1,5 @@
 <script>
+	import { browser } from '$app/environment';
 	import { onMount, onDestroy } from 'svelte';
 	import MD5 from 'crypto-js/md5';
 
@@ -131,9 +132,17 @@
 	let content;
 	let menu;
 
+	let desktop;
+
+	if (browser) {
+		desktop = window.matchMedia('(min-width: 720px)');
+	}
+
 	selected.subscribe((value) => {
-		// TODO: we should only dismiss this in mobile mode.
-		showmenu = false;
+		// Hide the menu on mobile view, it's covering everything.
+		if (desktop && !desktop.matches) {
+			showmenu = false;
+		}
 		content = value;
 		menu = getMenu(value);
 	});
