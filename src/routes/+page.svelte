@@ -212,7 +212,7 @@
 
 		/* Various stylings to keep consistency */
 		--radius: 0.5rem;
-		--shadow-radius: 0.5rem;
+		--shadow-offset: 0.25rem;
 		--padding: 0.75rem;
 		--padding-header: 4rem;
 		--icon-size: 1.5rem;
@@ -297,12 +297,13 @@
 		align-items: center;
 		gap: var(--padding);
 		cursor: pointer;
+		border-radius: var(--radius);
 	}
 	:global(button:hover) {
-		background-color: var(--brand-light);
+		background-color: var(--brand-dark);
 	}
 	:global(button:focus) {
-		background-color: var(--brand-light);
+		background-color: var(--brand-dark);
 	}
 	:global(iconify-icon) {
 		font-size: var(--icon-size);
@@ -332,6 +333,8 @@
 		padding: var(--padding);
 		border: 2px solid var(--brand);
 		background: white;
+		border-radius: var(--radius);
+		box-shadow: var(--shadow-offset) var(--shadow-offset) var(--radius) var(--mid-grey);
 	}
 	:global(summary) {
 		font-weight: bold;
