@@ -52,7 +52,7 @@
 			max-height: 80vh;
 			border: 1px outset var(--brand);
 			border-radius: var(--radius);
-			box-shadow: 0.25em 0.25em var(--shadow-radius) var(--mid-grey);
+			box-shadow: var(--shadow-offset) var(--shadow-offset) var(--radius) var(--mid-grey);
 		}
 
 		.modal.fixed {

@@ -61,7 +61,7 @@
 		z-index: 1;
 		background-color: white;
 		border: 1px outset var(--brand);
-		box-shadow: 0.25em 0.25em var(--shadow-radius) var(--mid-grey);
+		box-shadow: var(--shadow-offset) var(--shadow-offset) var(--radius) var(--mid-grey);
 		animation: growDown 300ms ease-in-out forwards;
 	}
 	div.dropdown-menu.show {

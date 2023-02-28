@@ -171,7 +171,7 @@
 
 <Breadcrumbs />
 
-<LabeledInput id="control-plane-select" value="Control Plane">
+<LabeledInput id="control-plane-select" value="Control Plane to display clusters for">
 	<select id="control-plane-select" bind:value={controlPlane} on:change={updateClusters}>
 		{#each controlPlanes as choice}
 			<option value={choice}>{choice.status.name}</option>
