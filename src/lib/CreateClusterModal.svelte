@@ -103,6 +103,12 @@
 	// Get a list of images from the origin, and derive a list of
 	// Kubernetes versions.
 	async function updateImages() {
+		const t = token.get();
+
+		if (t == null || t.scope == t.unscoped) {
+			return;
+		}
+
 		const results = await listImages({
 			token: token.get().token,
 			onUnauthorized: () => {
@@ -144,6 +150,12 @@
 
 	// Update the flavors available.
 	async function updateFlavors() {
+		const t = token.get();
+
+		if (t == null || t.scope == t.unscoped) {
+			return;
+		}
+
 		const results = await listFlavors({
 			token: token.get().token,
 			onUnauthorized: () => {
@@ -170,6 +182,12 @@
 
 	// Update the available SSH keypairs.
 	async function updateKeyPairs() {
+		const t = token.get();
+
+		if (t == null || t.scope == t.unscoped) {
+			return;
+		}
+
 		const results = await listKeyPairs({
 			token: token.get().token,
 			onUnauthorized: () => {
@@ -183,6 +201,12 @@
 
 	// Update the available compute AZs.
 	async function updateComputeAZs() {
+		const t = token.get();
+
+		if (t == null || t.scope == t.unscoped) {
+			return;
+		}
+
 		const results = await listComputeAvailabilityZones({
 			token: token.get().token,
 			onUnauthorized: () => {
@@ -195,6 +219,12 @@
 
 	// Update the available block storage AZs.
 	async function updateBlockStorageAZs() {
+		const t = token.get();
+
+		if (t == null || t.scope == t.unscoped) {
+			return;
+		}
+
 		const results = await listBlockStorageAvailabilityZones({
 			token: token.get().token,
 			onUnauthorized: () => {
@@ -207,6 +237,12 @@
 
 	// Update the available external networks.
 	async function updateExternalNetworks() {
+		const t = token.get();
+
+		if (t == null || t.scope == t.unscoped) {
+			return;
+		}
+
 		const results = await listExternalNetworks({
 			token: token.get().token,
 			onUnauthorized: () => {
@@ -229,11 +265,10 @@
 	});
 
 	// When we get a token
-	async function updateAll(t) {
-		if (t == null || t.scope == t.unscoped) {
-			return;
-		}
-
+	async function updateAll() {
+		// TODO: a check here to see if the token is valid, and then returning
+		// still executes these async functions, and will log you out because
+		// or rescoping.  Why??
 		updateKeyPairs();
 		updateImages();
 		updateFlavors();
