@@ -6,6 +6,7 @@
 	export let autoscaling;
 	export let flavors;
 	export let images;
+	export let computeAZs;
 
 	let name = null;
 	let image = null;
@@ -16,6 +17,7 @@
 	let maxReplicas = 3;
 	let labels = null;
 	let disk = 50;
+	let computeAZ = null;
 
 	// Roll up all the parameters in an easy to use/bind variable.
 	// On an update to any of the variables, update the object/any bindings
@@ -32,7 +34,8 @@
 			minReplicas: minReplicas,
 			maxReplicas: maxReplicas,
 			labels: labels,
-			disk: disk
+			disk: disk,
+			computeAZ: computeAZ
 		};
 
 		dispatch('workload-update', {});
@@ -44,6 +47,9 @@
 	}
 	$: if (flavor == null && flavors.length != 0) {
 		flavor = flavors[0];
+	}
+	$: if (computeAZ == null && computeAZs.length != 0) {
+		computeAZ = computeAZs[0];
 	}
 </script>
 
@@ -110,6 +116,13 @@
 	<input id="labels" type="text" placeholder="key1=value1,key2=value2" bind:value={labels} />
 	<label for="labels">Comma separated set of labels to apply to Kubernetes nodes on creation.</label
 	>
+
+	<select id="computeAZ" bind:value={computeAZ} required>
+		{#each computeAZs as a}
+			<option value={a}>{a.name}</option>
+		{/each}
+	</select>
+	<label for="image">Availability zone to provision the pool in.</label>
 </details>
 
 <style>
