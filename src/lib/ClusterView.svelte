@@ -93,7 +93,9 @@
 	}
 
 	function statusFromResource(status) {
-		if (status.status == 'Provisioned') {
+		if (status.deletionTime) {
+			return 'progressing';
+		} else if (status.status == 'Provisioned') {
 			return 'ok';
 		} else if (['Provisioning', 'Deprovisioning'].includes(status.status)) {
 			return 'progressing';
