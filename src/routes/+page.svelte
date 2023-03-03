@@ -256,10 +256,10 @@
 			select:focus
 		) {
 		outline: none;
-		box-shadow: 0 0 var(--shadow-radius) var(--brand-light);
+		box-shadow: 0 0 var(--radius) var(--brand-light);
 	}
 	:global(input[type='text']:invalid, input[type='password']:invalid, select:invalid) {
-		box-shadow: 0 0 var(--shadow-radius) var(--error);
+		box-shadow: 0 0 var(--radius) var(--error);
 	}
 	:global(input[type='range']::-moz-range-track) {
 		background-color: var(--brand);
@@ -377,7 +377,7 @@
 	main {
 		background-color: var(--light-grey);
 		transition: all 0.3s ease-in-out;
-		box-shadow: inset 0 0 var(--shadow-radius) var(--mid-grey);
+		box-shadow: inset 0 0 var(--radius) var(--mid-grey);
 		grid-row: 2;
 		grid-column: 2;
 	}
