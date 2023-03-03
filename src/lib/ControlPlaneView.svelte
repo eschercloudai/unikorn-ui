@@ -133,6 +133,8 @@
 		newControlPlaneName = null;
 
 		createModalActive = false;
+
+		updateControlPlanes();
 	}
 </script>
 
