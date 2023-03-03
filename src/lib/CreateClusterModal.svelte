@@ -365,6 +365,7 @@
 					version: version,
 					imageName: wp.image.name,
 					flavorName: wp.flavor.name,
+					availabilityZone: wp.computeAZ.name,
 					disk: {
 						size: wp.disk
 					}
@@ -575,6 +576,7 @@
 					{autoscaling}
 					{flavors}
 					{images}
+					{computeAZs}
 					bind:object={pool}
 					on:workload-update={updateCost}
 				/>
