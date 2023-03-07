@@ -195,7 +195,12 @@
 		<label for="name">Must be unique, contain only characters, numbers and dashes.</label>
 
 		<details>
-			<summary>Advanced Options</summary>
+			<summary>Lifecycle (Advanced)</summary>
+			<p>
+				The platform will automatically upgrade control planes to provide confidence in security,
+				and periodically enable new features. This section describes those defaults and, where
+				applicable, allows you to fine tune those settings.
+			</p>
 
 			<select id="appbundle" bind:value={applicationBundle}>
 				{#each applicationBundles as b}
@@ -339,6 +344,9 @@
 		display: block;
 		font-style: italic;
 		font-size: 0.75rem;
+	}
+	form label > em {
+		font-weight: bold;
 	}
 	@media only screen and (min-width: 720px) {
 		article {

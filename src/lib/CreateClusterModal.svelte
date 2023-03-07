@@ -12,7 +12,8 @@
 		listExternalNetworks,
 		createApplicationCredential,
 		deleteApplicationCredential,
-		createCluster
+		createCluster,
+		listApplicationBundlesCluster
 	} from '$lib/client.js';
 
 	import Modal from '$lib/Modal.svelte';
@@ -79,6 +80,10 @@
 
 	// External network to provision routers and VIPs on.
 	let externalNetworks = [];
+
+	// Cluster versioning support.
+	let applicationBundles = [];
+	let applicationBundle = null;
 
 	// Add a new workload pool to the list.
 	function addPool() {
@@ -253,6 +258,38 @@
 		externalNetworks = results;
 	}
 
+	async function updateApplicationBundles() {
+		let t = token.get();
+
+		if (t == null || t.scope == token.unscoped) {
+			return;
+		}
+
+		const result = await listApplicationBundlesCluster({
+			token: token.get().token,
+			onUnauthorized: () => {
+				token.remove();
+			}
+		});
+
+		if (result == null) {
+			return;
+		}
+
+		// These are returned in ascending order, we want latest first.
+		applicationBundles = result.reverse();
+	}
+
+	// Update the selected application bundle when the bundles list updates.
+	$: if (applicationBundles.length != 0 && applicationBundle == null) {
+		for (const b of applicationBundles) {
+			if (!b.preview && !b.endOfLife) {
+				applicationBundle = b;
+				break;
+			}
+		}
+	}
+
 	// id is a unique identifier for the component instance.
 	let id = Symbol();
 
@@ -275,6 +312,7 @@
 		updateComputeAZs();
 		updateBlockStorageAZs();
 		updateExternalNetworks();
+		updateApplicationBundles();
 	}
 
 	// Define the application credential name.
@@ -314,6 +352,7 @@
 
 		const body = {
 			name: name,
+			applicationBundle: applicationBundle.name,
 			openstack: {
 				applicationCredentialID: ac.id,
 				applicationCredentialSecret: ac.secret,
@@ -462,7 +501,34 @@
 		</label>
 
 		<details>
-			<summary>Networking (Advanced Options)</summary>
+			<summary>Lifecycle (Advanced)</summary>
+
+			<p>
+				The platform will automatically upgrade clusters to provide confidence in security, and
+				periodically enable new features. This section describes those defaults and, where
+				applicable, allows you to fine tune those settings.
+			</p>
+
+			<select id="appbundle" bind:value={applicationBundle}>
+				{#each applicationBundles as b}
+					{#if b.preview}
+						<option value={b}>{b.version} (Preview)</option>
+					{:else if b.endOfLife}
+						<option value={b}>{b.version} (End-of-Life {b.endOfLife})</option>
+					{:else}
+						<option value={b}>{b.version}</option>
+					{/if}
+				{/each}
+			</select>
+			<label for="appbundle">
+				Selects the cluster version. Versions marked as <em>Preview</em> are early release
+				candidates, and may have undergone less rigorous testing. Versions marked
+				<em>End-of-Life</em> indicate the date when they will be automatically upgraded by the platform.
+			</label>
+		</details>
+
+		<details>
+			<summary>Networking (Advanced)</summary>
 
 			<p>
 				Network settings are optional, and if not specified will yield stable and scalable defaults.
