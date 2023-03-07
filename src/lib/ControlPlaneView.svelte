@@ -178,7 +178,7 @@
 			clusters.
 		</p>
 		<p>
-			You may group clusters based on stability e.g. prodiction, staging, development. This allows
+			You may group clusters based on stability e.g. production, staging, development. This allows
 			upgrades to be tested in a staging control plane before applying those changes to a production
 			one.
 		</p>
