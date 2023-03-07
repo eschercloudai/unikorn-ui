@@ -213,6 +213,8 @@
 				<dd>{age(cl.status.creationTime)}</dd>
 				<dt>Status:</dt>
 				<dd>{cl.status.status}</dd>
+				<dt>Version:</dt>
+				<dd>{cl.applicationBundle}</dd>
 				<dt>Kubernetes:</dt>
 				<dd>{cl.controlPlane.version}</dd>
 			</dl>
