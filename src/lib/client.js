@@ -135,3 +135,11 @@ export function getClusterKubeconfig(controlPlane, cluster, opts) {
 export function deleteCluster(controlPlane, cluster, opts) {
 	return request('DELETE', `/api/v1/controlplanes/${controlPlane}/clusters/${cluster}`, opts);
 }
+
+export function listApplicationBundlesControlPlane(opts) {
+	return request('GET', '/api/v1/applicationBundles/controlPlane', opts);
+}
+
+export function listApplicationBundlesCluster(opts) {
+	return request('GET', '/api/v1/applicationBundles/cluster', opts);
+}
