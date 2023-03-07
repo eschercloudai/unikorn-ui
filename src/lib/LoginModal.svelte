@@ -84,7 +84,7 @@
 	}
 
 	.login-modal-header > img {
-		padding: 2em 5em;
+		padding: 2em 0;
 		width: 15em;
 		max-width: 20em;
 	}
