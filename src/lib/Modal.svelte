@@ -1,10 +1,11 @@
 <script>
 	export let active = false;
 	export let fixed = false;
+	export let width = '720px';
 </script>
 
 <div class="modal-backdrop" class:active>
-	<div class="modal" class:fixed>
+	<div class="modal" class:fixed style="--width: {width}">
 		<slot />
 	</div>
 </div>
@@ -57,7 +58,7 @@
 
 		.modal.fixed {
 			align-items: stretch;
-			width: 720px;
+			width: var(--width);
 		}
 	}
 </style>
