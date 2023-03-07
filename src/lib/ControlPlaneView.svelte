@@ -6,7 +6,8 @@
 		createProject,
 		listControlPlanes,
 		createControlPlane,
-		deleteControlPlane
+		deleteControlPlane,
+		listApplicationBundlesControlPlane
 	} from '$lib/client.js';
 
 	import Modal from '$lib/Modal.svelte';
@@ -15,9 +16,13 @@
 	import DropDownIcon from '$lib/DropDownIcon.svelte';
 
 	let controlPlanes = [];
+	let applicationBundles = [];
+	let applicationBundle = null;
 
 	function reset() {
 		controlPlanes = [];
+		applicationBundles = [];
+		applicationBundle = null;
 	}
 
 	// id is a unique identifier for the component instance.
@@ -26,7 +31,7 @@
 	let ticker = null;
 
 	onMount(() => {
-		token.subscribe(id, updateControlPlanes);
+		token.subscribe(id, updateAll);
 		ticker = setInterval(updateControlPlanes, 10000);
 	});
 
@@ -34,6 +39,11 @@
 		clearInterval(ticker);
 		token.unsubscribe(id);
 	});
+
+	async function updateAll() {
+		updateControlPlanes();
+		updateApplicationBundles();
+	}
 
 	async function updateControlPlanes() {
 		let t = token.get();
@@ -58,6 +68,39 @@
 		}
 
 		controlPlanes = result;
+	}
+
+	async function updateApplicationBundles() {
+		let t = token.get();
+
+		if (t == null || t.scope == token.unscoped) {
+			reset();
+			return;
+		}
+
+		const result = await listApplicationBundlesControlPlane({
+			token: token.get().token,
+			onUnauthorized: () => {
+				token.remove();
+			}
+		});
+
+		if (result == null) {
+			return;
+		}
+
+		// These are returned in ascending order, we want latest first.
+		applicationBundles = result.reverse();
+	}
+
+	// Update the selected application bundle when the bundles list updates.
+	$: if (applicationBundles.length != 0 && applicationBundle == null) {
+		for (const b of applicationBundles) {
+			if (!b.preview && !b.endOfLife) {
+				applicationBundle = b;
+				break;
+			}
+		}
 	}
 
 	function statusFromResource(status) {
@@ -113,7 +156,8 @@
 		});
 
 		const body = {
-			name: newControlPlaneName
+			name: newControlPlaneName,
+			applicationBundle: applicationBundle.name
 		};
 
 		await createControlPlane({
@@ -149,6 +193,28 @@
 			bind:value={newControlPlaneName}
 		/>
 		<label for="name">Must be unique, contain only characters, numbers and dashes.</label>
+
+		<details>
+			<summary>Advanced Options</summary>
+
+			<select id="appbundle" bind:value={applicationBundle}>
+				{#each applicationBundles as b}
+					{#if b.preview}
+						<option value={b}>{b.version} (Preview)</option>
+					{:else if b.endOfLife}
+						<option value={b}>{b.version} (End-of-Life {b.endOfLife})</option>
+					{:else}
+						<option value={b}>{b.version}</option>
+					{/if}
+				{/each}
+			</select>
+			<label for="appbundle">
+				Selects the control plane version. Versions marked as <em>Preview</em> are early release
+				candidates, and may have undergone less rigorous testing. Versions marked
+				<em>End-of-Life</em> indicate the date when they will be automatically upgraded by the platform.
+			</label>
+		</details>
+
 		<div class="buttons">
 			<button
 				type="submit"
@@ -211,6 +277,8 @@
 			<dd>{age(cp.status.creationTime)}</dd>
 			<dt>Status:</dt>
 			<dd>{cp.status.status}</dd>
+			<dt>Version:</dt>
+			<dd>{cp.applicationBundle}</dd>
 		</dl>
 	</article>
 {/each}
