@@ -3,7 +3,6 @@
 
 	const dispatch = createEventDispatcher();
 
-	export let autoscaling;
 	export let flavors;
 	export let images;
 	export let computeAZs;
@@ -11,7 +10,7 @@
 	let name = null;
 	let image = null;
 	let flavor = null;
-	let autoscalingEnabled = false;
+	let autoscaling = false;
 	let replicas = 3;
 	let minReplicas = 0;
 	let maxReplicas = 3;
@@ -29,7 +28,7 @@
 			name: name,
 			image: image,
 			flavor: flavor,
-			autoscaling: autoscalingEnabled,
+			autoscaling: autoscaling,
 			replicas: replicas,
 			minReplicas: minReplicas,
 			maxReplicas: maxReplicas,
@@ -47,9 +46,6 @@
 	}
 	$: if (flavor == null && flavors.length != 0) {
 		flavor = flavors[0];
-	}
-	$: if (computeAZ == null && computeAZs.length != 0) {
-		computeAZ = computeAZs[0];
 	}
 </script>
 
@@ -82,15 +78,13 @@
 </div>
 <label for="disk">The size of the root disk.</label>
 
-{#if autoscaling}
-	<div class="checkbox">
-		<input id="autoscaling" type="checkbox" bind:checked={autoscalingEnabled} />
-		<span>Autoscaling enabled</span>
-	</div>
-	<label for="autoscaling">Enables workload pool autoscaling.</label>
-{/if}
+<div class="checkbox">
+	<input id="autoscaling" type="checkbox" bind:checked={autoscaling} />
+	<span>Autoscaling enabled</span>
+</div>
+<label for="autoscaling">Enables workload pool autoscaling.</label>
 
-{#if autoscaling && autoscalingEnabled}
+{#if autoscaling}
 	<div class="slider">
 		<input id="minReplicas" type="range" min="0" max="50" bind:value={minReplicas} />
 		<span>{minReplicas}</span>
@@ -118,6 +112,7 @@
 	>
 
 	<select id="computeAZ" bind:value={computeAZ} required>
+		<option value={null}>(None)</option>
 		{#each computeAZs as a}
 			<option value={a}>{a.name}</option>
 		{/each}
