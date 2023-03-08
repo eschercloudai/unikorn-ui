@@ -76,6 +76,8 @@
 
 	// Availability zones to use.
 	let computeAZs = [];
+	let computeAZ = null;
+
 	let blockStorageAZs = [];
 
 	// External network to provision routers and VIPs on.
@@ -107,19 +109,17 @@
 
 	// Get a list of images from the origin, and derive a list of
 	// Kubernetes versions.
-	async function updateImages() {
-		const t = token.get();
-
-		if (t == null || t.scope == t.unscoped) {
-			return;
-		}
-
+	async function updateImages(t) {
 		const results = await listImages({
-			token: token.get().token,
+			token: t.token,
 			onUnauthorized: () => {
 				token.remove();
 			}
 		});
+
+		if (results == null) {
+			return;
+		}
 
 		// Find a unique set of versions...
 		const v = new Set();
@@ -154,19 +154,17 @@
 	}
 
 	// Update the flavors available.
-	async function updateFlavors() {
-		const t = token.get();
-
-		if (t == null || t.scope == t.unscoped) {
-			return;
-		}
-
+	async function updateFlavors(t) {
 		const results = await listFlavors({
-			token: token.get().token,
+			token: t.token,
 			onUnauthorized: () => {
 				token.remove();
 			}
 		});
+
+		if (results == null) {
+			return;
+		}
 
 		// TODO: push this into server.
 		results.sort((a, b) => a.name < b.name);
@@ -186,87 +184,93 @@
 	}
 
 	// Update the available SSH keypairs.
-	async function updateKeyPairs() {
-		const t = token.get();
-
-		if (t == null || t.scope == t.unscoped) {
-			return;
-		}
-
+	async function updateKeyPairs(t) {
 		const results = await listKeyPairs({
-			token: token.get().token,
+			token: t.token,
 			onUnauthorized: () => {
 				token.remove();
 			}
 		});
+
+		if (results == null) {
+			return;
+		}
 
 		// Don't pick a value, it's secure by default.
 		keyPairs = results;
 	}
 
 	// Update the available compute AZs.
-	async function updateComputeAZs() {
-		const t = token.get();
-
-		if (t == null || t.scope == t.unscoped) {
-			return;
-		}
-
+	async function updateComputeAZs(t) {
 		const results = await listComputeAvailabilityZones({
-			token: token.get().token,
+			token: t.token,
 			onUnauthorized: () => {
 				token.remove();
 			}
 		});
+
+		if (results == null) {
+			return;
+		}
 
 		computeAZs = results;
 	}
 
-	// Update the available block storage AZs.
-	async function updateBlockStorageAZs() {
-		const t = token.get();
+	$: if (computeAZs.length > 0 && computeAZ == null) {
+		let set = false;
 
-		if (t == null || t.scope == t.unscoped) {
-			return;
+		// Hack!  We don't/can't know the topology so we have to "guess".
+		// Server cannot figure this out either as it's acting as the user
+		// with their credentials.
+		for (const az of computeAZs) {
+			if (az.name == 'nova') {
+				computeAZ = az;
+				set = true;
+			}
 		}
 
+		if (!set) {
+			console.log('unable to find default compute AZ');
+
+			computeAZ = computeAZs[0];
+		}
+	}
+
+	// Update the available block storage AZs.
+	async function updateBlockStorageAZs(t) {
 		const results = await listBlockStorageAvailabilityZones({
-			token: token.get().token,
+			token: t.token,
 			onUnauthorized: () => {
 				token.remove();
 			}
 		});
+
+		if (results == null) {
+			return;
+		}
 
 		blockStorageAZs = results;
 	}
 
 	// Update the available external networks.
-	async function updateExternalNetworks() {
-		const t = token.get();
-
-		if (t == null || t.scope == t.unscoped) {
-			return;
-		}
-
+	async function updateExternalNetworks(t) {
 		const results = await listExternalNetworks({
-			token: token.get().token,
+			token: t.token,
 			onUnauthorized: () => {
 				token.remove();
 			}
 		});
 
-		externalNetworks = results;
-	}
-
-	async function updateApplicationBundles() {
-		let t = token.get();
-
-		if (t == null || t.scope == token.unscoped) {
+		if (results == null) {
 			return;
 		}
 
+		externalNetworks = results;
+	}
+
+	async function updateApplicationBundles(t) {
 		const result = await listApplicationBundlesCluster({
-			token: token.get().token,
+			token: t.token,
 			onUnauthorized: () => {
 				token.remove();
 			}
@@ -303,16 +307,19 @@
 
 	// When we get a token
 	async function updateAll() {
-		// TODO: a check here to see if the token is valid, and then returning
-		// still executes these async functions, and will log you out because
-		// or rescoping.  Why??
-		updateKeyPairs();
-		updateImages();
-		updateFlavors();
-		updateComputeAZs();
-		updateBlockStorageAZs();
-		updateExternalNetworks();
-		updateApplicationBundles();
+		const t = token.get();
+
+		if (t == null || t.scope == token.unscoped) {
+			return;
+		}
+
+		updateKeyPairs(t);
+		updateImages(t);
+		updateFlavors(t);
+		updateComputeAZs(t);
+		updateBlockStorageAZs(t);
+		updateExternalNetworks(t);
+		updateApplicationBundles(t);
 	}
 
 	// Define the application credential name.
@@ -356,7 +363,7 @@
 			openstack: {
 				applicationCredentialID: ac.id,
 				applicationCredentialSecret: ac.secret,
-				computeAvailabilityZone: computeAZs[0].name,
+				computeAvailabilityZone: computeAZ.name,
 				volumeAvailabilityZone: blockStorageAZs[0].name,
 				externalNetworkID: externalNetworks[0].id
 			},
@@ -377,6 +384,10 @@
 			},
 			workloadPools: []
 		};
+
+		if (keyPair) {
+			body.openstack.sshKeyName = keyPair.name;
+		}
 
 		if (sans || allowedPrefixes) {
 			body.api = {};
@@ -404,7 +415,6 @@
 					version: version,
 					imageName: wp.image.name,
 					flavorName: wp.flavor.name,
-					availabilityZone: wp.computeAZ.name,
 					disk: {
 						size: wp.disk
 					}
@@ -413,6 +423,10 @@
 
 			if (wp.labels) {
 				pool.labels = Object.fromEntries(wp.labels.split(',').map((x) => x.split('=')));
+			}
+
+			if (wp.computeAZ) {
+				pool.machine.availabilityZone = wp.computeAZ.name;
 			}
 
 			if (wp.autoscaling) {
@@ -435,6 +449,12 @@
 
 		dispatch('clusterCreated', {});
 		active = false;
+	}
+
+	function updateWorkloadPool() {
+		autoscaling = workloadPools.some((pool) => pool.autoscaling);
+
+		updateCost();
 	}
 
 	// TODO: this is just a bit of fun to prove how it could work, this
@@ -492,14 +512,6 @@
 			Cluster name. Must be unique, contain only characters, numbers and dashes.
 		</label>
 
-		<div class="checkbox">
-			<input id="autoscaling" type="checkbox" bind:checked={autoscaling} />
-			<span>Autoscaling enabled</span>
-		</div>
-		<label for="autoscaling">
-			Enables cluster autoscaling, this must be configured for each workload pool.
-		</label>
-
 		<details>
 			<summary>Lifecycle (Advanced)</summary>
 
@@ -528,6 +540,20 @@
 		</details>
 
 		<details>
+			<summary>Topology (Advanced)</summary>
+
+			<select id="compute-az" bind:value={computeAZ}>
+				{#each computeAZs as az}
+					<option value={az}>{az.name}</option>
+				{/each}
+			</select>
+			<label for="compute-az">
+				Select the global availability zone for compute instances. You can override this on a
+				per-workload pool basis to improve cluster availability.
+			</label>
+		</details>
+
+		<details>
 			<summary>Networking (Advanced)</summary>
 
 			<p>
@@ -540,7 +566,7 @@
 			</p>
 
 			<select id="keypair" bind:value={keyPair}>
-				<option value="">(None)</option>
+				<option value={null}>(None)</option>
 				{#each keyPairs as k}
 					<option value={k}>{k.name}</option>
 				{/each}
@@ -639,12 +665,11 @@
 		{#each workloadPools as pool, index}
 			<section>
 				<WorkloadPoolCreate
-					{autoscaling}
 					{flavors}
 					{images}
 					{computeAZs}
 					bind:object={pool}
-					on:workload-update={updateCost}
+					on:workload-update={updateWorkloadPool}
 				/>
 				<button on:click={() => removePool(index)}>
 					<iconify-icon icon="mdi:delete" />
@@ -706,11 +731,13 @@
 		align-items: stretch;
 		gap: var(--padding);
 	}
+	/*
 	div.checkbox {
 		display: flex;
 		align-items: center;
 		gap: var(--padding);
 	}
+	*/
 	div.slider {
 		display: flex;
 		align-items: center;
