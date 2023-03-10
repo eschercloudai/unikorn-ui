@@ -221,7 +221,7 @@
 
 	/* Global styles */
 	:global(html) {
-		font-family: sans;
+		font-family: sans-serif;
 	}
 	:global(body) {
 		margin: 0;

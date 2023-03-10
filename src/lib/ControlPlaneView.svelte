@@ -59,7 +59,7 @@
 				token.remove();
 			},
 			onNotFound: () => {
-				reset();
+				// This means the project hasn't been provisioned yet.
 			}
 		});
 
