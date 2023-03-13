@@ -19,6 +19,9 @@
 	import Modal from '$lib/Modal.svelte';
 	import WorkloadPoolCreate from '$lib/WorkloadPoolCreate.svelte';
 
+	// clusters allows name uniqueness checking.
+	export let clusters;
+
 	// controlPlane provides a reference to the selected control plane.
 	export let controlPlane;
 
@@ -31,6 +34,7 @@
 	// name of the cluster.
 	let name = null;
 	let nameValid = false;
+	let nameValidMessage;
 
 	// On creation we only consider a single version.
 	let versions = [];
@@ -328,15 +332,35 @@
 		return `${controlPlane.status.name}-${name}`;
 	}
 
-	// Check if the name constraints are valid.  RFC-1123.
-	// Upto 63 characters, lower case alpha, numeric and -.
-	// Must start and end with alphanumeric.
-	$: if (name != null) {
-		nameValid = name.match(/^(?!-)[a-z0-9-]{0,62}[a-z0-9]$/);
+	const nameInvalidUnset =
+		'Name must contain only lower-case characters, numbers or hyphens (-), it must start and end with a character or number, and must be at most 63 characters.';
+	const nameInvalidUsed = 'Name already used by another cluster';
+
+	function validateName(name, clusters) {
+		if (name == null || clusters == null) {
+			nameValidMessage = nameInvalidUnset;
+			return false;
+		}
+
+		// RFC-1123.  Must start and end with alphanumeric.
+		// Upto 63 characters, lower case alpha, numeric and -.
+		if (!name.match(/^(?!-)[a-z0-9-]{0,62}[a-z0-9]$/)) {
+			nameValidMessage = nameInvalidUnset;
+			return false;
+		}
+
+		if (clusters.some((x) => x.name == name)) {
+			nameValidMessage = nameInvalidUsed;
+			return false;
+		}
+
+		return true;
 	}
 
-	let valid = false;
+	// Check if the name constraints are valid.
+	$: nameValid = validateName(name, clusters);
 
+	// Roll up validity to enable creation.
 	$: valid = [nameValid].every((x) => x) && workloadPools.every((x) => x.valid);
 
 	async function submitCreateCluster() {
@@ -371,7 +395,7 @@
 
 		const body = {
 			name: name,
-			applicationBundle: applicationBundle.name,
+			applicationBundle: applicationBundle,
 			openstack: {
 				applicationCredentialID: ac.id,
 				applicationCredentialSecret: ac.secret,
@@ -479,10 +503,7 @@
 			Cluster name. Must be unique, contain only characters, numbers and dashes.
 		</label>
 		{#if !nameValid}
-			<label for="name" class="error"
-				>Name must contain only lower-case characters, numbers or hyphens (-), it must start and end
-				with a character or number, and must be at most 63 characters.</label
-			>
+			<label for="name" class="error">{nameValidMessage}</label>
 		{/if}
 
 		<details>
