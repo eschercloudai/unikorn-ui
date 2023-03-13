@@ -27,6 +27,6 @@
 		padding: var(--padding);
 		display: flex;
 		align-items: center;
-		overflow: scroll;
+		overflow-x: auto;
 	}
 </style>

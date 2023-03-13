@@ -33,7 +33,7 @@
 		display: flex;
 		flex-direction: column;
 		align-items: center;
-		overflow: scroll;
+		overflow-y: auto;
 		background-color: white;
 	}
 

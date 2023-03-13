@@ -91,7 +91,6 @@
 	}
 	div.expanded {
 		max-height: 20em;
-		overflow: scroll;
 	}
 	.no-icon {
 		padding-left: calc(var(--nav-icon-size) + var(--padding));
