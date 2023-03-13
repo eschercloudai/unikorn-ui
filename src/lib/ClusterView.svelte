@@ -166,8 +166,9 @@
 </script>
 
 <CreateClusterModal
-	bind:active={createModalActive}
 	{controlPlane}
+	{clusters}
+	bind:active={createModalActive}
 	on:clusterCreated={clusterCreated}
 />
 
@@ -214,7 +215,7 @@
 				<dt>Status:</dt>
 				<dd>{cl.status.status}</dd>
 				<dt>Version:</dt>
-				<dd>{cl.applicationBundle}</dd>
+				<dd>{cl.applicationBundle.version}</dd>
 				<dt>Kubernetes:</dt>
 				<dd>{cl.controlPlane.version}</dd>
 			</dl>

@@ -11,6 +11,9 @@
 
 	import Modal from '$lib/Modal.svelte';
 
+	// list of control planes so we can validate the name is unique.
+	export let controlPlanes;
+
 	// active reports whether this modal is visible or not.
 	export let active;
 
@@ -20,6 +23,7 @@
 	// Control plane name.
 	let name = null;
 	let nameValid = false;
+	let nameValidMessage;
 
 	// Control plane versioning support.
 	let applicationBundles = [];
@@ -79,14 +83,33 @@
 		}
 	}
 
-	// Check if the name constraints are valid.  RFC-1123.
-	// Upto 63 characters, lower case alpha, numeric and -.
-	// Must start and end with alphanumeric.
-	$: if (name != null) {
-		nameValid = name.match(/^(?!-)[a-z0-9-]{0,62}[a-z0-9]$/);
+	const nameInvalidUnset =
+		'Name must contain only lower-case characters, numbers or hyphens (-), it must start and end with a character or number, and must be at most 63 characters.';
+	const nameInvalidUsed = 'Name already used by another control plane';
+
+	function validateName(name, controlPlanes) {
+		if (name == null || controlPlanes == null) {
+			nameValidMessage = nameInvalidUnset;
+			return false;
+		}
+
+		// RFC-1123.  Must start and end with alphanumeric.
+		// Upto 63 characters, lower case alpha, numeric and -.
+		if (!name.match(/^(?!-)[a-z0-9-]{0,62}[a-z0-9]$/)) {
+			nameValidMessage = nameInvalidUnset;
+			return false;
+		}
+
+		if (controlPlanes.some((x) => x.name == name)) {
+			nameValidMessage = nameInvalidUsed;
+			return false;
+		}
+
+		return true;
 	}
 
-	let allValid = false;
+	// Check if the name constraints are valid.
+	$: nameValid = validateName(name, controlPlanes);
 
 	// Roll up validity to enable creation.
 	$: allValid = [nameValid].every((x) => x);
@@ -104,7 +127,7 @@
 
 		const body = {
 			name: name,
-			applicationBundle: applicationBundle.name
+			applicationBundle: applicationBundle
 		};
 
 		await createControlPlane({
@@ -132,10 +155,7 @@
 		<input id="name" type="text" placeholder="Control plane name" bind:value={name} />
 		<label for="name">Control plane name.</label>
 		{#if !nameValid}
-			<label for="name" class="error"
-				>Name must contain only lower-case characters, numbers or hyphens (-), it must start and end
-				with a character or number, and must be at most 63 characters.</label
-			>
+			<label for="name" class="error">{nameValidMessage}</label>
 		{/if}
 
 		<details>

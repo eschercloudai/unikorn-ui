@@ -100,6 +100,7 @@
 </script>
 
 <CreateControlPlaneModal
+	{controlPlanes}
 	bind:active={createModalActive}
 	on:controlPlaneCreated={controlPlaneCreated}
 />
@@ -150,7 +151,7 @@
 			<dt>Status:</dt>
 			<dd>{cp.status.status}</dd>
 			<dt>Version:</dt>
-			<dd>{cp.applicationBundle}</dd>
+			<dd>{cp.applicationBundle.version}</dd>
 		</dl>
 	</article>
 {/each}
