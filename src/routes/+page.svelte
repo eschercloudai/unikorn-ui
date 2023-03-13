@@ -389,6 +389,7 @@
 		grid-row: 2;
 		width: 0;
 		overflow-x: hidden;
+		overflow-y: auto;
 		z-index: 10;
 		display: flex;
 		flex-direction: column;
