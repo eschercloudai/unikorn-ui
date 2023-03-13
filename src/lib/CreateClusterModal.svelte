@@ -29,7 +29,8 @@
 	const dispatch = createEventDispatcher();
 
 	// name of the cluster.
-	let name;
+	let name = null;
+	let nameValid = false;
 
 	// On creation we only consider a single version.
 	let versions = [];
@@ -327,6 +328,17 @@
 		return `${controlPlane.status.name}-${name}`;
 	}
 
+	// Check if the name constraints are valid.  RFC-1123.
+	// Upto 63 characters, lower case alpha, numeric and -.
+	// Must start and end with alphanumeric.
+	$: if (name != null) {
+		nameValid = name.match(/^(?!-)[a-z0-9-]{0,62}[a-z0-9]$/);
+	}
+
+	let valid = false;
+
+	$: valid = [nameValid].every((x) => x) && workloadPools.every((x) => x.valid);
+
 	async function submitCreateCluster() {
 		// TODO: sanity checking/validation before doing anything
 		// potentially destructive!
@@ -452,54 +464,9 @@
 	}
 
 	function updateWorkloadPool() {
+		// TODO: given validity "just works (tm)" is this event based stuff
+		// actually necessary??
 		autoscaling = workloadPools.some((pool) => pool.autoscaling);
-
-		updateCost();
-	}
-
-	// TODO: this is just a bit of fun to prove how it could work, this
-	// data needs to come from an API, not a spreadsheet embedded in a
-	// presentation.
-	const prices = {
-		'g.48.highmem.a100.2': 10.12,
-		'g.24.highmem.a100.1': 5.06,
-		'g.12.highmem.a100.3g.40gb': 2.53,
-		'g.8.highmem.a100.2g.20gb': 1.51,
-		'g.4.highmem.a100.1g.10gb': 0.76,
-		'g.4.standard': 0.16,
-		'g.2.standard': 0.08
-	};
-
-	let cost = 0.0;
-	let costMax = 0.0;
-
-	function updateCost() {
-		if (flavor == null) {
-			return;
-		}
-
-		let c = prices[flavor.name] * replicas;
-		let e = 0.0;
-
-		for (const wp of workloadPools) {
-			if (wp.flavor == null) {
-				continue;
-			}
-
-			if (wp.autoscaling) {
-				c = c + prices[wp.flavor.name] * wp.minReplicas;
-				e = e + prices[wp.flavor.name] * (wp.maxReplicas - wp.minReplicas);
-			} else {
-				c = c + prices[wp.flavor.name] * wp.replicas;
-			}
-		}
-
-		cost = c;
-		costMax = c + e;
-	}
-
-	$: if (flavor != null) {
-		updateCost();
 	}
 </script>
 
@@ -507,10 +474,16 @@
 	<form>
 		<h1>Create New Cluster</h1>
 
-		<input id="name" type="text" placeholder="Cluster name" required bind:value={name} />
+		<input id="name" type="text" placeholder="Cluster name" bind:value={name} />
 		<label for="name">
 			Cluster name. Must be unique, contain only characters, numbers and dashes.
 		</label>
+		{#if !nameValid}
+			<label for="name" class="error"
+				>Name must contain only lower-case characters, numbers or hyphens (-), it must start and end
+				with a character or number, and must be at most 63 characters.</label
+			>
+		{/if}
 
 		<details>
 			<summary>Lifecycle (Advanced)</summary>
@@ -683,15 +656,8 @@
 			<div>Add New Pool</div>
 		</button>
 
-		<h2>Estimated Cost</h2>
-		<div>Fixed cost: &euro;{cost.toFixed(2)}/h</div>
-
-		{#if autoscaling}
-			<div>Maximum burst cost: &euro;{costMax.toFixed(2)}/h</div>
-		{/if}
-
 		<div class="buttons">
-			<button type="submit" on:click={submitCreateCluster}>
+			<button type="submit" disabled={!valid} on:click={submitCreateCluster}>
 				<iconify-icon icon="mdi:tick" />
 				<div>Submit</div>
 			</button>

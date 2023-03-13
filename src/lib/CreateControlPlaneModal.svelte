@@ -19,6 +19,7 @@
 
 	// Control plane name.
 	let name = null;
+	let nameValid = false;
 
 	// Control plane versioning support.
 	let applicationBundles = [];
@@ -78,6 +79,18 @@
 		}
 	}
 
+	// Check if the name constraints are valid.  RFC-1123.
+	// Upto 63 characters, lower case alpha, numeric and -.
+	// Must start and end with alphanumeric.
+	$: if (name != null) {
+		nameValid = name.match(/^(?!-)[a-z0-9-]{0,62}[a-z0-9]$/);
+	}
+
+	let allValid = false;
+
+	// Roll up validity to enable creation.
+	$: allValid = [nameValid].every((x) => x);
+
 	async function submitCreateControlPlane() {
 		await createProject({
 			token: token.get().token,
@@ -116,8 +129,14 @@
 <Modal {active} fixed="true">
 	<form>
 		<h2>Create New Control Plane</h2>
-		<input id="name" type="text" placeholder="Control plane name" required bind:value={name} />
-		<label for="name">Must be unique, contain only characters, numbers and dashes.</label>
+		<input id="name" type="text" placeholder="Control plane name" bind:value={name} />
+		<label for="name">Control plane name.</label>
+		{#if !nameValid}
+			<label for="name" class="error"
+				>Name must contain only lower-case characters, numbers or hyphens (-), it must start and end
+				with a character or number, and must be at most 63 characters.</label
+			>
+		{/if}
 
 		<details>
 			<summary>Lifecycle (Advanced)</summary>
@@ -148,6 +167,7 @@
 		<div class="buttons">
 			<button
 				type="submit"
+				disabled={!allValid}
 				on:click={submitCreateControlPlane}
 				on:keydown={submitCreateControlPlane}
 			>
