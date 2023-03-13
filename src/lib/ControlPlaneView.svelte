@@ -2,27 +2,17 @@
 	import { onMount, onDestroy } from 'svelte';
 	import { token } from '$lib/credentials.js';
 	import { age } from '$lib/time.js';
-	import {
-		createProject,
-		listControlPlanes,
-		createControlPlane,
-		deleteControlPlane,
-		listApplicationBundlesControlPlane
-	} from '$lib/client.js';
+	import { listControlPlanes, deleteControlPlane } from '$lib/client.js';
 
-	import Modal from '$lib/Modal.svelte';
 	import Breadcrumbs from '$lib/Breadcrumbs.svelte';
 	import StatusIcon from '$lib/StatusIcon.svelte';
 	import DropDownIcon from '$lib/DropDownIcon.svelte';
+	import CreateControlPlaneModal from '$lib/CreateControlPlaneModal.svelte';
 
 	let controlPlanes = [];
-	let applicationBundles = [];
-	let applicationBundle = null;
 
 	function reset() {
 		controlPlanes = [];
-		applicationBundles = [];
-		applicationBundle = null;
 	}
 
 	// id is a unique identifier for the component instance.
@@ -31,7 +21,7 @@
 	let ticker = null;
 
 	onMount(() => {
-		token.subscribe(id, updateAll);
+		token.subscribe(id, updateControlPlanes);
 		ticker = setInterval(updateControlPlanes, 10000);
 	});
 
@@ -39,11 +29,6 @@
 		clearInterval(ticker);
 		token.unsubscribe(id);
 	});
-
-	async function updateAll() {
-		updateControlPlanes();
-		updateApplicationBundles();
-	}
 
 	async function updateControlPlanes() {
 		let t = token.get();
@@ -68,39 +53,6 @@
 		}
 
 		controlPlanes = result;
-	}
-
-	async function updateApplicationBundles() {
-		let t = token.get();
-
-		if (t == null || t.scope == token.unscoped) {
-			reset();
-			return;
-		}
-
-		const result = await listApplicationBundlesControlPlane({
-			token: token.get().token,
-			onUnauthorized: () => {
-				token.remove();
-			}
-		});
-
-		if (result == null) {
-			return;
-		}
-
-		// These are returned in ascending order, we want latest first.
-		applicationBundles = result.reverse();
-	}
-
-	// Update the selected application bundle when the bundles list updates.
-	$: if (applicationBundles.length != 0 && applicationBundle == null) {
-		for (const b of applicationBundles) {
-			if (!b.preview && !b.endOfLife) {
-				applicationBundle = b;
-				break;
-			}
-		}
 	}
 
 	function statusFromResource(status) {
@@ -142,100 +94,15 @@
 		createModalActive = !createModalActive;
 	}
 
-	let newControlPlaneName = null;
-
-	async function submitCreateControlPlane() {
-		await createProject({
-			token: token.get().token,
-			onConflict: () => {
-				// this is fine.
-			},
-			onUnauthorized: () => {
-				token.remove();
-			}
-		});
-
-		const body = {
-			name: newControlPlaneName,
-			applicationBundle: applicationBundle.name
-		};
-
-		await createControlPlane({
-			token: token.get().token,
-			body: body,
-			onBadRequest: () => {
-				console.log('you have made a mistake');
-			},
-			onUnauthorized: () => {
-				token.remove();
-			},
-			onConflict: () => {
-				console.log('visual feedback on name clash');
-			}
-		});
-
-		newControlPlaneName = null;
-
-		createModalActive = false;
-
+	function controlPlaneCreated() {
 		updateControlPlanes();
 	}
 </script>
 
-<Modal active={createModalActive}>
-	<form>
-		<h2>Create New Control Plane</h2>
-		<input
-			id="name"
-			type="text"
-			placeholder="Control plane name"
-			required
-			bind:value={newControlPlaneName}
-		/>
-		<label for="name">Must be unique, contain only characters, numbers and dashes.</label>
-
-		<details>
-			<summary>Lifecycle (Advanced)</summary>
-			<p>
-				The platform will automatically upgrade control planes to provide confidence in security,
-				and periodically enable new features. This section describes those defaults and, where
-				applicable, allows you to fine tune those settings.
-			</p>
-
-			<select id="appbundle" bind:value={applicationBundle}>
-				{#each applicationBundles as b}
-					{#if b.preview}
-						<option value={b}>{b.version} (Preview)</option>
-					{:else if b.endOfLife}
-						<option value={b}>{b.version} (End-of-Life {b.endOfLife})</option>
-					{:else}
-						<option value={b}>{b.version}</option>
-					{/if}
-				{/each}
-			</select>
-			<label for="appbundle">
-				Selects the control plane version. Versions marked as <em>Preview</em> are early release
-				candidates, and may have undergone less rigorous testing. Versions marked
-				<em>End-of-Life</em> indicate the date when they will be automatically upgraded by the platform.
-			</label>
-		</details>
-
-		<div class="buttons">
-			<button
-				type="submit"
-				on:click={submitCreateControlPlane}
-				on:keydown={submitCreateControlPlane}
-			>
-				<iconify-icon icon="mdi:tick" />
-				<div>Submit</div>
-			</button>
-			<button on:click={toggleCreateModal}>
-				<iconify-icon icon="mdi:close" />
-				<div>Cancel</div>
-			</button>
-		</div>
-	</form>
-</Modal>
+<CreateControlPlaneModal
+	bind:active={createModalActive}
+	on:controlPlaneCreated={controlPlaneCreated}
+/>
 
 <Breadcrumbs />
 
@@ -312,11 +179,6 @@
 		grid-row: 1;
 		grid-column: 2;
 	}
-	div.buttons {
-		display: flex;
-		justify-content: center;
-		gap: var(--padding);
-	}
 	dl {
 		grid-row: 2;
 		grid-column: 1 / -1;
@@ -332,21 +194,6 @@
 	}
 	dd {
 		margin: 0;
-	}
-	form {
-		display: flex;
-		flex-direction: column;
-		align-items: stretch;
-		padding: var(--padding);
-		gap: var(--padding);
-	}
-	form label {
-		display: block;
-		font-style: italic;
-		font-size: 0.75rem;
-	}
-	form label > em {
-		font-weight: bold;
 	}
 	@media only screen and (min-width: 720px) {
 		article {
