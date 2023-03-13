@@ -8,6 +8,8 @@
 	export let computeAZs;
 
 	let name = null;
+	let nameValid = false;
+
 	let image = null;
 	let flavor = null;
 	let autoscaling = false;
@@ -25,6 +27,7 @@
 
 	$: {
 		object = {
+			valid: [nameValid].every((x) => x),
 			name: name,
 			image: image,
 			flavor: flavor,
@@ -47,12 +50,25 @@
 	$: if (flavor == null && flavors.length != 0) {
 		flavor = flavors[0];
 	}
+
+	// Check if the name constraints are valid.  RFC-1123.
+	// Upto 63 characters, lower case alpha, numeric and -.
+	// Must start and end with alphanumeric.
+	$: if (name != null) {
+		nameValid = name.match(/^(?!-)[a-z0-9-]{0,62}[a-z0-9]$/);
+	}
 </script>
 
-<input id="name" type="text" placeholder="Workload pool name" required bind:value={name} />
+<input id="name" type="text" placeholder="Workload pool name" bind:value={name} />
 <label for="name"
 	>Workload pool name. Must be unique, contain only characters, numbers and dashes.</label
 >
+{#if !nameValid}
+	<label for="name" class="error"
+		>Name must contain only lower-case characters, numbers or hyphens (-), it must start and end
+		with a character or number, and must be at most 63 characters.</label
+	>
+{/if}
 
 <select id="image" bind:value={image} required>
 	{#each images as i}

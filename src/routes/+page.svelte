@@ -289,7 +289,6 @@
 	:global(button) {
 		color: white;
 		padding: var(--padding);
-		border: 2px solid var(--brand);
 		font-weight: bold;
 		font-size: 1rem;
 		background-color: var(--brand);
@@ -298,12 +297,17 @@
 		gap: var(--padding);
 		cursor: pointer;
 		border-radius: var(--radius);
+		border-style: none;
 	}
 	:global(button:hover) {
 		background-color: var(--brand-dark);
 	}
 	:global(button:focus) {
 		background-color: var(--brand-dark);
+	}
+	:global(button:disabled) {
+		background-color: var(--brand-light);
+		cursor: not-allowed;
 	}
 	:global(iconify-icon) {
 		font-size: var(--icon-size);
@@ -342,6 +346,9 @@
 	}
 	:global(.selectable) {
 		cursor: pointer;
+	}
+	:global(.error) {
+		color: var(--error);
 	}
 	iconify-icon {
 		color: var(--brand);
