@@ -32,7 +32,7 @@
 		width: 100vw;
 		display: flex;
 		flex-direction: column;
-		align-items: center;
+		align-items: stretch;
 		overflow-y: auto;
 		background-color: white;
 	}

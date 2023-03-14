@@ -3,27 +3,18 @@
 	import { token } from '$lib/credentials.js';
 	import { createEventDispatcher } from 'svelte';
 
-	import {
-		createProject,
-		createControlPlane,
-		listApplicationBundlesControlPlane
-	} from '$lib/client.js';
+	import { updateControlPlane, listApplicationBundlesControlPlane } from '$lib/client.js';
 
 	import Modal from '$lib/Modal.svelte';
 
-	// list of control planes so we can validate the name is unique.
-	export let controlPlanes;
+	// control planes to edit.
+	export let controlPlane;
 
 	// active reports whether this modal is visible or not.
 	export let active;
 
-	// We will raise clusterCreated on successful cluster creation.
+	// We will raise controlPlaneUpdated on successful cluster update.
 	const dispatch = createEventDispatcher();
-
-	// Control plane name.
-	let name = null;
-	let nameValid = false;
-	let nameValidMessage;
 
 	// Control plane versioning support.
 	let applicationBundles = [];
@@ -31,7 +22,6 @@
 
 	function reset() {
 		applicationBundles = [];
-		applicationBundle = null;
 	}
 
 	// Close the modal.
@@ -73,64 +63,20 @@
 		applicationBundles = result.reverse();
 	}
 
-	// Update the selected application bundle when the bundles list updates.
-	$: if (applicationBundles.length != 0 && applicationBundle == null) {
-		for (const b of applicationBundles) {
-			if (!b.preview && !b.endOfLife) {
-				applicationBundle = b;
-				break;
-			}
-		}
+	$: if (!applicationBundle && controlPlane && applicationBundles.length > 0) {
+		applicationBundle = applicationBundles.find(
+			(x) => x.name == controlPlane.applicationBundle.name
+		);
 	}
 
-	const nameInvalidUnset =
-		'Name must contain only lower-case characters, numbers or hyphens (-), it must start and end with a character or number, and must be at most 63 characters.';
-	const nameInvalidUsed = 'Name already used by another control plane';
+	async function submitUpdateControlPlane() {
+		// Deep copy the object, bad tends to happen when you mutate
+		// something non-local.
+		let body = JSON.parse(JSON.stringify(controlPlane));
 
-	function validateName(name, controlPlanes) {
-		if (name == null || controlPlanes == null) {
-			nameValidMessage = nameInvalidUnset;
-			return false;
-		}
+		body.applicationBundle = applicationBundle;
 
-		// RFC-1123.  Must start and end with alphanumeric.
-		// Upto 63 characters, lower case alpha, numeric and -.
-		if (!name.match(/^(?!-)[a-z0-9-]{0,62}[a-z0-9]$/)) {
-			nameValidMessage = nameInvalidUnset;
-			return false;
-		}
-
-		if (controlPlanes.some((x) => x.name == name)) {
-			nameValidMessage = nameInvalidUsed;
-			return false;
-		}
-
-		return true;
-	}
-
-	// Check if the name constraints are valid.
-	$: nameValid = validateName(name, controlPlanes);
-
-	// Roll up validity to enable creation.
-	$: allValid = [nameValid].every((x) => x);
-
-	async function submitCreateControlPlane() {
-		await createProject({
-			token: token.get().token,
-			onConflict: () => {
-				// this is fine.
-			},
-			onUnauthorized: () => {
-				token.remove();
-			}
-		});
-
-		const body = {
-			name: name,
-			applicationBundle: applicationBundle
-		};
-
-		await createControlPlane({
+		await updateControlPlane(controlPlane.name, {
 			token: token.get().token,
 			body: body,
 			onBadRequest: () => {
@@ -138,25 +84,22 @@
 			},
 			onUnauthorized: () => {
 				token.remove();
-			},
-			onConflict: () => {
-				console.log('visual feedback on name clash');
 			}
 		});
 
-		dispatch('controlPlaneCreated', {});
+		dispatch('controlPlaneUpdated', {});
+
 		active = false;
 	}
 </script>
 
 <Modal {active} fixed="true">
 	<form>
-		<h2>Create Control Plane</h2>
-		<input id="name" type="text" placeholder="Control plane name" bind:value={name} />
-		<label for="name">Control plane name.</label>
-		{#if !nameValid}
-			<label for="name" class="error">{nameValidMessage}</label>
-		{/if}
+		<h2>Update Control Plane</h2>
+		<dl>
+			<dt>Name</dt>
+			<dd>{controlPlane.name}</dd>
+		</dl>
 
 		<details>
 			<summary>Lifecycle (Advanced)</summary>
@@ -187,9 +130,8 @@
 		<div class="buttons">
 			<button
 				type="submit"
-				disabled={!allValid}
-				on:click={submitCreateControlPlane}
-				on:keydown={submitCreateControlPlane}
+				on:click={submitUpdateControlPlane}
+				on:keydown={submitUpdateControlPlane}
 			>
 				<iconify-icon icon="mdi:tick" />
 				<div>Submit</div>
@@ -222,5 +164,21 @@
 	}
 	form label > em {
 		font-weight: bold;
+	}
+	dl {
+		grid-row: 2;
+		grid-column: 1 / -1;
+		margin: 0;
+		display: grid;
+		grid-template-columns: auto 1fr;
+		grid-auto-flow: column;
+		grid-gap: calc(var(--padding) / 2) var(--padding);
+	}
+	dt {
+		font-weight: bold;
+		grid-column-start: 1;
+	}
+	dd {
+		margin: 0;
 	}
 </style>

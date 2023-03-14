@@ -229,6 +229,7 @@
 	:global(h1, h2, h3, h4, h5, h6) {
 		color: var(--brand);
 		margin-top: 0.5em;
+		text-align: center;
 	}
 	:global(a:link, a:visited) {
 		color: var(--brand);
