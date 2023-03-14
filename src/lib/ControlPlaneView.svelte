@@ -8,6 +8,7 @@
 	import StatusIcon from '$lib/StatusIcon.svelte';
 	import DropDownIcon from '$lib/DropDownIcon.svelte';
 	import CreateControlPlaneModal from '$lib/CreateControlPlaneModal.svelte';
+	import EditControlPlaneModal from '$lib/EditControlPlaneModal.svelte';
 
 	let controlPlanes = [];
 
@@ -60,7 +61,7 @@
 			return 'progressing';
 		} else if (status.status == 'Provisioned') {
 			return 'ok';
-		} else if (['Provisioning', 'Deprovisioning'].includes(status.status)) {
+		} else if (['Provisioning', 'Deprovisioning', 'Updating'].includes(status.status)) {
 			return 'progressing';
 		} else if (['Unknown', 'Cancelled'].includes(status.status)) {
 			return 'warning';
@@ -69,10 +70,18 @@
 		}
 	}
 
+	// controlPlane defines the active CP for instance specific modals.
+	let controlPlane = null;
+
 	// Define dropdown callbacks.
 	function handleDetails() {}
 
-	function handleEdit() {}
+	let editModalActive = false;
+
+	function handleEdit(cp) {
+		controlPlane = cp;
+		editModalActive = true;
+	}
 
 	async function handleDelete(cp) {
 		await deleteControlPlane(cp.name, {
@@ -98,16 +107,25 @@
 		createModalActive = !createModalActive;
 	}
 
-	function controlPlaneCreated() {
+	function controlPlanesMutated() {
 		updateControlPlanes();
+		controlPlane = null;
 	}
 </script>
 
 <CreateControlPlaneModal
 	{controlPlanes}
 	bind:active={createModalActive}
-	on:controlPlaneCreated={controlPlaneCreated}
+	on:controlPlaneCreated={controlPlanesMutated}
 />
+
+{#if controlPlane}
+	<EditControlPlaneModal
+		{controlPlane}
+		bind:active={editModalActive}
+		on:controlPlaneUpdated={controlPlanesMutated}
+	/>
+{/if}
 
 <Breadcrumbs />
 

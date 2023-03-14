@@ -116,6 +116,10 @@ export function deleteControlPlane(controlPlane, opts) {
 	return request('DELETE', `/api/v1/controlplanes/${controlPlane}`, opts);
 }
 
+export function updateControlPlane(controlPlane, opts) {
+	return request('PUT', `/api/v1/controlplanes/${controlPlane}`, opts);
+}
+
 export function listClusters(controlPlane, opts) {
 	return request('GET', `/api/v1/controlplanes/${controlPlane}/clusters`, opts);
 }

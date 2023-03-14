@@ -97,7 +97,7 @@
 			return 'progressing';
 		} else if (status.status == 'Provisioned') {
 			return 'ok';
-		} else if (['Provisioning', 'Deprovisioning'].includes(status.status)) {
+		} else if (['Provisioning', 'Deprovisioning', 'Updating'].includes(status.status)) {
 			return 'progressing';
 		} else if (['Unknown', 'Cancelled'].includes(status.status)) {
 			return 'warning';

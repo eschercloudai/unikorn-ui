@@ -496,7 +496,7 @@
 
 <Modal {active} fixed="true">
 	<form>
-		<h1>Create New Cluster</h1>
+		<h1>Create Cluster</h1>
 
 		<input id="name" type="text" placeholder="Cluster name" bind:value={name} />
 		<label for="name">
