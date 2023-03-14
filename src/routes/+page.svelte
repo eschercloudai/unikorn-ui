@@ -328,7 +328,6 @@
 	}
 	:global(ul li iconify-icon:first-child) {
 		color: var(--brand);
-		margin-right: var(--padding);
 	}
 	:global(section) {
 		margin: var(--padding);

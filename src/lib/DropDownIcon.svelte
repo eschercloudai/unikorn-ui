@@ -1,4 +1,5 @@
 <script>
+	import { clickOutside } from '$lib/clickout.js';
 	import DropDownItem from '$lib/DropDownItem.svelte';
 
 	// Unique resource the menu belongs to.
@@ -18,6 +19,12 @@
 		show = !show;
 	}
 
+	function hide() {
+		if (show) {
+			show = false;
+		}
+	}
+
 	// Intercept selection messages raise the handler and close the menu.
 	function selected(event) {
 		show = false;
@@ -27,7 +34,7 @@
 
 <div class="dropdown selectable">
 	<iconify-icon {icon} on:click={toggle} on:keypress={toggle} />
-	<div class="dropdown-menu" class:show>
+	<div class="dropdown-menu" class:show use:clickOutside on:click_outside={hide}>
 		<ul>
 			{#each items as item}
 				<DropDownItem on:select={selected} {item}>
