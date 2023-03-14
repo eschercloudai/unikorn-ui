@@ -106,53 +106,56 @@
 		}
 	}
 
-	// Define the per-control plane drop down menu.
-	let dropdownItems = [
-		{ id: 'detail', value: 'Show Details', icon: 'bx:detail' },
-		{ id: 'kubeconfig', value: 'Download Kubeconfig', icon: 'mdi:kubernetes' },
-		{ id: 'delete', value: 'Delete', icon: 'mdi:delete' }
-	];
+	// Define dropdown callback handlers.
+	function handleDetails() {}
 
-	async function selected(event) {
-		if (event.detail.item.id == 'delete') {
-			await deleteCluster(controlPlane.status.name, event.detail.id, {
-				token: token.get().token,
-				onUnauthorized: () => {
-					token.remove();
-				}
-			});
+	async function handleKubeconfig(cl) {
+		const blob = await getClusterKubeconfig(controlPlane.name, cl.name, {
+			token: token.get().token,
+			onUnauthorized: () => {
+				token.remove();
+			}
+		});
 
-			updateClusters();
+		if (blob == null) {
 			return;
 		}
 
-		if (event.detail.item.id == 'kubeconfig') {
-			const blob = await getClusterKubeconfig(controlPlane.status.name, event.detail.id, {
-				token: token.get().token,
-				onUnauthorized: () => {
-					token.remove();
-				}
-			});
+		if (browser) {
+			const url = window.URL.createObjectURL(blob);
 
-			if (blob == null) {
-				return;
-			}
+			const a = document.createElement('a');
+			a.style.display = 'none';
+			a.href = url;
+			a.download = `kubeconfig-${cl.name}.yaml`;
 
-			if (browser) {
-				const url = window.URL.createObjectURL(blob);
+			document.body.appendChild(a);
+			a.click();
 
-				const a = document.createElement('a');
-				a.style.display = 'none';
-				a.href = url;
-				a.download = `kubeconfig-${event.detail.id}.yaml`;
-
-				document.body.appendChild(a);
-				a.click();
-
-				window.URL.revokeObjectURL(url);
-			}
+			window.URL.revokeObjectURL(url);
 		}
 	}
+
+	function handleEdit() {}
+
+	async function handleDelete(cl) {
+		await deleteCluster(controlPlane.name, cl.name, {
+			token: token.get().token,
+			onUnauthorized: () => {
+				token.remove();
+			}
+		});
+
+		updateClusters();
+	}
+
+	// Define the per-control plane drop down menu.
+	let dropdownItems = [
+		{ id: 'detail', value: 'Details', icon: 'bx:detail', handler: handleDetails },
+		{ id: 'kubeconfig', value: 'Kubeconfig', icon: 'mdi:kubernetes', handler: handleKubeconfig },
+		{ id: 'edit', value: 'Edit', icon: 'bx:edit', handler: handleEdit },
+		{ id: 'delete', value: 'Delete', icon: 'bx:trash', handler: handleDelete }
+	];
 
 	let createModalActive = false;
 
@@ -202,12 +205,7 @@
 				<div class="name">{cl.status.name}</div>
 			</div>
 			<div class="widgets">
-				<DropDownIcon
-					icon="mdi:dots-vertical"
-					id={cl.status.name}
-					items={dropdownItems}
-					on:select={selected}
-				/>
+				<DropDownIcon icon="mdi:dots-vertical" resource={cl} items={dropdownItems} />
 			</div>
 			<dl>
 				<dt>Age:</dt>

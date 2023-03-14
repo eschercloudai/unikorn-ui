@@ -1,9 +1,8 @@
 <script>
-	import { createEventDispatcher } from 'svelte';
 	import DropDownItem from '$lib/DropDownItem.svelte';
 
-	// Unique ID for the menu instance.
-	export let id;
+	// Unique resource the menu belongs to.
+	export let resource;
 
 	// icon for the dropdown.
 	export let icon;
@@ -19,16 +18,10 @@
 		show = !show;
 	}
 
-	const dispatch = createEventDispatcher();
-
-	// Intercept selection messages, close the menu, then propagate upward.
+	// Intercept selection messages raise the handler and close the menu.
 	function selected(event) {
 		show = false;
-
-		dispatch('select', {
-			id: id,
-			item: event.detail
-		});
+		event.detail.handler(resource);
 	}
 </script>
 
@@ -37,7 +30,7 @@
 	<div class="dropdown-menu" class:show>
 		<ul>
 			{#each items as item}
-				<DropDownItem on:select={selected} id={item.id}>
+				<DropDownItem on:select={selected} {item}>
 					<iconify-icon icon={item.icon} />
 					<div>{item.value}</div>
 				</DropDownItem>

@@ -2,12 +2,12 @@
 	import { createEventDispatcher } from 'svelte';
 
 	// id is a unique identifier within the menu.
-	export let id;
+	export let item;
 
 	const dispatch = createEventDispatcher();
 
 	function click() {
-		dispatch('select', { id: id });
+		dispatch('select', item);
 	}
 </script>
 
