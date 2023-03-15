@@ -335,7 +335,7 @@
 	:global(article) {
 		margin: var(--padding);
 		padding: var(--padding);
-		border: 2px solid var(--brand);
+		border: 1px solid var(--dark-grey);
 		background: white;
 		border-radius: var(--radius);
 		box-shadow: var(--shadow-offset) var(--shadow-offset) var(--radius) var(--mid-grey);
