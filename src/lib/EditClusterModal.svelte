@@ -9,18 +9,16 @@
 		listKeyPairs,
 		listComputeAvailabilityZones,
 		listBlockStorageAvailabilityZones,
+		listApplicationBundlesCluster,
 		listExternalNetworks,
-		createApplicationCredential,
-		deleteApplicationCredential,
-		createCluster,
-		listApplicationBundlesCluster
+		updateCluster
 	} from '$lib/client.js';
 
 	import Modal from '$lib/Modal.svelte';
-	import WorkloadPoolCreate from '$lib/WorkloadPoolCreate.svelte';
+	import WorkloadPoolEdit from '$lib/WorkloadPoolEdit.svelte';
 
-	// clusters allows name uniqueness checking.
-	export let clusters;
+	// cluster refers to the existing cluster.
+	export let cluster;
 
 	// controlPlane provides a reference to the selected control plane.
 	export let controlPlane;
@@ -31,73 +29,132 @@
 	// We will raise clusterCreated on successful cluster creation.
 	const dispatch = createEventDispatcher();
 
-	// name of the cluster.
-	let name = null;
-	let nameValid = false;
-	let nameValidMessage;
-
-	// On creation we only consider a single version.
+	// Define dynamic things from the API.
 	let versions = [];
-	let version;
-
-	// Images are a one size fits all for simplicity.
 	let allImages = [];
-
-	// Images are filtered based on the version.
 	let images = [];
-	let image;
-
-	// All flavors (for worker nodes).
 	let flavors = [];
-
-	// Control plane flavors are limited to non-GPU.
 	let cpFlavors = [];
-	let flavor;
-
-	// Default replicas for the kubernetes control plane.
-	let replicas = 3;
-
-	// SSH keys.
 	let keyPairs = [];
-	let keyPair;
-
-	// Default disk size for control plane nodes.
-	let disk = 50;
-
-	// Network options.
-	let nodePrefix;
-	let podPrefix;
-	let servicePrefix;
-	let dnsNameservers;
-	let allowedPrefixes;
-	let sans;
-
-	// Whether the cluster-autoscaler add-on is provisioned.
-	let autoscaling = false;
-
-	// A set of workload pools for the cluster.
-	let workloadPools = [];
-	addPool();
-
-	// Availability zones to use.
 	let computeAZs = [];
-	let computeAZ = null;
-
 	let blockStorageAZs = [];
-
-	// External network to provision routers and VIPs on.
 	let externalNetworks = [];
-
-	// Cluster versioning support.
 	let applicationBundles = [];
-	let applicationBundle = null;
+
+	// Define things derived from the cluster, and user updatable.
+	// If it's not here, please check that CAPI webhooks before
+	// adding anything, because it must be allowed by their API.
+	let version;
+	let image;
+	let flavor;
+	let computeAZ;
+	let applicationBundle;
+
+	let replicas = cluster.controlPlane.replicas;
+	let disk = cluster.controlPlane.disk.size;
+	let keyPair = cluster.openstack.sshKeyName;
+	let allowedPrefixes = cluster.api ? cluster.api.allowedPrefixes.join(',') : null;
+	let autoscaling = cluster.features && cluster.features.autoscaling;
+
+	let workloadPools = [];
+
+	for (const pool of cluster.workloadPools) {
+		addExistingPool(pool);
+	}
+
+	// When all images are available (and by implication versions), we can
+	// get the image from the cluster, derive its version, then show all images
+	// available for that version.
+	function changeAllImages(allImages) {
+		if (allImages.length == 0) {
+			return;
+		}
+
+		image = allImages.find((x) => x.name == cluster.controlPlane.imageName);
+		version = versions.find((x) => x == image.versions.kubernetes);
+		images = allImages.filter((x) => x.versions.kubernetes == version);
+	}
+
+	$: changeAllImages(allImages);
+
+	// When the version changes, so does our view of the images, so pick a new one.
+	// However... When the version matches that of the cluster, then default
+	// to the existing image to avoid upgrades unless explicitly triggered.
+	function changeVersion(version) {
+		if (!version) {
+			return;
+		}
+
+		images = allImages.filter((x) => x.versions.kubernetes == version);
+
+		const existing = images.find((x) => x.name == cluster.controlPlane.imageName);
+		if (existing) {
+			image = existing;
+		} else {
+			image = images[0];
+		}
+	}
+
+	$: changeVersion(version);
+
+	// Update the chosen flavor when the flavors are available.
+	function changeFlavors(flavors) {
+		if (flavors.length == 0 || flavor) {
+			return;
+		}
+
+		flavor = flavors.find((x) => x.name == cluster.controlPlane.flavorName);
+	}
+
+	$: changeFlavors(flavors);
+
+	// Update the application bundle when they are available.
+	function changeApplicationBundles(applicationBundles) {
+		// TODO: this second check shouldn't be necessary, why is it triggered
+		// on a select??
+		if (applicationBundles.length == 0 || applicationBundle) {
+			return;
+		}
+
+		applicationBundle = applicationBundles.find((x) => x.name == cluster.applicationBundle.name);
+	}
+
+	$: changeApplicationBundles(applicationBundles);
+
+	// Update availability zones when they are available.
+	function changeComputeAZs(computeAZs) {
+		if (computeAZs.length == 0 || computeAZ) {
+			return;
+		}
+
+		computeAZ = computeAZs.find((x) => x.name == cluster.openstack.computeAvailabilityZone);
+	}
+
+	$: changeComputeAZs(computeAZs);
 
 	// Add a new workload pool to the list.
 	function addPool() {
 		// Create an object to bind the WorkloadPoolCreate component to.
 		let object = {};
 
-		workloadPools.push(object);
+		let p = {
+			existing: null,
+			object: object
+		};
+
+		workloadPools.push(p);
+		workloadPools = workloadPools;
+	}
+
+	function addExistingPool(pool) {
+		let object = {};
+
+		let p = {
+			existing: pool,
+			object: object
+		};
+
+		workloadPools.push(p);
 		workloadPools = workloadPools;
 	}
 
@@ -135,27 +192,11 @@
 
 		// ... then list them in reverse order (newest first).
 		versions = Array.from(v.values()).sort().reverse();
-		version = versions[0];
 
 		// Sort by date, newest first.
 		results.sort((a, b) => a.creationTime < b.creationTime);
 
 		allImages = results;
-	}
-
-	// When images update, or the version, then trigger an update to the
-	// version filtered view of images.
-	$: if (allImages.length > 0 && version != null) {
-		let i = [];
-
-		for (const image of allImages) {
-			if (image.versions.kubernetes == version) {
-				i.push(image);
-			}
-		}
-
-		images = i;
-		image = images[0];
 	}
 
 	// Update the flavors available.
@@ -174,18 +215,8 @@
 		// TODO: push this into server.
 		results.sort((a, b) => a.name < b.name);
 
-		const cpf = [];
-
-		for (const result of results) {
-			if (result.gpus == null) {
-				cpf.push(result);
-			}
-		}
-
-		cpFlavors = cpf;
-		flavor = cpf[0];
-
 		flavors = results;
+		cpFlavors = flavors.filter((x) => x.gpus == null);
 	}
 
 	// Update the available SSH keypairs.
@@ -219,26 +250,6 @@
 		}
 
 		computeAZs = results;
-	}
-
-	$: if (computeAZs.length > 0 && computeAZ == null) {
-		let set = false;
-
-		// Hack!  We don't/can't know the topology so we have to "guess".
-		// Server cannot figure this out either as it's acting as the user
-		// with their credentials.
-		for (const az of computeAZs) {
-			if (az.name == 'nova') {
-				computeAZ = az;
-				set = true;
-			}
-		}
-
-		if (!set) {
-			console.log('unable to find default compute AZ');
-
-			computeAZ = computeAZs[0];
-		}
 	}
 
 	// Update the available block storage AZs.
@@ -289,16 +300,6 @@
 		applicationBundles = result.reverse();
 	}
 
-	// Update the selected application bundle when the bundles list updates.
-	$: if (applicationBundles.length != 0 && applicationBundle == null) {
-		for (const b of applicationBundles) {
-			if (!b.preview && !b.endOfLife) {
-				applicationBundle = b;
-				break;
-			}
-		}
-	}
-
 	// id is a unique identifier for the component instance.
 	let id = Symbol();
 
@@ -327,120 +328,75 @@
 		updateApplicationBundles(t);
 	}
 
-	// Define the application credential name.
-	function appCredName() {
-		return `${controlPlane.status.name}-${name}`;
-	}
-
-	const nameInvalidUnset =
-		'Name must contain only lower-case characters, numbers or hyphens (-), it must start and end with a character or number, and must be at most 63 characters.';
-	const nameInvalidUsed = 'Name already used by another cluster';
-
-	function validateName(name, clusters) {
-		if (name == null || clusters == null) {
-			nameValidMessage = nameInvalidUnset;
-			return false;
-		}
-
-		// RFC-1123.  Must start and end with alphanumeric.
-		// Upto 63 characters, lower case alpha, numeric and -.
-		if (!name.match(/^(?!-)[a-z0-9-]{0,62}[a-z0-9]$/)) {
-			nameValidMessage = nameInvalidUnset;
-			return false;
-		}
-
-		if (clusters.some((x) => x.name == name)) {
-			nameValidMessage = nameInvalidUsed;
-			return false;
-		}
-
-		return true;
-	}
-
-	// Check if the name constraints are valid.
-	$: nameValid = validateName(name, clusters);
-
 	// Roll up validity to enable creation.
-	$: valid = [nameValid].every((x) => x) && workloadPools.every((x) => x.valid);
+	let valid = false;
+
+	function changeWorkloadPools(workloadPools) {
+		valid = workloadPools.every((x) => x.object.valid);
+
+		// NOTE: if this is on, leave it on, unikorn-cluster-manager will
+		// just orphan the application at present, and probably cause issues.
+		if (!cluster.features || !cluster.features.autoscaling) {
+			autoscaling = workloadPools.some((pool) => pool.object.autoscaling);
+		}
+	}
+
+	$: changeWorkloadPools(workloadPools);
 
 	async function submit() {
-		// Delete an existing application credential that may be
-		// in the way.
-		// TODO: we should garbage collect these after cluster deprovision
-		// but that's somewhat difficult.
-		await deleteApplicationCredential(appCredName(name), {
-			token: token.get().token,
-			onUnauthorized: () => {
-				token.remove();
-			},
-			onNotFound: () => {}
-		});
+		// Deep copy the object, bad tends to happen when you mutate
+		// something non-local.
+		let body = JSON.parse(JSON.stringify(cluster));
 
-		let ac = await createApplicationCredential({
-			token: token.get().token,
-			onUnauthorized: () => {
-				token.remove();
-			},
-			body: {
-				name: appCredName(name)
-			}
-		});
+		console.log(body);
 
-		if (ac == null) {
-			return;
-		}
+		// Handle updates of required fields.
+		body.applicationBundle = applicationBundle;
+		body.openstack.computeAvailabilityZone = computeAZ.name;
+		body.controlPlane.replicas = replicas;
+		body.controlPlane.version = version;
+		body.controlPlane.imageName = image.name;
+		body.controlPlane.flavorName = flavor.name;
+		body.controlPlane.disk.size = disk;
+		body.workloadPools = [];
 
-		const body = {
-			name: name,
-			applicationBundle: applicationBundle,
-			openstack: {
-				applicationCredentialID: ac.id,
-				applicationCredentialSecret: ac.secret,
-				computeAvailabilityZone: computeAZ.name,
-				volumeAvailabilityZone: blockStorageAZs[0].name,
-				externalNetworkID: externalNetworks[0].id
-			},
-			network: {
-				nodePrefix: nodePrefix ? nodePrefix : '192.168.0.0/16',
-				servicePrefix: servicePrefix ? servicePrefix : '172.16.0.0/12',
-				podPrefix: podPrefix ? podPrefix : '10.0.0.0/8',
-				dnsNameservers: dnsNameservers ? dnsNameservers.split(',') : ['8.8.8.8', '8.8.4.4']
-			},
-			controlPlane: {
-				replicas: replicas,
-				version: version,
-				imageName: image.name,
-				flavorName: flavor.name,
-				disk: {
-					size: disk
-				}
-			},
-			workloadPools: []
-		};
+		console.log(body);
 
+		// Handle updates of optional fields.
+		// TODO: this feels pretty clunky...
 		if (keyPair) {
 			body.openstack.sshKeyName = keyPair.name;
+		} else {
+			delete body.openstack.sshKeyName;
 		}
 
-		if (sans || allowedPrefixes) {
-			body.api = {};
-
-			if (sans) {
-				body.api.sans = sans.split(',');
+		if (allowedPrefixes) {
+			if (!body.openstack.api) {
+				body.openstack.api = {};
 			}
 
-			if (allowedPrefixes) {
-				body.api.allowedPrefixes = allowedPrefixes.split(',');
+			body.openstack.api.allowedPrefixes = allowedPrefixes.split(',');
+		} else {
+			if (body.openstack.api) {
+				delete body.openstack.api.allowedPrefixes;
 			}
 		}
 
 		if (autoscaling) {
-			body.features = {
-				autoscaling: true
-			};
+			if (!body.features) {
+				body.features = {};
+			}
+
+			body.features.autoscaling = true;
+		} else {
+			if (body.features) {
+				delete body.features.autoscaling;
+			}
 		}
 
-		for (const wp of workloadPools) {
+		for (const p of workloadPools) {
+			const wp = p.object;
+
 			const pool = {
 				name: wp.name,
 				machine: {
@@ -472,7 +428,7 @@
 			body.workloadPools.push(pool);
 		}
 
-		await createCluster(controlPlane.name, {
+		await updateCluster(controlPlane.name, cluster.name, {
 			token: token.get().token,
 			onUnauthorized: () => {
 				token.remove();
@@ -480,24 +436,18 @@
 			body: body
 		});
 
-		dispatch('created', {});
+		dispatch('updated', {});
 		active = false;
 	}
-
-	$: autoscaling = workloadPools.some((pool) => pool.autoscaling);
 </script>
 
 <Modal {active} fixed="true">
 	<form>
-		<h1>Create Cluster</h1>
-
-		<input id="name" type="text" placeholder="Cluster name" bind:value={name} />
-		<label for="name">
-			Cluster name. Must be unique, contain only characters, numbers and dashes.
-		</label>
-		{#if !nameValid}
-			<label for="name" class="error">{nameValidMessage}</label>
-		{/if}
+		<h1>Edit Cluster</h1>
+		<dl>
+			<dt>Name</dt>
+			<dd>{controlPlane.name}</dd>
+		</dl>
 
 		<details>
 			<summary>Lifecycle (Advanced)</summary>
@@ -563,28 +513,6 @@
 			</label>
 
 			<input
-				id="dnsnameservers"
-				type="text"
-				placeholder="8.8.8.8,8.8.4.4"
-				bind:value={dnsNameservers}
-			/>
-			<label for="dnsnameservers">Comma separated list of DNS name servers to use.</label>
-
-			<input id="nodeNetwork" type="text" placeholder="192.168.0.0/16" bind:value={nodePrefix} />
-			<label for="nodeNetwork">IPv4 CIDR to run Kubernetes nodes in.</label>
-
-			<input id="podNetwork" type="text" placeholder="10.0.0.0/8" bind:value={podPrefix} />
-			<label for="podNetwork">IPv4 CIDR to run Kubernets pods in.</label>
-
-			<input
-				id="serviceNetwork"
-				type="text"
-				placeholder="127.16.0.0/12"
-				bind:value={servicePrefix}
-			/>
-			<label for="serviceNetwork">IPv4 CIDR to run Kubernetes services in.</label>
-
-			<input
 				id="allowedPrefixes"
 				type="text"
 				placeholder="1.2.3.4/32,7.8.0.0/16"
@@ -592,12 +520,6 @@
 			/>
 			<label for="allowedPrefixes">
 				Comma separated list of IPv4 CIDR blocks to permit access to the Kubernetes API.
-			</label>
-
-			<input id="sans" type="text" placeholder="kubernetes.my-domain.com" bind:value={sans} />
-			<label for="sans">
-				Comma separated list of X.509 subject alterative names to add to the Kubernetes API
-				certificate.
 			</label>
 		</details>
 
@@ -651,7 +573,13 @@
 
 		{#each workloadPools as pool, index}
 			<section>
-				<WorkloadPoolCreate {flavors} {images} {computeAZs} bind:object={pool} />
+				<WorkloadPoolEdit
+					existing={pool.existing}
+					{flavors}
+					{images}
+					{computeAZs}
+					bind:object={pool.object}
+				/>
 				<button on:click={() => removePool(index)}>
 					<iconify-icon icon="mdi:delete" />
 					<div>Remove Pool</div>
@@ -669,7 +597,7 @@
 				<iconify-icon icon="mdi:tick" />
 				<div>Submit</div>
 			</button>
-			<button on:click={close}>
+			<button on:click={close} on:keydown={close}>
 				<iconify-icon icon="mdi:close" />
 				<div>Cancel</div>
 			</button>
@@ -716,5 +644,21 @@
 		display: flex;
 		align-items: center;
 		gap: var(--padding);
+	}
+	dl {
+		grid-row: 2;
+		grid-column: 1 / -1;
+		margin: 0;
+		display: grid;
+		grid-template-columns: auto 1fr;
+		grid-auto-flow: column;
+		grid-gap: calc(var(--padding) / 2) var(--padding);
+	}
+	dt {
+		font-weight: bold;
+		grid-column-start: 1;
+	}
+	dd {
+		margin: 0;
 	}
 </style>

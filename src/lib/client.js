@@ -140,6 +140,10 @@ export function deleteCluster(controlPlane, cluster, opts) {
 	return request('DELETE', `/api/v1/controlplanes/${controlPlane}/clusters/${cluster}`, opts);
 }
 
+export function updateCluster(controlPlane, cluster, opts) {
+	return request('PUT', `/api/v1/controlplanes/${controlPlane}/clusters/${cluster}`, opts);
+}
+
 export function listApplicationBundlesControlPlane(opts) {
 	return request('GET', '/api/v1/applicationBundles/controlPlane', opts);
 }

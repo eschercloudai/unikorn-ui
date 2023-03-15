@@ -15,6 +15,7 @@
 	import DropDownIcon from '$lib/DropDownIcon.svelte';
 	import LabeledInput from '$lib/LabeledInput.svelte';
 	import CreateClusterModal from '$lib/CreateClusterModal.svelte';
+	import EditClusterModal from '$lib/EditClusterModal.svelte';
 
 	let controlPlanes = [];
 	let controlPlane = null;
@@ -136,7 +137,15 @@
 		}
 	}
 
-	function handleEdit() {}
+	// cluster defines the cluster subject to edit/details views.
+	let cluster = null;
+
+	let editModalActive = false;
+
+	function handleEdit(cl) {
+		cluster = cl;
+		editModalActive = true;
+	}
 
 	async function handleDelete(cl) {
 		await deleteCluster(controlPlane.name, cl.name, {
@@ -159,21 +168,32 @@
 
 	let createModalActive = false;
 
-	function toggleCreateModal() {
-		createModalActive = !createModalActive;
+	function showCreateModal() {
+		createModalActive = true;
 	}
 
-	function clusterCreated() {
+	function clustersMutated() {
 		updateClusters();
 	}
 </script>
 
-<CreateClusterModal
-	{controlPlane}
-	{clusters}
-	bind:active={createModalActive}
-	on:clusterCreated={clusterCreated}
-/>
+{#if createModalActive}
+	<CreateClusterModal
+		{controlPlane}
+		{clusters}
+		bind:active={createModalActive}
+		on:created={clustersMutated}
+	/>
+{/if}
+
+{#if editModalActive}
+	<EditClusterModal
+		{controlPlane}
+		{cluster}
+		bind:active={editModalActive}
+		on:updated={clustersMutated}
+	/>
+{/if}
 
 <Breadcrumbs />
 
@@ -192,7 +212,7 @@
 	</section>
 {:else}
 	<section>
-		<button on:click={toggleCreateModal}>
+		<button on:click={showCreateModal}>
 			<iconify-icon icon="material-symbols:add" />
 			<div>Create</div>
 		</button>
@@ -213,7 +233,13 @@
 				<dt>Status:</dt>
 				<dd>{cl.status.status}</dd>
 				<dt>Version:</dt>
-				<dd>{cl.applicationBundle.version}</dd>
+				{#if cl.applicationBundle.preview}
+					<dd>{cl.applicationBundle.version} (Preview)</dd>
+				{:else if cl.applicationBundle.endOfLife}
+					<dd>{cl.applicationBundle.version} (End-of-Life {cl.applicationBundle.endOfLife})</dd>
+				{:else}
+					<dd>{cl.applicationBundle.version}</dd>
+				{/if}
 				<dt>Kubernetes:</dt>
 				<dd>{cl.controlPlane.version}</dd>
 			</dl>

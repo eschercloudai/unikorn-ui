@@ -144,7 +144,7 @@
 			}
 		});
 
-		dispatch('controlPlaneCreated', {});
+		dispatch('created', {});
 		active = false;
 	}
 </script>
