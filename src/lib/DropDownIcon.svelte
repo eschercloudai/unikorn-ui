@@ -13,59 +13,54 @@
 	//   value: value of the menu item (aka text)
 	export let items = [];
 
-	let show = false;
+	let active = false;
 
-	function toggle() {
-		show = !show;
+	function show() {
+		active = true;
 	}
 
 	function hide() {
-		if (show) {
-			show = false;
-		}
+		active = false;
 	}
 
 	// Intercept selection messages raise the handler and close the menu.
 	function selected(event) {
-		show = false;
+		active = false;
 		event.detail.handler(resource);
 	}
 </script>
 
 <div class="dropdown selectable">
-	<iconify-icon {icon} on:click={toggle} on:keypress={toggle} />
-	<div class="dropdown-menu" class:show use:clickOutside on:click_outside={hide}>
-		<ul>
-			{#each items as item}
-				<DropDownItem on:select={selected} {item}>
-					<iconify-icon icon={item.icon} />
-					<div>{item.value}</div>
-				</DropDownItem>
-			{/each}
-		</ul>
-	</div>
+	<iconify-icon {icon} on:click={show} on:keypress={show} />
+	{#if active}
+		<div class="dropdown-menu" class:active use:clickOutside on:click_outside={hide}>
+			<ul>
+				{#each items as item}
+					<DropDownItem on:select={selected} {item}>
+						<iconify-icon icon={item.icon} />
+						<div>{item.value}</div>
+					</DropDownItem>
+				{/each}
+			</ul>
+		</div>
+	{/if}
 </div>
 
 <style>
 	div.dropdown {
 		position: relative;
-		display: flex;
-		align-items: center;
 		color: var(--mid-grey);
 	}
 	div.dropdown-menu {
-		display: none;
 		position: absolute;
-		top: var(--icon-size);
+		top: 0;
 		right: 0;
 		z-index: 1;
 		background-color: white;
-		border: 1px outset var(--brand);
+		border: 1px outset var(--dark-grey);
 		box-shadow: var(--shadow-offset) var(--shadow-offset) var(--radius) var(--mid-grey);
 		animation: growDown 300ms ease-in-out forwards;
-	}
-	div.dropdown-menu.show {
-		display: block;
+		transform-origin: top;
 	}
 	@keyframes growDown {
 		0% {
