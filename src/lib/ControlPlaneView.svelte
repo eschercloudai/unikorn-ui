@@ -103,27 +103,28 @@
 
 	let createModalActive = false;
 
-	function toggleCreateModal() {
-		createModalActive = !createModalActive;
+	function showCreateModal() {
+		createModalActive = true;
 	}
 
 	function controlPlanesMutated() {
 		updateControlPlanes();
-		controlPlane = null;
 	}
 </script>
 
-<CreateControlPlaneModal
-	{controlPlanes}
-	bind:active={createModalActive}
-	on:controlPlaneCreated={controlPlanesMutated}
-/>
+{#if createModalActive}
+	<CreateControlPlaneModal
+		{controlPlanes}
+		bind:active={createModalActive}
+		on:created={controlPlanesMutated}
+	/>
+{/if}
 
-{#if controlPlane}
+{#if editModalActive}
 	<EditControlPlaneModal
 		{controlPlane}
 		bind:active={editModalActive}
-		on:controlPlaneUpdated={controlPlanesMutated}
+		on:updated={controlPlanesMutated}
 	/>
 {/if}
 
@@ -147,7 +148,7 @@
 </section>
 
 <section>
-	<button on:click={toggleCreateModal}>
+	<button on:click={showCreateModal}>
 		<iconify-icon icon="material-symbols:add" />
 		<div>Create</div>
 	</button>
@@ -168,7 +169,13 @@
 			<dt>Status:</dt>
 			<dd>{cp.status.status}</dd>
 			<dt>Version:</dt>
-			<dd>{cp.applicationBundle.version}</dd>
+			{#if cp.applicationBundle.preview}
+				<dd>{cp.applicationBundle.version} (Preview)</dd>
+			{:else if cp.applicationBundle.endOfLife}
+				<dd>{cp.applicationBundle.version} (End-of-Life {cp.applicationBundle.endOfLife})</dd>
+			{:else}
+				<dd>{cp.applicationBundle.version}</dd>
+			{/if}
 		</dl>
 	</article>
 {/each}

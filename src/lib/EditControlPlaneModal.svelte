@@ -69,7 +69,7 @@
 		);
 	}
 
-	async function submitUpdateControlPlane() {
+	async function submit() {
 		// Deep copy the object, bad tends to happen when you mutate
 		// something non-local.
 		let body = JSON.parse(JSON.stringify(controlPlane));
@@ -87,7 +87,7 @@
 			}
 		});
 
-		dispatch('controlPlaneUpdated', {});
+		dispatch('updated', {});
 
 		active = false;
 	}
@@ -95,7 +95,7 @@
 
 <Modal {active} fixed="true">
 	<form>
-		<h2>Update Control Plane</h2>
+		<h2>Edit Control Plane</h2>
 		<dl>
 			<dt>Name</dt>
 			<dd>{controlPlane.name}</dd>
@@ -128,11 +128,7 @@
 		</details>
 
 		<div class="buttons">
-			<button
-				type="submit"
-				on:click={submitUpdateControlPlane}
-				on:keydown={submitUpdateControlPlane}
-			>
+			<button type="submit" on:click={submit} on:keydown={submit}>
 				<iconify-icon icon="mdi:tick" />
 				<div>Submit</div>
 			</button>

@@ -1,28 +1,97 @@
 <script>
+	// existing is an existing configuration in server API format.
+	export let existing;
+
+	// Define dynamic things from the API.  Passed in from the parent.
 	export let flavors;
 	export let images;
 	export let computeAZs;
 
+	// These are all the things that can be configured.  With defaults for
+	// creating a new pool...
 	let name = '';
-	let nameValid = false;
-
-	let image = null;
-	let flavor = null;
-	let autoscaling = false;
 	let replicas = 3;
+	let image;
+	let flavor;
+	let disk = 50;
+	let autoscaling = false;
 	let minReplicas = 0;
 	let maxReplicas = 3;
 	let labels = null;
-	let disk = 50;
 	let computeAZ = null;
 
-	// Set defaults when they are available.
-	$: if (image == null && images.length != 0) {
+	// Existing pools on the other hand can override these defaults.
+	if (existing) {
+		name = existing.name;
+		replicas = existing.machine.replicas;
+		disk = existing.machine.disk.size;
+
+		if (existing.autoscaling) {
+			autoscaling = true;
+			minReplicas = existing.autoscaling.minimumReplicas;
+			maxReplicas = existing.autoscaling.maximumReplicas;
+		}
+
+		if (existing.labels) {
+			labels = existing.labels.keys.map((x) => `${x}=${existing.labels[x]}`).join(',');
+		}
+	}
+
+	// When images are available update the image selection.  List the control
+	// plane, try keep the existing image in order to avoid rolling upgrades.
+	function changeImages(images) {
+		if (images.length == 0) {
+			return;
+		}
+
+		if (existing) {
+			const existingImage = images.find((x) => x.name == existing.machine.imageName);
+			if (existingImage) {
+				image = existingImage;
+				return;
+			}
+		}
+
 		image = images[0];
 	}
-	$: if (flavor == null && flavors.length != 0) {
+
+	$: changeImages(images);
+
+	// Update the chosen flavor when the flavors are available.
+	function changeFlavours(flavors) {
+		if (flavors.length == 0) {
+			return;
+		}
+
+		if (existing) {
+			const existingFlavor = flavors.find((x) => x.name == existing.machine.flavorName);
+			if (existingFlavor) {
+				flavor = existingFlavor;
+				return;
+			}
+		}
+
 		flavor = flavors[0];
 	}
+
+	$: changeFlavours(flavors);
+
+	// Update availability zones when they are available.
+	function changeComputeAZs(computeAZs) {
+		if (computeAZs.length == 0) {
+			return;
+		}
+
+		if (existing && existing.machine.availabilityZone) {
+			const existingAZ = computeAZs.find((x) => x == existing.machine.availabilityZone);
+			if (existingAZ) {
+				computeAZ = existingAZ;
+				return;
+			}
+		}
+	}
+
+	$: changeComputeAZs(computeAZs);
 
 	// Check if the name constraints are valid.  RFC-1123.
 	// Upto 63 characters, lower case alpha, numeric and -.
@@ -53,15 +122,22 @@
 	}
 </script>
 
-<input id="name" type="text" placeholder="Workload pool name" bind:value={name} />
-<label for="name"
-	>Workload pool name. Must be unique, contain only characters, numbers and dashes.</label
->
-{#if !nameValid}
-	<label for="name" class="error"
-		>Name must contain only lower-case characters, numbers or hyphens (-), it must start and end
-		with a character or number, and must be at most 63 characters.</label
+{#if existing}
+	<dl>
+		<dt>Name</dt>
+		<dd>{existing.name}</dd>
+	</dl>
+{:else}
+	<input id="name" type="text" placeholder="Workload pool name" bind:value={name} />
+	<label for="name"
+		>Workload pool name. Must be unique, contain only characters, numbers and dashes.</label
 	>
+	{#if !nameValid}
+		<label for="name" class="error"
+			>Name must contain only lower-case characters, numbers or hyphens (-), it must start and end
+			with a character or number, and must be at most 63 characters.</label
+		>
+	{/if}
 {/if}
 
 <select id="image" bind:value={image} required>
@@ -146,5 +222,21 @@
 		display: flex;
 		align-items: center;
 		gap: var(--padding);
+	}
+	dl {
+		grid-row: 2;
+		grid-column: 1 / -1;
+		margin: 0;
+		display: grid;
+		grid-template-columns: auto 1fr;
+		grid-auto-flow: column;
+		grid-gap: calc(var(--padding) / 2) var(--padding);
+	}
+	dt {
+		font-weight: bold;
+		grid-column-start: 1;
+	}
+	dd {
+		margin: 0;
 	}
 </style>
