@@ -318,12 +318,13 @@
 		padding: 0;
 	}
 	:global(ul li) {
-		color: var(--mid-grey);
+		color: var(--dark-grey);
 		padding: var(--padding);
 		list-style: none;
+		transition: all 0.3s ease-in-out;
 	}
 	:global(ul li:hover) {
-		color: var(--dark-grey);
+		color: black;
 		background-color: var(--light-grey);
 	}
 	:global(ul li iconify-icon:first-child) {

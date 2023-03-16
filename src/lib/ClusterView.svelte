@@ -161,8 +161,14 @@
 	// Define the per-control plane drop down menu.
 	let dropdownItems = [
 		{ id: 'detail', value: 'Details', icon: 'bx:detail', handler: handleDetails },
-		{ id: 'kubeconfig', value: 'Kubeconfig', icon: 'mdi:kubernetes', handler: handleKubeconfig },
-		{ id: 'edit', value: 'Edit', icon: 'bx:edit', handler: handleEdit },
+		{
+			id: 'kubeconfig',
+			value: 'Kubeconfig',
+			icon: 'mdi:kubernetes',
+			handler: handleKubeconfig,
+			disablable: true
+		},
+		{ id: 'edit', value: 'Edit', icon: 'bx:edit', handler: handleEdit, disablable: true },
 		{ id: 'delete', value: 'Delete', icon: 'bx:trash', handler: handleDelete }
 	];
 
@@ -225,7 +231,12 @@
 				<div class="name">{cl.status.name}</div>
 			</div>
 			<div class="widgets">
-				<DropDownIcon icon="mdi:dots-vertical" resource={cl} items={dropdownItems} />
+				<DropDownIcon
+					icon="mdi:dots-vertical"
+					resource={cl}
+					items={dropdownItems}
+					disabled={cl.status.status != 'Provisioned'}
+				/>
 			</div>
 			<dl>
 				<dt>Age:</dt>
