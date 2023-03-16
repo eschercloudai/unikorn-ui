@@ -33,7 +33,9 @@
 		}
 
 		if (existing.labels) {
-			labels = existing.labels.keys.map((x) => `${x}=${existing.labels[x]}`).join(',');
+			labels = Object.keys(existing.labels)
+				.map((x) => `${x}=${existing.labels[x]}`)
+				.join(',');
 		}
 	}
 

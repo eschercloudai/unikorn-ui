@@ -310,6 +310,8 @@
 		token.unsubscribe(id);
 	});
 
+	let loaded = false;
+
 	// When we get a token
 	async function updateAll() {
 		const t = token.get();
@@ -318,13 +320,17 @@
 			return;
 		}
 
-		updateKeyPairs(t);
-		updateImages(t);
-		updateFlavors(t);
-		updateComputeAZs(t);
-		updateBlockStorageAZs(t);
-		updateExternalNetworks(t);
-		updateApplicationBundles(t);
+		await Promise.all([
+			updateKeyPairs(t),
+			updateImages(t),
+			updateFlavors(t),
+			updateComputeAZs(t),
+			updateBlockStorageAZs(t),
+			updateExternalNetworks(t),
+			updateApplicationBundles(t)
+		]);
+
+		loaded = true;
 	}
 
 	// Define the application credential name.
@@ -488,193 +494,198 @@
 </script>
 
 <Modal {active} fixed="true">
-	<form>
-		<h1>Create Cluster</h1>
+	{#if loaded}
+		<form>
+			<h1>Create Cluster</h1>
 
-		<input id="name" type="text" placeholder="Cluster name" bind:value={name} />
-		<label for="name">
-			Cluster name. Must be unique, contain only characters, numbers and dashes.
-		</label>
-		{#if !nameValid}
-			<label for="name" class="error">{nameValidMessage}</label>
-		{/if}
+			<input id="name" type="text" placeholder="Cluster name" bind:value={name} />
+			<label for="name">
+				Cluster name. Must be unique, contain only characters, numbers and dashes.
+			</label>
+			{#if !nameValid}
+				<label for="name" class="error">{nameValidMessage}</label>
+			{/if}
 
-		<details>
-			<summary>Lifecycle (Advanced)</summary>
+			<details>
+				<summary>Lifecycle (Advanced)</summary>
 
-			<p>
-				The platform will automatically upgrade clusters to provide confidence in security, and
-				periodically enable new features. This section describes those defaults and, where
-				applicable, allows you to fine tune those settings.
-			</p>
+				<p>
+					The platform will automatically upgrade clusters to provide confidence in security, and
+					periodically enable new features. This section describes those defaults and, where
+					applicable, allows you to fine tune those settings.
+				</p>
 
-			<select id="appbundle" bind:value={applicationBundle}>
-				{#each applicationBundles as b}
-					{#if b.preview}
-						<option value={b}>{b.version} (Preview)</option>
-					{:else if b.endOfLife}
-						<option value={b}>{b.version} (End-of-Life {b.endOfLife})</option>
+				<select id="appbundle" bind:value={applicationBundle}>
+					{#each applicationBundles as b}
+						{#if b.preview}
+							<option value={b}>{b.version} (Preview)</option>
+						{:else if b.endOfLife}
+							<option value={b}>{b.version} (End-of-Life {b.endOfLife})</option>
+						{:else}
+							<option value={b}>{b.version}</option>
+						{/if}
+					{/each}
+				</select>
+				<label for="appbundle">
+					Selects the cluster version. Versions marked as <em>Preview</em> are early release
+					candidates, and may have undergone less rigorous testing. Versions marked
+					<em>End-of-Life</em> indicate the date when they will be automatically upgraded by the platform.
+				</label>
+			</details>
+
+			<details>
+				<summary>Topology (Advanced)</summary>
+
+				<select id="compute-az" bind:value={computeAZ}>
+					{#each computeAZs as az}
+						<option value={az}>{az.name}</option>
+					{/each}
+				</select>
+				<label for="compute-az">
+					Select the global availability zone for compute instances. You can override this on a
+					per-workload pool basis to improve cluster availability.
+				</label>
+			</details>
+
+			<details>
+				<summary>Networking (Advanced)</summary>
+
+				<p>
+					Network settings are optional, and if not specified will yield stable and scalable
+					defaults.
+				</p>
+				<p>
+					It is possible to connect Kubernetes clusters together with virtual private networks
+					(VPNs). While this is discouraged, you must ensure that network CIDRs are globally unique
+					and do not overlap.
+				</p>
+
+				<select id="keypair" bind:value={keyPair}>
+					<option value={null}>(None)</option>
+					{#each keyPairs as k}
+						<option value={k}>{k.name}</option>
+					{/each}
+				</select>
+				<label for="keypair">
+					SSH key pair to include on each node. It is advised this not be used to improve security.
+				</label>
+
+				<input
+					id="dnsnameservers"
+					type="text"
+					placeholder="8.8.8.8,8.8.4.4"
+					bind:value={dnsNameservers}
+				/>
+				<label for="dnsnameservers">Comma separated list of DNS name servers to use.</label>
+
+				<input id="nodeNetwork" type="text" placeholder="192.168.0.0/16" bind:value={nodePrefix} />
+				<label for="nodeNetwork">IPv4 CIDR to run Kubernetes nodes in.</label>
+
+				<input id="podNetwork" type="text" placeholder="10.0.0.0/8" bind:value={podPrefix} />
+				<label for="podNetwork">IPv4 CIDR to run Kubernets pods in.</label>
+
+				<input
+					id="serviceNetwork"
+					type="text"
+					placeholder="127.16.0.0/12"
+					bind:value={servicePrefix}
+				/>
+				<label for="serviceNetwork">IPv4 CIDR to run Kubernetes services in.</label>
+
+				<input
+					id="allowedPrefixes"
+					type="text"
+					placeholder="1.2.3.4/32,7.8.0.0/16"
+					bind:value={allowedPrefixes}
+				/>
+				<label for="allowedPrefixes">
+					Comma separated list of IPv4 CIDR blocks to permit access to the Kubernetes API.
+				</label>
+
+				<input id="sans" type="text" placeholder="kubernetes.my-domain.com" bind:value={sans} />
+				<label for="sans">
+					Comma separated list of X.509 subject alterative names to add to the Kubernetes API
+					certificate.
+				</label>
+			</details>
+
+			<h2>Control Plane</h2>
+
+			<select id="version" bind:value={version} required>
+				{#each versions as v}
+					<option value={v}>{v}</option>
+				{/each}
+			</select>
+			<label for="version">Kubernetes version to provision with.</label>
+
+			<select id="image" bind:value={image} required>
+				{#each images as i}
+					<option value={i}>{i.name}</option>
+				{/each}
+			</select>
+			<label for="image">Virtual machine image to use.</label>
+
+			<select id="flavor" bind:value={flavor} required>
+				{#each cpFlavors as f}
+					{#if f.gpus}
+						<option value={f}>{f.name} ({f.cpus} core, {f.memory}Gi, {f.gpus} GPU)</option>
 					{:else}
-						<option value={b}>{b.version}</option>
+						<option value={f}>{f.name} ({f.cpus} core, {f.memory}Gi)</option>
 					{/if}
 				{/each}
 			</select>
-			<label for="appbundle">
-				Selects the cluster version. Versions marked as <em>Preview</em> are early release
-				candidates, and may have undergone less rigorous testing. Versions marked
-				<em>End-of-Life</em> indicate the date when they will be automatically upgraded by the platform.
-			</label>
-		</details>
-
-		<details>
-			<summary>Topology (Advanced)</summary>
-
-			<select id="compute-az" bind:value={computeAZ}>
-				{#each computeAZs as az}
-					<option value={az}>{az.name}</option>
-				{/each}
-			</select>
-			<label for="compute-az">
-				Select the global availability zone for compute instances. You can override this on a
-				per-workload pool basis to improve cluster availability.
-			</label>
-		</details>
-
-		<details>
-			<summary>Networking (Advanced)</summary>
-
-			<p>
-				Network settings are optional, and if not specified will yield stable and scalable defaults.
-			</p>
-			<p>
-				It is possible to connect Kubernetes clusters together with virtual private networks (VPNs).
-				While this is discouraged, you must ensure that network CIDRs are globally unique and do not
-				overlap.
-			</p>
-
-			<select id="keypair" bind:value={keyPair}>
-				<option value={null}>(None)</option>
-				{#each keyPairs as k}
-					<option value={k}>{k.name}</option>
-				{/each}
-			</select>
-			<label for="keypair">
-				SSH key pair to include on each node. It is advised this not be used to improve security.
-			</label>
-
-			<input
-				id="dnsnameservers"
-				type="text"
-				placeholder="8.8.8.8,8.8.4.4"
-				bind:value={dnsNameservers}
-			/>
-			<label for="dnsnameservers">Comma separated list of DNS name servers to use.</label>
-
-			<input id="nodeNetwork" type="text" placeholder="192.168.0.0/16" bind:value={nodePrefix} />
-			<label for="nodeNetwork">IPv4 CIDR to run Kubernetes nodes in.</label>
-
-			<input id="podNetwork" type="text" placeholder="10.0.0.0/8" bind:value={podPrefix} />
-			<label for="podNetwork">IPv4 CIDR to run Kubernets pods in.</label>
-
-			<input
-				id="serviceNetwork"
-				type="text"
-				placeholder="127.16.0.0/12"
-				bind:value={servicePrefix}
-			/>
-			<label for="serviceNetwork">IPv4 CIDR to run Kubernetes services in.</label>
-
-			<input
-				id="allowedPrefixes"
-				type="text"
-				placeholder="1.2.3.4/32,7.8.0.0/16"
-				bind:value={allowedPrefixes}
-			/>
-			<label for="allowedPrefixes">
-				Comma separated list of IPv4 CIDR blocks to permit access to the Kubernetes API.
-			</label>
-
-			<input id="sans" type="text" placeholder="kubernetes.my-domain.com" bind:value={sans} />
-			<label for="sans">
-				Comma separated list of X.509 subject alterative names to add to the Kubernetes API
-				certificate.
-			</label>
-		</details>
-
-		<h2>Control Plane</h2>
-
-		<select id="version" bind:value={version} required>
-			{#each versions as v}
-				<option value={v}>{v}</option>
-			{/each}
-		</select>
-		<label for="version">Kubernetes version to provision with.</label>
-
-		<select id="image" bind:value={image} required>
-			{#each images as i}
-				<option value={i}>{i.name}</option>
-			{/each}
-		</select>
-		<label for="image">Virtual machine image to use.</label>
-
-		<select id="flavor" bind:value={flavor} required>
-			{#each cpFlavors as f}
-				{#if f.gpus}
-					<option value={f}>{f.name} ({f.cpus} core, {f.memory}Gi, {f.gpus} GPU)</option>
-				{:else}
-					<option value={f}>{f.name} ({f.cpus} core, {f.memory}Gi)</option>
-				{/if}
-			{/each}
-		</select>
-		<label for="flavor">Virtual machine type to use.</label>
-
-		<div class="slider">
-			<input id="disk" type="range" min="50" max="2000" step="50" bind:value={disk} />
-			<span>{disk}GiB</span>
-		</div>
-		<label for="disk">The size of the root disk.</label>
-
-		<details>
-			<summary>Advanced Options</summary>
+			<label for="flavor">Virtual machine type to use.</label>
 
 			<div class="slider">
-				<input id="replicas" type="range" min="1" max="9" step="2" bind:value={replicas} />
-				<span>{replicas}</span>
+				<input id="disk" type="range" min="50" max="2000" step="50" bind:value={disk} />
+				<span>{disk}GiB</span>
 			</div>
-			<label for="replicas">
-				Number of virtual machines. The default (3) is generally cost effective while providing
-				high-availability.
-			</label>
-		</details>
+			<label for="disk">The size of the root disk.</label>
 
-		<h2>Workload Pools</h2>
+			<details>
+				<summary>Advanced Options</summary>
 
-		{#each workloadPools as pool, index}
-			<section>
-				<WorkloadPoolCreate {flavors} {images} {computeAZs} bind:object={pool} />
-				<button on:click={() => removePool(index)}>
-					<iconify-icon icon="mdi:delete" />
-					<div>Remove Pool</div>
+				<div class="slider">
+					<input id="replicas" type="range" min="1" max="9" step="2" bind:value={replicas} />
+					<span>{replicas}</span>
+				</div>
+				<label for="replicas">
+					Number of virtual machines. The default (3) is generally cost effective while providing
+					high-availability.
+				</label>
+			</details>
+
+			<h2>Workload Pools</h2>
+
+			{#each workloadPools as pool, index}
+				<section>
+					<WorkloadPoolCreate {flavors} {images} {computeAZs} bind:object={pool} />
+					<button on:click={() => removePool(index)}>
+						<iconify-icon icon="mdi:delete" />
+						<div>Remove Pool</div>
+					</button>
+				</section>
+			{/each}
+
+			<button on:click={addPool}>
+				<iconify-icon icon="material-symbols:add" />
+				<div>Add New Pool</div>
+			</button>
+
+			<div class="buttons">
+				<button type="submit" disabled={!valid} on:click={submit} on:keydown={submit}>
+					<iconify-icon icon="mdi:tick" />
+					<div>Submit</div>
 				</button>
-			</section>
-		{/each}
-
-		<button on:click={addPool}>
-			<iconify-icon icon="material-symbols:add" />
-			<div>Add New Pool</div>
-		</button>
-
-		<div class="buttons">
-			<button type="submit" disabled={!valid} on:click={submit} on:keydown={submit}>
-				<iconify-icon icon="mdi:tick" />
-				<div>Submit</div>
-			</button>
-			<button on:click={close}>
-				<iconify-icon icon="mdi:close" />
-				<div>Cancel</div>
-			</button>
-		</div>
-	</form>
+				<button on:click={close}>
+					<iconify-icon icon="mdi:close" />
+					<div>Cancel</div>
+				</button>
+			</div>
+		</form>
+	{:else}
+		<h3>Loading ...</h3>
+	{/if}
 </Modal>
 
 <style>

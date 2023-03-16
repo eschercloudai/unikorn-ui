@@ -13,6 +13,9 @@
 	//   value: value of the menu item (aka text)
 	export let items = [];
 
+	// disabled propagates this to individual items.
+	export let disabled = false;
+
 	let active = false;
 
 	function show() {
@@ -36,7 +39,7 @@
 		<div class="dropdown-menu" class:active use:clickOutside on:click_outside={hide}>
 			<ul>
 				{#each items as item}
-					<DropDownItem on:select={selected} {item}>
+					<DropDownItem on:select={selected} {item} {disabled}>
 						<iconify-icon icon={item.icon} />
 						<div>{item.value}</div>
 					</DropDownItem>

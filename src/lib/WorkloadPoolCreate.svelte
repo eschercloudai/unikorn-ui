@@ -17,6 +17,8 @@
 	let computeAZ = null;
 
 	// Set defaults when they are available.
+	// TODO: the image list will change when the version does, so this
+	// doesn't work properly.
 	$: if (image == null && images.length != 0) {
 		image = images[0];
 	}

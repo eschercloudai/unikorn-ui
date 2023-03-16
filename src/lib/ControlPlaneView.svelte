@@ -97,7 +97,7 @@
 	// Define the per-control plane drop down menu.
 	let dropdownItems = [
 		{ id: 'detail', value: 'Details', icon: 'bx:detail', handler: handleDetails },
-		{ id: 'edit', value: 'Edit', icon: 'bx:edit', handler: handleEdit },
+		{ id: 'edit', value: 'Edit', icon: 'bx:edit', handler: handleEdit, disablable: true },
 		{ id: 'delete', value: 'Delete', icon: 'bx:trash', handler: handleDelete }
 	];
 
@@ -161,7 +161,12 @@
 			<div class="name">{cp.status.name}</div>
 		</div>
 		<div class="widgets">
-			<DropDownIcon icon="mdi:dots-vertical" resource={cp} items={dropdownItems} />
+			<DropDownIcon
+				icon="mdi:dots-vertical"
+				resource={cp}
+				items={dropdownItems}
+				disabled={cp.status.status != 'Provisioned'}
+			/>
 		</div>
 		<dl>
 			<dt>Age:</dt>
