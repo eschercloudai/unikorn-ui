@@ -2,6 +2,11 @@ export function age(start) {
 	// This is in milliseconds.
 	let duration = Date.now() - Date.parse(start);
 
+	// Handle clock skew.
+	if (duration < 0) {
+		return '0s';
+	}
+
 	// Now in seconds.
 	duration = Math.floor(duration / 1000);
 

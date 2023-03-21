@@ -39,10 +39,12 @@
 		<div class="dropdown-menu" class:active use:clickOutside on:click_outside={hide}>
 			<ul>
 				{#each items as item}
-					<DropDownItem on:select={selected} {item} {disabled}>
-						<iconify-icon icon={item.icon} />
-						<div>{item.value}</div>
-					</DropDownItem>
+					{#if !item.disablable || !disabled}
+						<DropDownItem on:select={selected} {item}>
+							<iconify-icon icon={item.icon} />
+							<div>{item.value}</div>
+						</DropDownItem>
+					{/if}
 				{/each}
 			</ul>
 		</div>
