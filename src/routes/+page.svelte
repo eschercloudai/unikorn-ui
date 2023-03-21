@@ -217,6 +217,7 @@
 		--padding-header: 4rem;
 		--icon-size: 1.5rem;
 		--nav-icon-size: 2rem;
+		--nav-width-desktop: 300px;
 	}
 
 	/* Global styles */
@@ -356,24 +357,22 @@
 		font-weight: bold;
 	}
 
-	/*
-	   Main layout is a 2x2 grid, with header spanning the first row
-	   and nav/main in the second.  In normal view (mobile) the nav is fixed
-	   positioned in relation to the row/column, so the first column doesn't
-	   actually contain anything and the main spans the whole page.  In desktop
-	   view the nav reverts back to a grid cell.
-	 */
+	/* Main styling */
 	:global(.container) {
 		width: 100vw;
 		height: 100vh;
-		display: grid;
-		grid-template-columns: auto 1fr;
-		grid-template-rows: auto 1fr;
+		display: flex;
+		flex-direction: column;
 	}
+	main {
+		background-color: var(--light-grey);
+		transition: all 0.3s ease-in-out;
+		flex: 1;
+	}
+
+	/* Header/masthead styling */
 	header {
 		box-sizing: border-box;
-		grid-row: 1;
-		grid-column: 1 / -1;
 		position: sticky;
 		top: 0;
 		padding: var(--padding);
@@ -382,31 +381,6 @@
 		text-align: center;
 		background-color: white;
 	}
-	main {
-		background-color: var(--light-grey);
-		transition: all 0.3s ease-in-out;
-		box-shadow: inset 0 0 var(--radius) var(--mid-grey);
-		grid-row: 2;
-		grid-column: 2;
-	}
-	nav {
-		position: fixed;
-		top: 3.75em;
-		height: calc(100vh - 3.75em);
-		grid-column: 1;
-		grid-row: 2;
-		width: 0;
-		overflow-x: hidden;
-		overflow-y: auto;
-		z-index: 10;
-		display: flex;
-		flex-direction: column;
-		color: var(--mid-grey);
-		transition: all 0.3s ease-in-out;
-		background-color: white;
-	}
-
-	/* Header/masthead styling */
 	header > img {
 		max-height: 2em;
 		margin-right: 2em;
@@ -427,8 +401,23 @@
 	}
 
 	/* Nav styling */
-	nav.showmenu {
+	nav {
+		position: fixed;
+		top: 3.75em;
+		height: calc(100vh - 3.75em);
 		width: 100vw;
+		overflow-y: auto;
+		z-index: 10;
+		display: flex;
+		flex-direction: column;
+		color: var(--mid-grey);
+		transform-origin: left;
+		transform: translateX(-100vh);
+		transition: transform 0.3s ease-in-out;
+		background-color: white;
+	}
+	nav.showmenu {
+		transform: none;
 	}
 	.nav-group {
 		display: flex;
@@ -449,11 +438,14 @@
 
 	/* Desktop overrides */
 	@media only screen and (min-width: 720px) {
-		nav {
-			position: static;
+		main.showmenu {
+			margin-left: var(--nav-width-desktop);
 		}
-		nav.showmenu {
-			width: 300px;
+		nav {
+			width: var(--nav-width-desktop);
+			transform: translateX(calc(var(--nav-width-desktop) * -1));
+			border-right: 1px solid var(--brand);
+			box-shadow: 0 var(--shadow-offset) var(--radius) var(--mid-grey);
 		}
 	}
 </style>

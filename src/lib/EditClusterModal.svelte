@@ -354,8 +354,6 @@
 		// something non-local.
 		let body = JSON.parse(JSON.stringify(cluster));
 
-		console.log(body);
-
 		// Handle updates of required fields.
 		body.applicationBundle = applicationBundle;
 		body.openstack.computeAvailabilityZone = computeAZ.name;
@@ -365,8 +363,6 @@
 		body.controlPlane.flavorName = flavor.name;
 		body.controlPlane.disk.size = disk;
 		body.workloadPools = [];
-
-		console.log(body);
 
 		// Handle updates of optional fields.
 		// TODO: this feels pretty clunky...
