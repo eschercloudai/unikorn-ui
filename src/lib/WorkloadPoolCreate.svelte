@@ -17,11 +17,26 @@
 	let computeAZ = null;
 
 	// Set defaults when they are available.
-	// TODO: the image list will change when the version does, so this
-	// doesn't work properly.
-	$: if (image == null && images.length != 0) {
+	function changeImages(images) {
+		if (images.length == 0) {
+			return;
+		}
+
+		// TODO: Oddly enough, this triggers when we select a new image :shrug:
+		// preserve the existing image if it's in the list.
+		if (image != null) {
+			const existing = images.find((x) => x.name == image.name);
+			if (existing) {
+				image = existing;
+				return;
+			}
+		}
+
 		image = images[0];
 	}
+
+	$: changeImages(images);
+
 	$: if (flavor == null && flavors.length != 0) {
 		flavor = flavors[0];
 	}
