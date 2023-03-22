@@ -74,6 +74,7 @@
 
 	// Whether the cluster-autoscaler add-on is provisioned.
 	let autoscaling = false;
+	let ingress = false;
 
 	// A set of workload pools for the cluster.
 	let workloadPools = [];
@@ -440,10 +441,16 @@
 			}
 		}
 
-		if (autoscaling) {
-			body.features = {
-				autoscaling: true
-			};
+		if (autoscaling || ingress) {
+			body.features = {};
+
+			if (autoscaling) {
+				body.features.autoscaling = true;
+			}
+
+			if (ingress) {
+				body.features.ingress = true;
+			}
 		}
 
 		for (const wp of workloadPools) {
@@ -609,6 +616,22 @@
 				</label>
 			</details>
 
+			<details>
+				<summary>Add-on Features</summary>
+
+				<p>
+					Add-on features allow the management of typical Kubernetes componenents that are not
+					include by default, but are considered standard. They are not enabled by default to
+					improve baseline security and resource utilisation.
+				</p>
+
+				<div class="checkbox">
+					<input id="ingress" type="checkbox" bind:checked={ingress} />
+					<span>Ingress controller enabled</span>
+				</div>
+				<label for="ingress">Enables Nginx ingress controller.</label>
+			</details>
+
 			<h2>Control Plane</h2>
 
 			<select id="version" bind:value={version} required>
@@ -716,13 +739,11 @@
 		align-items: stretch;
 		gap: var(--padding);
 	}
-	/*
 	div.checkbox {
 		display: flex;
 		align-items: center;
 		gap: var(--padding);
 	}
-	*/
 	div.slider {
 		display: flex;
 		align-items: center;

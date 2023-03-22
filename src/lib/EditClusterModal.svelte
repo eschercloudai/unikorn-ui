@@ -55,6 +55,7 @@
 	let keyPair = cluster.openstack.sshKeyName;
 	let allowedPrefixes = cluster.api ? cluster.api.allowedPrefixes.join(',') : null;
 	let autoscaling = cluster.features && cluster.features.autoscaling;
+	let ingress = cluster.features && cluster.features.ingress;
 
 	let workloadPools = [];
 
@@ -396,6 +397,18 @@
 			}
 		}
 
+		if (ingress) {
+			if (!body.features) {
+				body.features = {};
+			}
+
+			body.features.ingress = true;
+		} else {
+			if (body.features) {
+				delete body.features.ingress;
+			}
+		}
+
 		for (const p of workloadPools) {
 			const wp = p.object;
 
@@ -525,6 +538,22 @@
 				<label for="allowedPrefixes">
 					Comma separated list of IPv4 CIDR blocks to permit access to the Kubernetes API.
 				</label>
+			</details>
+
+			<details>
+				<summary>Add-on Features</summary>
+
+				<p>
+					Add-on features allow the management of typical Kubernetes componenents that are not
+					include by default, but are considered standard. They are not enabled by default to
+					improve baseline security and resource utilisation.
+				</p>
+
+				<div class="checkbox">
+					<input id="ingress" type="checkbox" bind:checked={ingress} />
+					<span>Ingress controller enabled</span>
+				</div>
+				<label for="ingress">Enables Nginx ingress controller.</label>
 			</details>
 
 			<h2>Control Plane</h2>
