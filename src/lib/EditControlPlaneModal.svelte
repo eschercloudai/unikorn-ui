@@ -60,7 +60,11 @@
 		}
 
 		// These are returned in ascending order, we want latest first.
-		applicationBundles = result.reverse();
+		// Don't display end-of-life bundles, unless the existing one is
+		// marked EOL.
+		applicationBundles = result
+			.reverse()
+			.filter((x) => !x.endOfLife || x.name == controlPlane.applicationBundle.name);
 	}
 
 	$: if (!applicationBundle && controlPlane && applicationBundles.length > 0) {

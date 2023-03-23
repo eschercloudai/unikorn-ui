@@ -245,9 +245,13 @@
 				<dd>{cl.status.status}</dd>
 				<dt>Version:</dt>
 				{#if cl.applicationBundle.preview}
-					<dd>{cl.applicationBundle.version} (Preview)</dd>
+					<dd>{cl.applicationBundle.version} <span class="detail">Preview</span></dd>
 				{:else if cl.applicationBundle.endOfLife}
-					<dd>{cl.applicationBundle.version} (End-of-Life {cl.applicationBundle.endOfLife})</dd>
+					<dd>
+						{cl.applicationBundle.version}
+						<span class="detail">EOL {new Date(cl.applicationBundle.endOfLife).toDateString()}</span
+						>
+					</dd>
 				{:else}
 					<dd>{cl.applicationBundle.version}</dd>
 				{/if}
@@ -307,6 +311,10 @@
 	}
 	dd {
 		margin: 0;
+	}
+	dd span.detail {
+		font-size: 0.75rem;
+		color: var(--mid-grey);
 	}
 	@media only screen and (min-width: 720px) {
 		article {

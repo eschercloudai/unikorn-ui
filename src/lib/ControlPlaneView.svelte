@@ -175,9 +175,12 @@
 			<dd>{cp.status.status}</dd>
 			<dt>Version:</dt>
 			{#if cp.applicationBundle.preview}
-				<dd>{cp.applicationBundle.version} (Preview)</dd>
+				<dd>{cp.applicationBundle.version} <span class="detail">Preview)</span></dd>
 			{:else if cp.applicationBundle.endOfLife}
-				<dd>{cp.applicationBundle.version} (End-of-Life {cp.applicationBundle.endOfLife})</dd>
+				<dd>
+					{cp.applicationBundle.version}
+					<span class="detail">EOL {cp.applicationBundle.endOfLife}</span>
+				</dd>
 			{:else}
 				<dd>{cp.applicationBundle.version}</dd>
 			{/if}
@@ -224,6 +227,10 @@
 	}
 	dd {
 		margin: 0;
+	}
+	dd span.detail {
+		font-size: 0.75rem;
+		color: var(--mid-grey);
 	}
 	@media only screen and (min-width: 720px) {
 		article {
