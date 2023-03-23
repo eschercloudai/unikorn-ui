@@ -7,7 +7,8 @@
 		listControlPlanes,
 		listClusters,
 		deleteCluster,
-		getClusterKubeconfig
+		getClusterKubeconfig,
+		listApplicationBundlesCluster
 	} from '$lib/client.js';
 
 	import Breadcrumbs from '$lib/Breadcrumbs.svelte';
@@ -79,6 +80,19 @@
 			return;
 		}
 
+		const bresult = await listApplicationBundlesCluster({
+			token: token.get().token,
+			onUnauthorized: () => {
+				token.remove();
+			}
+		});
+
+		if (bresult == null) {
+			return;
+		}
+
+		const bundles = bresult.reverse().filter((x) => !x.endOfLife);
+
 		const result = await listClusters(controlPlane.status.name, {
 			token: token.get().token,
 			onUnauthorized: () => {
@@ -88,6 +102,12 @@
 
 		if (result == null) {
 			return;
+		}
+
+		for (const cluster of result) {
+			if (cluster.applicationBundle.name != bundles[0].name) {
+				cluster.upgradable = true;
+			}
 		}
 
 		clusters = result;
@@ -231,6 +251,9 @@
 				<div class="name">{cl.status.name}</div>
 			</div>
 			<div class="widgets">
+				{#if cl.upgradable}
+					<iconify-icon class="upgrade" icon="material-symbols:upgrade-rounded" />
+				{/if}
 				<DropDownIcon
 					icon="mdi:dots-vertical"
 					resource={cl}
@@ -263,6 +286,9 @@
 {/if}
 
 <style>
+	.upgrade {
+		color: var(--error);
+	}
 	article {
 		display: grid;
 		grid-template-columns: 1fr auto;
@@ -282,7 +308,6 @@
 	div.widgets {
 		display: flex;
 		align-items: center;
-		gap: var(--padding);
 		grid-row: 1;
 	}
 	section.sad-kitty {
@@ -304,6 +329,7 @@
 		grid-template-columns: auto 1fr;
 		grid-auto-flow: column;
 		grid-gap: calc(var(--padding) / 2) var(--padding);
+		font-size: 0.75em;
 	}
 	dt {
 		font-weight: bold;
