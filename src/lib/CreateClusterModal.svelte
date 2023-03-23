@@ -287,7 +287,8 @@
 		}
 
 		// These are returned in ascending order, we want latest first.
-		applicationBundles = result.reverse();
+		// Also don't allow users to create new end-of-life resources.
+		applicationBundles = result.reverse().filter((x) => !x.endOfLife);
 	}
 
 	// Update the selected application bundle when the bundles list updates.
