@@ -55,6 +55,7 @@
 	div.dropdown {
 		position: relative;
 		color: var(--mid-grey);
+		display: flex;
 	}
 	div.dropdown-menu {
 		position: absolute;

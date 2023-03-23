@@ -2,7 +2,11 @@
 	import { onMount, onDestroy } from 'svelte';
 	import { token } from '$lib/credentials.js';
 	import { age } from '$lib/time.js';
-	import { listControlPlanes, deleteControlPlane } from '$lib/client.js';
+	import {
+		listControlPlanes,
+		deleteControlPlane,
+		listApplicationBundlesControlPlane
+	} from '$lib/client.js';
 
 	import Breadcrumbs from '$lib/Breadcrumbs.svelte';
 	import StatusIcon from '$lib/StatusIcon.svelte';
@@ -39,6 +43,19 @@
 			return;
 		}
 
+		const bresult = await listApplicationBundlesControlPlane({
+			token: token.get().token,
+			onUnauthorized: () => {
+				token.remove();
+			}
+		});
+
+		if (bresult == null) {
+			return;
+		}
+
+		const bundles = bresult.reverse().filter((x) => !x.endOfLife);
+
 		const result = await listControlPlanes({
 			token: token.get().token,
 			onUnauthorized: () => {
@@ -51,6 +68,12 @@
 
 		if (result == null) {
 			return;
+		}
+
+		for (const cp of result) {
+			if (cp.applicationBundle.name != bundles[0].name) {
+				cp.upgradable = true;
+			}
 		}
 
 		controlPlanes = result;
@@ -161,6 +184,9 @@
 			<div class="name">{cp.status.name}</div>
 		</div>
 		<div class="widgets">
+			{#if cp.upgradable}
+				<iconify-icon class="upgrade" icon="material-symbols:upgrade-rounded" />
+			{/if}
 			<DropDownIcon
 				icon="mdi:dots-vertical"
 				resource={cp}
@@ -179,7 +205,7 @@
 			{:else if cp.applicationBundle.endOfLife}
 				<dd>
 					{cp.applicationBundle.version}
-					<span class="detail">EOL {cp.applicationBundle.endOfLife}</span>
+					<span class="detail">EOL {new Date(cp.applicationBundle.endOfLife).toDateString()}</span>
 				</dd>
 			{:else}
 				<dd>{cp.applicationBundle.version}</dd>
@@ -189,6 +215,9 @@
 {/each}
 
 <style>
+	.upgrade {
+		color: var(--error);
+	}
 	article {
 		display: grid;
 		grid-template-columns: 1fr auto;
@@ -208,7 +237,6 @@
 	div.widgets {
 		display: flex;
 		align-items: center;
-		gap: var(--padding);
 		grid-row: 1;
 		grid-column: 2;
 	}
@@ -220,6 +248,7 @@
 		grid-template-columns: auto 1fr;
 		grid-auto-flow: column;
 		grid-gap: calc(var(--padding) / 2) var(--padding);
+		font-size: 0.75em;
 	}
 	dt {
 		font-weight: bold;
