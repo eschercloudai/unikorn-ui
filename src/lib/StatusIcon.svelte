@@ -34,6 +34,9 @@
 		animation-iteration-count: infinite;
 		animation-timing-function: linear;
 	}
+	iconify-icon {
+		font-size: var(--icon-size);
+	}
 	@keyframes spin {
 		from {
 			transform: rotate(0deg);

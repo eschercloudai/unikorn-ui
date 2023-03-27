@@ -40,10 +40,7 @@
 			<ul>
 				{#each items as item}
 					{#if !item.disablable || !disabled}
-						<DropDownItem on:select={selected} {item}>
-							<iconify-icon icon={item.icon} />
-							<div>{item.value}</div>
-						</DropDownItem>
+						<DropDownItem on:select={selected} {item} />
 					{/if}
 				{/each}
 			</ul>
@@ -67,6 +64,9 @@
 		box-shadow: var(--shadow-offset) var(--shadow-offset) var(--radius) var(--mid-grey);
 		animation: growDown 300ms ease-in-out forwards;
 		transform-origin: top;
+	}
+	iconify-icon {
+		font-size: var(--icon-size);
 	}
 	@keyframes growDown {
 		0% {

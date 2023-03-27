@@ -195,17 +195,21 @@
 
 <details>
 	<summary>Advanced Options</summary>
-	<input id="labels" type="text" placeholder="key1=value1,key2=value2" bind:value={labels} />
-	<label for="labels">Comma separated set of labels to apply to Kubernetes nodes on creation.</label
-	>
 
-	<select id="computeAZ" bind:value={computeAZ} required>
-		<option value={null}>(None)</option>
-		{#each computeAZs as a}
-			<option value={a}>{a.name}</option>
-		{/each}
-	</select>
-	<label for="image">Availability zone to provision the pool in.</label>
+	<section>
+		<input id="labels" type="text" placeholder="key1=value1,key2=value2" bind:value={labels} />
+		<label for="labels"
+			>Comma separated set of labels to apply to Kubernetes nodes on creation.</label
+		>
+
+		<select id="computeAZ" bind:value={computeAZ} required>
+			<option value={null}>(None)</option>
+			{#each computeAZs as a}
+				<option value={a}>{a.name}</option>
+			{/each}
+		</select>
+		<label for="image">Availability zone to provision the pool in.</label>
+	</section>
 </details>
 
 <style>
@@ -213,7 +217,6 @@
 		display: block;
 		font-style: italic;
 		font-size: 0.75rem;
-		margin-bottom: var(--padding);
 	}
 	div.checkbox {
 		display: flex;

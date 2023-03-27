@@ -159,9 +159,9 @@
 </header>
 
 <nav class:showmenu>
-	<div class="nav-group user">
+	<div class="user">
 		<img src="https://www.gravatar.com/avatar/{MD5(email)}" alt="User Gravatar" />
-		{email}
+		<span>{email}</span>
 		<iconify-icon
 			class="selectable"
 			icon="material-symbols:logout"
@@ -196,9 +196,6 @@
 <style>
 	/* Global constants */
 	:global(:root) {
-		/* Font size setting the relative sizing of all the things. */
-		font-size: 15px;
-
 		/* Brand color palette */
 		--brand: hsl(295, 21%, 48%);
 		--brand-light: hsl(295, 21%, 60%);
@@ -221,11 +218,13 @@
 	}
 
 	/* Global styles */
+	:global(*) {
+		margin: 0;
+		padding: 0;
+		box-sizing: border-box;
+	}
 	:global(html) {
 		font-family: sans-serif;
-	}
-	:global(body) {
-		margin: 0;
 	}
 	:global(h1, h2, h3, h4, h5, h6) {
 		color: var(--brand);
@@ -293,7 +292,7 @@
 		padding: var(--padding);
 		font-weight: bold;
 		font-size: 1rem;
-		background-color: var(--brand);
+		background: linear-gradient(90deg, var(--brand) 0%, var(--brand-light) 100%);
 		display: inline-flex;
 		align-items: center;
 		gap: var(--padding);
@@ -302,37 +301,39 @@
 		border-style: none;
 	}
 	:global(button:hover) {
-		background-color: var(--brand-dark);
+		background: linear-gradient(90deg, var(--brand-dark) 0%, var(--brand) 100%);
 	}
 	:global(button:focus) {
-		background-color: var(--brand-dark);
+		background: linear-gradient(90deg, var(--brand-dark) 0%, var(--brand) 100%);
 	}
 	:global(button:disabled) {
-		background-color: var(--brand-light);
+		background: linear-gradient(90deg, var(--dark-grey) 0%, var(--mid-grey) 100%);
 		cursor: not-allowed;
 	}
-	:global(iconify-icon) {
-		font-size: var(--icon-size);
-	}
-	:global(ul) {
-		margin: 0;
-		padding: 0;
-	}
-	:global(ul li) {
-		color: var(--dark-grey);
+	:global(summary) {
 		padding: var(--padding);
-		list-style: none;
-		transition: all 0.3s ease-in-out;
-	}
-	:global(ul li:hover) {
-		color: black;
-		background-color: var(--light-grey);
-	}
-	:global(ul li iconify-icon:first-child) {
 		color: var(--brand);
+		cursor: pointer;
+		border-radius: var(--radius) 0 0 0;
+		border: 1px solid var(--brand);
+	}
+	:global(summary:hover) {
+		color: var(--brand-dark);
+	}
+	:global(details) {
+		background-color: white;
+	}
+	:global(details > section) {
+		margin: 0;
+		padding: var(--padding);
+		border: 1px solid var(--brand);
+		border-top: none;
 	}
 	:global(section) {
 		margin: var(--padding);
+		display: flex;
+		flex-direction: column;
+		gap: var(--padding);
 	}
 	:global(article) {
 		margin: var(--padding);
@@ -342,19 +343,20 @@
 		border-radius: var(--radius);
 		box-shadow: var(--shadow-offset) var(--shadow-offset) var(--radius) var(--mid-grey);
 	}
-	:global(summary) {
-		font-weight: bold;
-		color: var(--brand);
-	}
 	:global(.selectable) {
 		cursor: pointer;
 	}
 	:global(.error) {
 		color: var(--error);
 	}
-	iconify-icon {
-		color: var(--brand);
-		font-weight: bold;
+	:global(.modal-header) {
+		margin: 0;
+		padding: var(--padding);
+		background: linear-gradient(90deg, var(--brand-dark) 0%, var(--brand) 100%);
+		color: white;
+		display: inline-flex;
+		gap: var(--padding);
+		align-items: center;
 	}
 
 	/* Main styling */
@@ -419,21 +421,27 @@
 	nav.showmenu {
 		transform: none;
 	}
-	.nav-group {
+
+	/* User nav element */
+	.user {
 		display: flex;
 		align-items: center;
 		padding: var(--padding);
 		gap: var(--padding);
-	}
-	nav > .user {
-		font-size: 0.8em;
 		justify-content: space-between;
 	}
-	nav > .user img {
-		max-height: 2em;
+	.user span {
+		font-size: 0.8em;
+	}
+	.user img {
+		max-height: var(--nav-icon-size);
 		margin-right: var(--padding);
 		border-radius: 1em;
 		border: 1px solid black;
+	}
+	.user iconify-icon {
+		font-size: var(--icon-size);
+		color: var(--brand);
 	}
 
 	/* Desktop overrides */
