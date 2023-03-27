@@ -128,8 +128,6 @@
 	}
 
 	// Define dropdown callback handlers.
-	function handleDetails() {}
-
 	async function handleKubeconfig(cl) {
 		const blob = await getClusterKubeconfig(controlPlane.name, cl.name, {
 			token: token.get().token,
@@ -180,7 +178,6 @@
 
 	// Define the per-control plane drop down menu.
 	let dropdownItems = [
-		{ id: 'detail', value: 'Details', icon: 'bx:detail', handler: handleDetails },
 		{
 			id: 'kubeconfig',
 			value: 'Kubeconfig',
@@ -286,6 +283,9 @@
 {/if}
 
 <style>
+	iconify-icon {
+		font-size: var(--icon-size);
+	}
 	.upgrade {
 		color: var(--error);
 	}

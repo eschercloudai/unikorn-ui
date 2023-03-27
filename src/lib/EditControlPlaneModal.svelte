@@ -98,8 +98,8 @@
 </script>
 
 <Modal {active} fixed="true">
+	<h2 class="modal-header"><iconify-icon icon="bx:edit" />Edit Control Plane</h2>
 	<form>
-		<h2>Edit Control Plane</h2>
 		<dl>
 			<dt>Name</dt>
 			<dd>{controlPlane.name}</dd>
@@ -107,28 +107,31 @@
 
 		<details>
 			<summary>Lifecycle (Advanced)</summary>
-			<p>
-				The platform will automatically upgrade control planes to provide confidence in security,
-				and periodically enable new features. This section describes those defaults and, where
-				applicable, allows you to fine tune those settings.
-			</p>
 
-			<select id="appbundle" bind:value={applicationBundle}>
-				{#each applicationBundles as b}
-					{#if b.preview}
-						<option value={b}>{b.version} (Preview)</option>
-					{:else if b.endOfLife}
-						<option value={b}>{b.version} (End-of-Life {b.endOfLife})</option>
-					{:else}
-						<option value={b}>{b.version}</option>
-					{/if}
-				{/each}
-			</select>
-			<label for="appbundle">
-				Selects the control plane version. Versions marked as <em>Preview</em> are early release
-				candidates, and may have undergone less rigorous testing. Versions marked
-				<em>End-of-Life</em> indicate the date when they will be automatically upgraded by the platform.
-			</label>
+			<section>
+				<p>
+					The platform will automatically upgrade control planes to provide confidence in security,
+					and periodically enable new features. This section describes those defaults and, where
+					applicable, allows you to fine tune those settings.
+				</p>
+
+				<select id="appbundle" bind:value={applicationBundle}>
+					{#each applicationBundles as b}
+						{#if b.preview}
+							<option value={b}>{b.version} (Preview)</option>
+						{:else if b.endOfLife}
+							<option value={b}>{b.version} (End-of-Life {b.endOfLife})</option>
+						{:else}
+							<option value={b}>{b.version}</option>
+						{/if}
+					{/each}
+				</select>
+				<label for="appbundle">
+					Selects the control plane version. Versions marked as <em>Preview</em> are early release
+					candidates, and may have undergone less rigorous testing. Versions marked
+					<em>End-of-Life</em> indicate the date when they will be automatically upgraded by the platform.
+				</label>
+			</section>
 		</details>
 
 		<div class="buttons">

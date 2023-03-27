@@ -97,8 +97,6 @@
 	let controlPlane = null;
 
 	// Define dropdown callbacks.
-	function handleDetails() {}
-
 	let editModalActive = false;
 
 	function handleEdit(cp) {
@@ -119,7 +117,6 @@
 
 	// Define the per-control plane drop down menu.
 	let dropdownItems = [
-		{ id: 'detail', value: 'Details', icon: 'bx:detail', handler: handleDetails },
 		{ id: 'edit', value: 'Edit', icon: 'bx:edit', handler: handleEdit, disablable: true },
 		{ id: 'delete', value: 'Delete', icon: 'bx:trash', handler: handleDelete }
 	];
@@ -156,17 +153,19 @@
 <section>
 	<p>Kubernetes control planes manage the lifecycle of Kubernetes clusters.</p>
 	<details>
-		<summary>Details</summary>
-		<p>
-			Kubernetes control planes manage Kubernetes cluster creation, updates, upgrades, and deletion.
-			A Kubernetes cluster is managed by a single control plane, providing groupings of Kubernetes
-			clusters.
-		</p>
-		<p>
-			You may group clusters based on stability e.g. production, staging, development. This allows
-			upgrades to be tested in a staging control plane before applying those changes to a production
-			one.
-		</p>
+		<summary>What are Control Planes?</summary>
+		<section>
+			<p>
+				Kubernetes control planes manage Kubernetes cluster creation, updates, upgrades, and
+				deletion. A Kubernetes cluster is managed by a single control plane, providing groupings of
+				Kubernetes clusters.
+			</p>
+			<p>
+				You may group clusters based on stability e.g. production, staging, development. This allows
+				upgrades to be tested in a staging control plane before applying those changes to a
+				production one.
+			</p>
+		</section>
 	</details>
 </section>
 
@@ -215,6 +214,14 @@
 {/each}
 
 <style>
+	details {
+		display: flex;
+		flex-direction: column;
+		gap: var(--padding);
+	}
+	iconify-icon {
+		font-size: var(--icon-size);
+	}
 	.upgrade {
 		color: var(--error);
 	}
