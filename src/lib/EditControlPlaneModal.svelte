@@ -5,7 +5,10 @@
 
 	import { updateControlPlane, listApplicationBundlesControlPlane } from '$lib/client.js';
 
+	import { applicationBundleFormatter } from '$lib/formatters.js';
+
 	import Modal from '$lib/Modal.svelte';
+	import SelectField from '$lib/SelectField.svelte';
 
 	// control planes to edit.
 	export let controlPlane;
@@ -115,22 +118,15 @@
 					applicable, allows you to fine tune those settings.
 				</p>
 
-				<select id="appbundle" bind:value={applicationBundle}>
-					{#each applicationBundles as b}
-						{#if b.preview}
-							<option value={b}>{b.version} (Preview)</option>
-						{:else if b.endOfLife}
-							<option value={b}>{b.version} (End-of-Life {b.endOfLife})</option>
-						{:else}
-							<option value={b}>{b.version}</option>
-						{/if}
-					{/each}
-				</select>
-				<label for="appbundle">
-					Selects the control plane version. Versions marked as <em>Preview</em> are early release
-					candidates, and may have undergone less rigorous testing. Versions marked
-					<em>End-of-Life</em> indicate the date when they will be automatically upgraded by the platform.
-				</label>
+				<SelectField
+					id="appbundle"
+					help="Selects the control plane version. Versions marked as <em>Preview</em> are early release
+                                        candidates, and may have undergone less rigorous testing. Versions marked
+                                        <em>End-of-Life</em> indicate the date when they will be automatically upgraded by the platform."
+					formatter={applicationBundleFormatter}
+					bind:options={applicationBundles}
+					bind:value={applicationBundle}
+				/>
 			</section>
 		</details>
 
@@ -159,14 +155,6 @@
 		align-items: stretch;
 		padding: var(--padding);
 		gap: var(--padding);
-	}
-	form label {
-		display: block;
-		font-style: italic;
-		font-size: 0.75rem;
-	}
-	form label > em {
-		font-weight: bold;
 	}
 	dl {
 		grid-row: 2;

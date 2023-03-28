@@ -292,7 +292,9 @@
 		padding: var(--padding);
 		font-weight: bold;
 		font-size: 1rem;
-		background: linear-gradient(90deg, var(--brand) 0%, var(--brand-light) 100%);
+		background: linear-gradient(0, var(--brand-dark) 0%, var(--brand) 50%, var(--brand-light) 100%);
+		background-size: auto 200%;
+		transition: background-position 0.2s ease-in;
 		display: inline-flex;
 		align-items: center;
 		gap: var(--padding);
@@ -301,13 +303,13 @@
 		border-style: none;
 	}
 	:global(button:hover) {
-		background: linear-gradient(90deg, var(--brand-dark) 0%, var(--brand) 100%);
+		background-position: center bottom;
 	}
 	:global(button:focus) {
-		background: linear-gradient(90deg, var(--brand-dark) 0%, var(--brand) 100%);
+		background-position: center bottom;
 	}
 	:global(button:disabled) {
-		background: linear-gradient(90deg, var(--dark-grey) 0%, var(--mid-grey) 100%);
+		background: linear-gradient(0, var(--dark-grey) 0%, var(--mid-grey) 100%);
 		cursor: not-allowed;
 	}
 	:global(summary) {
@@ -352,7 +354,7 @@
 	:global(.modal-header) {
 		margin: 0;
 		padding: var(--padding);
-		background: linear-gradient(90deg, var(--brand-dark) 0%, var(--brand) 100%);
+		background: linear-gradient(0, var(--brand-dark) 0%, var(--brand) 50%, var(--brand-light) 100%);
 		color: white;
 		display: inline-flex;
 		gap: var(--padding);

@@ -169,7 +169,7 @@
 	</details>
 </section>
 
-<section>
+<section class="nx">
 	<button on:click={showCreateModal}>
 		<iconify-icon icon="material-symbols:add" />
 		<div>Create</div>
@@ -267,6 +267,9 @@
 	dd span.detail {
 		font-size: 0.75rem;
 		color: var(--mid-grey);
+	}
+	.nx {
+		flex-direction: revert;
 	}
 	@media only screen and (min-width: 720px) {
 		article {

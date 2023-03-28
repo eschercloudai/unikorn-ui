@@ -1,4 +1,11 @@
 <script>
+	import { namedObjectFormatter, flavorFormatter } from '$lib/formatters.js';
+
+	import TextField from '$lib/TextField.svelte';
+	import SelectField from '$lib/SelectField.svelte';
+	import CheckBoxField from '$lib/CheckBoxField.svelte';
+	import SliderField from '$lib/SliderField.svelte';
+
 	export let flavors;
 	export let images;
 	export let computeAZs;
@@ -41,10 +48,10 @@
 		flavor = flavors[0];
 	}
 
-	// Check if the name constraints are valid.  RFC-1123.
-	// Upto 63 characters, lower case alpha, numeric and -.
-	// Must start and end with alphanumeric.
-	$: nameValid = name.match(/^(?!-)[a-z0-9-]{0,62}[a-z0-9]$/);
+	// TODO: must be unique!
+	function validateName(name) {
+		return name.match(/^(?!-)[a-z0-9-]{0,62}[a-z0-9]$/);
+	}
 
 	$: valid = [nameValid].every((x) => x);
 
@@ -70,101 +77,95 @@
 	}
 </script>
 
-<input id="name" type="text" placeholder="Workload pool name" bind:value={name} />
-<label for="name"
-	>Workload pool name. Must be unique, contain only characters, numbers and dashes.</label
->
-{#if !nameValid}
-	<label for="name" class="error"
-		>Name must contain only lower-case characters, numbers or hyphens (-), it must start and end
-		with a character or number, and must be at most 63 characters.</label
-	>
-{/if}
+<TextField
+	id="name"
+	placeholder="Workload pool name"
+	help="A valid Kubernetes name, unique within the cluster."
+	validator={validateName}
+	invalidtext="Name must contain only lower-case characters, numbers or hyphens (-), it must start and end
+	with a character or number, and must be at most 63 characters."
+	bind:value={name}
+	bind:valid={nameValid}
+/>
 
-<select id="image" bind:value={image} required>
-	{#each images as i}
-		<option value={i}>{i.name}</option>
-	{/each}
-</select>
-<label for="image">Virtual machine image to use.</label>
+<SelectField
+	id="image"
+	help="Virtual machine image to use."
+	formatter={namedObjectFormatter}
+	bind:options={images}
+	bind:value={image}
+/>
 
-<select id="flavor" bind:value={flavor} required>
-	{#each flavors as f}
-		{#if f.gpus}
-			<option value={f}>{f.name} ({f.cpus} core, {f.memory}Gi, {f.gpus} GPU)</option>
-		{:else}
-			<option value={f}>{f.name} ({f.cpus} core, {f.memory}Gi)</option>
-		{/if}
-	{/each}
-</select>
-<label for="flavor">Virtual machine type to use.</label>
+<SelectField
+	id="flavor"
+	help="Virtual machine type to use."
+	formatter={flavorFormatter}
+	bind:options={flavors}
+	bind:value={flavor}
+/>
 
-<div class="slider">
-	<input id="disk" type="range" min="50" max="2000" step="50" bind:value={disk} />
-	<span>{disk}GiB</span>
-</div>
-<label for="disk">The size of the root disk.</label>
+<SliderField
+	id="disk"
+	help="The size of the root disk."
+	min="50"
+	max="2000"
+	step="50"
+	formatter={(x) => `${x}GiB`}
+	bind:value={disk}
+/>
 
-<div class="checkbox">
-	<input id="autoscaling" type="checkbox" bind:checked={autoscaling} />
-	<span>Autoscaling enabled</span>
-</div>
-<label for="autoscaling">Enables workload pool autoscaling.</label>
+<CheckBoxField
+	id="autoscaling"
+	help="Enables workload pool autoscaling."
+	label="Enable autoscaling?"
+	bind:checked={autoscaling}
+/>
 
 {#if autoscaling}
-	<div class="slider">
-		<input id="minReplicas" type="range" min="0" max="50" bind:value={minReplicas} />
-		<span>{minReplicas}</span>
-	</div>
-	<label for="minReplicas">Minumum number of virtual machines.</label>
+	<SliderField
+		id="minReplicas"
+		help="Minimunm number of virtual machines."
+		min="0"
+		max="50"
+		bind:value={minReplicas}
+	/>
 
 	<!-- TODO: this should be relative to the minimum -->
-	<div class="slider">
-		<input id="maxReplicas" type="range" min="0" max="50" bind:value={maxReplicas} />
-		<span>{maxReplicas}</span>
-	</div>
-	<label for="maxReplicas">Maximunm number of virtual machines.</label>
+	<SliderField
+		id="maxReplicas"
+		help="Maximunm number of virtual machines."
+		min="0"
+		max="50"
+		bind:value={maxReplicas}
+	/>
 {:else}
-	<div class="slider">
-		<input id="meplicas" type="range" min="1" max="50" bind:value={replicas} />
-		<span>{replicas}</span>
-	</div>
-	<label for="replicas">Number of virtual machines.</label>
+	<SliderField
+		id="replicas"
+		help="Number of virtual machines."
+		min="1"
+		max="50"
+		bind:value={replicas}
+	/>
 {/if}
 
 <details>
 	<summary>Advanced Options</summary>
 
 	<section>
-		<input id="labels" type="text" placeholder="key1=value1,key2=value2" bind:value={labels} />
-		<label for="labels"
-			>Comma separated set of labels to apply to Kubernetes nodes on creation.</label
-		>
+		<TextField
+			id="labels"
+			placeholder="key1=value1,key2=value2"
+			help="Comma separated set of labels to apply to Kubernetes nodes on creation."
+			bind:value={labels}
+		/>
 
-		<select id="computeAZ" bind:value={computeAZ} required>
-			<option value={null}>(None)</option>
-			{#each computeAZs as a}
-				<option value={a}>{a.name}</option>
-			{/each}
-		</select>
-		<label for="image">Availability zone to provision the pool in.</label>
+		<SelectField
+			id="computeAZ"
+			help="Availability zone to provision the pool in."
+			formatter={namedObjectFormatter}
+			nullable="true"
+			bind:options={computeAZs}
+			bind:value={computeAZ}
+		/>
 	</section>
 </details>
-
-<style>
-	label {
-		display: block;
-		font-style: italic;
-		font-size: 0.75rem;
-	}
-	div.checkbox {
-		display: flex;
-		align-items: center;
-		gap: var(--padding);
-	}
-	div.slider {
-		display: flex;
-		align-items: center;
-		gap: var(--padding);
-	}
-</style>
