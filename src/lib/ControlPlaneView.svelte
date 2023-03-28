@@ -13,6 +13,8 @@
 	import DropDownIcon from '$lib/DropDownIcon.svelte';
 	import CreateControlPlaneModal from '$lib/CreateControlPlaneModal.svelte';
 	import EditControlPlaneModal from '$lib/EditControlPlaneModal.svelte';
+	import ItemView from '$lib/ItemView.svelte';
+	import Item from '$lib/Item.svelte';
 
 	let controlPlanes = [];
 
@@ -176,59 +178,57 @@
 	</button>
 </section>
 
-{#each controlPlanes as cp}
-	<article>
-		<div class="title">
-			<StatusIcon status={statusFromResource(cp.status)} />
-			<div class="name">{cp.status.name}</div>
-		</div>
-		<div class="widgets">
-			{#if cp.upgradable}
-				<iconify-icon class="upgrade" icon="material-symbols:upgrade-rounded" />
-			{/if}
-			<DropDownIcon
-				icon="mdi:dots-vertical"
-				resource={cp}
-				items={dropdownItems}
-				disabled={cp.status.status != 'Provisioned'}
-			/>
-		</div>
-		<dl>
-			<dt>Age:</dt>
-			<dd>{age(cp.status.creationTime)}</dd>
-			<dt>Status:</dt>
-			<dd>{cp.status.status}</dd>
-			<dt>Version:</dt>
-			{#if cp.applicationBundle.preview}
-				<dd>{cp.applicationBundle.version} <span class="detail">Preview)</span></dd>
-			{:else if cp.applicationBundle.endOfLife}
-				<dd>
-					{cp.applicationBundle.version}
-					<span class="detail">EOL {new Date(cp.applicationBundle.endOfLife).toDateString()}</span>
-				</dd>
-			{:else}
-				<dd>{cp.applicationBundle.version}</dd>
-			{/if}
-		</dl>
-	</article>
-{/each}
+<ItemView>
+	{#each controlPlanes as cp}
+		<Item>
+			<div class="header">
+				<div class="title">
+					<StatusIcon status={statusFromResource(cp.status)} />
+					<div class="name">{cp.status.name}</div>
+				</div>
+				<div class="widgets">
+					{#if cp.upgradable}
+						<iconify-icon class="upgrade" icon="material-symbols:upgrade-rounded" />
+					{/if}
+					<DropDownIcon
+						icon="mdi:dots-vertical"
+						resource={cp}
+						items={dropdownItems}
+						disabled={cp.status.status != 'Provisioned'}
+					/>
+				</div>
+			</div>
+			<dl>
+				<dt>Age:</dt>
+				<dd>{age(cp.status.creationTime)}</dd>
+				<dt>Status:</dt>
+				<dd>{cp.status.status}</dd>
+				<dt>Version:</dt>
+				{#if cp.applicationBundle.preview}
+					<dd>{cp.applicationBundle.version} <span class="detail">Preview)</span></dd>
+				{:else if cp.applicationBundle.endOfLife}
+					<dd>
+						{cp.applicationBundle.version}
+						<span class="detail">EOL {new Date(cp.applicationBundle.endOfLife).toDateString()}</span
+						>
+					</dd>
+				{:else}
+					<dd>{cp.applicationBundle.version}</dd>
+				{/if}
+			</dl>
+		</Item>
+	{/each}
+</ItemView>
 
 <style>
-	details {
-		display: flex;
-		flex-direction: column;
-		gap: var(--padding);
-	}
 	iconify-icon {
 		font-size: var(--icon-size);
 	}
 	.upgrade {
 		color: var(--error);
 	}
-	article {
-		display: grid;
-		grid-template-columns: 1fr auto;
-		grid-gap: var(--padding);
+	.header {
+		display: flex;
 	}
 	div.name {
 		color: var(--brand);
@@ -238,19 +238,13 @@
 		display: flex;
 		align-items: center;
 		gap: var(--padding);
-		grid-row: 1;
-		grid-column: 1;
+		flex: 1;
 	}
 	div.widgets {
 		display: flex;
 		align-items: center;
-		grid-row: 1;
-		grid-column: 2;
 	}
 	dl {
-		grid-row: 2;
-		grid-column: 1 / -1;
-		margin: 0;
 		display: grid;
 		grid-template-columns: auto 1fr;
 		grid-auto-flow: column;
@@ -261,28 +255,11 @@
 		font-weight: bold;
 		grid-column-start: 1;
 	}
-	dd {
-		margin: 0;
-	}
 	dd span.detail {
 		font-size: 0.75rem;
 		color: var(--mid-grey);
 	}
 	.nx {
 		flex-direction: revert;
-	}
-	@media only screen and (min-width: 720px) {
-		article {
-			grid-template-columns: auto 1fr auto;
-		}
-		div.widgets {
-			grid-column: 3;
-		}
-		dl {
-			grid-row: 1;
-			grid-column: 2;
-			display: flex;
-			align-items: center;
-		}
 	}
 </style>
