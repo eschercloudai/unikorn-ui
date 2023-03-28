@@ -17,6 +17,8 @@
 	import LabeledInput from '$lib/LabeledInput.svelte';
 	import CreateClusterModal from '$lib/CreateClusterModal.svelte';
 	import EditClusterModal from '$lib/EditClusterModal.svelte';
+	import ItemView from '$lib/ItemView.svelte';
+	import Item from '$lib/Item.svelte';
 
 	let controlPlanes = [];
 	let controlPlane = null;
@@ -241,45 +243,50 @@
 		</button>
 	</section>
 
-	{#each clusters as cl}
-		<article>
-			<div class="title">
-				<StatusIcon status={statusFromResource(cl.status)} />
-				<div class="name">{cl.status.name}</div>
-			</div>
-			<div class="widgets">
-				{#if cl.upgradable}
-					<iconify-icon class="upgrade" icon="material-symbols:upgrade-rounded" />
-				{/if}
-				<DropDownIcon
-					icon="mdi:dots-vertical"
-					resource={cl}
-					items={dropdownItems}
-					disabled={cl.status.status != 'Provisioned'}
-				/>
-			</div>
-			<dl>
-				<dt>Age:</dt>
-				<dd>{age(cl.status.creationTime)}</dd>
-				<dt>Status:</dt>
-				<dd>{cl.status.status}</dd>
-				<dt>Version:</dt>
-				{#if cl.applicationBundle.preview}
-					<dd>{cl.applicationBundle.version} <span class="detail">Preview</span></dd>
-				{:else if cl.applicationBundle.endOfLife}
-					<dd>
-						{cl.applicationBundle.version}
-						<span class="detail">EOL {new Date(cl.applicationBundle.endOfLife).toDateString()}</span
-						>
-					</dd>
-				{:else}
-					<dd>{cl.applicationBundle.version}</dd>
-				{/if}
-				<dt>Kubernetes:</dt>
-				<dd>{cl.controlPlane.version}</dd>
-			</dl>
-		</article>
-	{/each}
+	<ItemView>
+		{#each clusters as cl}
+			<Item>
+				<div class="header">
+					<div class="title">
+						<StatusIcon status={statusFromResource(cl.status)} />
+						<div class="name">{cl.status.name}</div>
+					</div>
+					<div class="widgets">
+						{#if cl.upgradable}
+							<iconify-icon class="upgrade" icon="material-symbols:upgrade-rounded" />
+						{/if}
+						<DropDownIcon
+							icon="mdi:dots-vertical"
+							resource={cl}
+							items={dropdownItems}
+							disabled={cl.status.status != 'Provisioned'}
+						/>
+					</div>
+				</div>
+				<dl>
+					<dt>Age:</dt>
+					<dd>{age(cl.status.creationTime)}</dd>
+					<dt>Status:</dt>
+					<dd>{cl.status.status}</dd>
+					<dt>Version:</dt>
+					{#if cl.applicationBundle.preview}
+						<dd>{cl.applicationBundle.version} <span class="detail">Preview</span></dd>
+					{:else if cl.applicationBundle.endOfLife}
+						<dd>
+							{cl.applicationBundle.version}
+							<span class="detail"
+								>EOL {new Date(cl.applicationBundle.endOfLife).toDateString()}</span
+							>
+						</dd>
+					{:else}
+						<dd>{cl.applicationBundle.version}</dd>
+					{/if}
+					<dt>Kubernetes:</dt>
+					<dd>{cl.controlPlane.version}</dd>
+				</dl>
+			</Item>
+		{/each}
+	</ItemView>
 {/if}
 
 <style>
@@ -289,10 +296,8 @@
 	.upgrade {
 		color: var(--error);
 	}
-	article {
-		display: grid;
-		grid-template-columns: 1fr auto;
-		grid-gap: var(--padding);
+	.header {
+		display: flex;
 	}
 	div.name {
 		color: var(--brand);
@@ -302,13 +307,11 @@
 		display: flex;
 		align-items: center;
 		gap: var(--padding);
-		grid-row: 1;
-		grid-column: 1;
+		flex: 1;
 	}
 	div.widgets {
 		display: flex;
 		align-items: center;
-		grid-row: 1;
 	}
 	section.sad-kitty {
 		display: flex;
@@ -322,9 +325,6 @@
 		color: var(--mid-grey);
 	}
 	dl {
-		grid-row: 2;
-		grid-column: 1 / -1;
-		margin: 0;
 		display: grid;
 		grid-template-columns: auto 1fr;
 		grid-auto-flow: column;
@@ -335,28 +335,11 @@
 		font-weight: bold;
 		grid-column-start: 1;
 	}
-	dd {
-		margin: 0;
-	}
 	dd span.detail {
 		font-size: 0.75rem;
 		color: var(--mid-grey);
 	}
 	.nx {
 		flex-direction: revert;
-	}
-	@media only screen and (min-width: 720px) {
-		article {
-			grid-template-columns: auto 1fr auto;
-		}
-		div.widgets {
-			grid-column: 3;
-		}
-		dl {
-			grid-row: 1;
-			grid-column: 2;
-			display: flex;
-			align-items: center;
-		}
 	}
 </style>
