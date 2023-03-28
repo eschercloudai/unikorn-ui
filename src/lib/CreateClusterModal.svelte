@@ -16,8 +16,18 @@
 		listApplicationBundlesCluster
 	} from '$lib/client.js';
 
+	import {
+		namedObjectFormatter,
+		applicationBundleFormatter,
+		flavorFormatter
+	} from '$lib/formatters.js';
+
 	import Modal from '$lib/Modal.svelte';
 	import WorkloadPoolCreate from '$lib/WorkloadPoolCreate.svelte';
+	import TextField from '$lib/TextField.svelte';
+	import SelectField from '$lib/SelectField.svelte';
+	import CheckBoxField from '$lib/CheckBoxField.svelte';
+	import SliderField from '$lib/SliderField.svelte';
 
 	// clusters allows name uniqueness checking.
 	export let clusters;
@@ -365,9 +375,6 @@
 		return true;
 	}
 
-	// Check if the name constraints are valid.
-	$: nameValid = validateName(name, clusters);
-
 	// Roll up validity to enable creation.
 	$: valid = [nameValid].every((x) => x) && workloadPools.every((x) => x.valid);
 
@@ -505,13 +512,15 @@
 	{#if loaded}
 		<h2 class="modal-header"><iconify-icon icon="bx:edit" />Create Cluster</h2>
 		<form>
-			<input id="name" type="text" placeholder="Cluster name" bind:value={name} />
-			<label for="name">
-				Cluster name. Must be unique, contain only characters, numbers and dashes.
-			</label>
-			{#if !nameValid}
-				<label for="name" class="error">{nameValidMessage}</label>
-			{/if}
+			<TextField
+				id="name"
+				placeholder="Cluster name"
+				help="A valid Kubernetes name, unique within the control plane"
+				validator={(x) => validateName(x, clusters)}
+				invalidtext={nameValidMessage}
+				bind:value={name}
+				bind:valid={nameValid}
+			/>
 
 			<details>
 				<summary>Lifecycle (Advanced)</summary>
@@ -522,22 +531,15 @@
 						applicable, allows you to fine tune those settings.
 					</p>
 
-					<select id="appbundle" bind:value={applicationBundle}>
-						{#each applicationBundles as b}
-							{#if b.preview}
-								<option value={b}>{b.version} (Preview)</option>
-							{:else if b.endOfLife}
-								<option value={b}>{b.version} (End-of-Life {b.endOfLife})</option>
-							{:else}
-								<option value={b}>{b.version}</option>
-							{/if}
-						{/each}
-					</select>
-					<label for="appbundle">
-						Selects the cluster version. Versions marked as <em>Preview</em> are early release
-						candidates, and may have undergone less rigorous testing. Versions marked
-						<em>End-of-Life</em> indicate the date when they will be automatically upgraded by the platform.
-					</label>
+					<SelectField
+						id="appbundle"
+						help="Selects the cluster version. Versions marked as <em>Preview</em> are early release
+                                                candidates, and may have undergone less rigorous testing. Versions marked
+                                                <em>End-of-Life</em> indicate the date when they will be automatically upgraded by the platform."
+						formatter={applicationBundleFormatter}
+						bind:options={applicationBundles}
+						bind:value={applicationBundle}
+					/>
 				</section>
 			</details>
 
@@ -551,15 +553,14 @@
 					</p>
 					<p>By default the platform will schedule across any availabilty zone.</p>
 
-					<select id="compute-az" bind:value={computeAZ}>
-						{#each computeAZs as az}
-							<option value={az}>{az.name}</option>
-						{/each}
-					</select>
-					<label for="compute-az">
-						Select the global availability zone for compute instances. You can override this on a
-						per-workload pool basis to improve cluster availability.
-					</label>
+					<SelectField
+						id="compute-az"
+						help="Select the global availability zone for compute instances. You can override this on a
+						per-workload pool basis to improve cluster availability."
+						formatter={namedObjectFormatter}
+						bind:options={computeAZs}
+						bind:value={computeAZ}
+					/>
 				</section>
 			</details>
 
@@ -577,59 +578,58 @@
 						unique and do not overlap.
 					</p>
 
-					<select id="keypair" bind:value={keyPair}>
-						<option value={null}>(None)</option>
-						{#each keyPairs as k}
-							<option value={k}>{k.name}</option>
-						{/each}
-					</select>
-					<label for="keypair">
-						SSH key pair to include on each node. It is advised this not be used to improve
-						security.
-					</label>
+					<SelectField
+						id="keypair"
+						help="SSH key pair to include on each node. It is advised this not be used to improve
+						security."
+						nullable="true"
+						formatter={namedObjectFormatter}
+						bind:options={keyPairs}
+						bind:value={keyPair}
+					/>
 
-					<input
+					<TextField
 						id="dnsnameservers"
-						type="text"
 						placeholder="8.8.8.8,8.8.4.4"
+						help="Comma separated list of DNS name servers to use."
 						bind:value={dnsNameservers}
 					/>
-					<label for="dnsnameservers">Comma separated list of DNS name servers to use.</label>
 
-					<input
+					<TextField
 						id="nodeNetwork"
-						type="text"
 						placeholder="192.168.0.0/16"
+						help="IPv4 CIDR to run Kubernetes nodes in."
 						bind:value={nodePrefix}
 					/>
-					<label for="nodeNetwork">IPv4 CIDR to run Kubernetes nodes in.</label>
 
-					<input id="podNetwork" type="text" placeholder="10.0.0.0/8" bind:value={podPrefix} />
-					<label for="podNetwork">IPv4 CIDR to run Kubernets pods in.</label>
+					<TextField
+						id="podNetwork"
+						placeholder="10.0.0.0/8"
+						help="IPv4 CIDR to run Kubernets pods in."
+						bind:value={podPrefix}
+					/>
 
-					<input
+					<TextField
 						id="serviceNetwork"
-						type="text"
 						placeholder="127.16.0.0/12"
+						help="IPv4 CIDR to run Kubernetes services in."
 						bind:value={servicePrefix}
 					/>
-					<label for="serviceNetwork">IPv4 CIDR to run Kubernetes services in.</label>
 
-					<input
+					<TextField
 						id="allowedPrefixes"
-						type="text"
 						placeholder="1.2.3.4/32,7.8.0.0/16"
+						help="Comma separated list of IPv4 CIDR blocks to permit access to the Kubernetes API."
 						bind:value={allowedPrefixes}
 					/>
-					<label for="allowedPrefixes">
-						Comma separated list of IPv4 CIDR blocks to permit access to the Kubernetes API.
-					</label>
 
-					<input id="sans" type="text" placeholder="kubernetes.my-domain.com" bind:value={sans} />
-					<label for="sans">
-						Comma separated list of X.509 subject alterative names to add to the Kubernetes API
-						certificate.
-					</label>
+					<TextField
+						id="sans"
+						placeholder="kubernetes.my-domain.com"
+						help="Comma separated list of X.509 subject alterative names to add to the Kubernetes API
+                                                certificate."
+						bind:value={sans}
+					/>
 				</section>
 			</details>
 
@@ -645,59 +645,63 @@
 						They are not enabled by default to improve baseline security and resource utilisation.
 					</p>
 
-					<div class="checkbox">
-						<input id="ingress" type="checkbox" bind:checked={ingress} />
-						<span>Ingress controller enabled</span>
-					</div>
-					<label for="ingress">Enables Nginx ingress controller.</label>
+					<CheckBoxField
+						id="ingress"
+						label="Enable ingress controller?"
+						help="Enables Nginx ingress controller"
+						bind:checked={ingress}
+					/>
 				</section>
 			</details>
 
 			<h2>Control Plane</h2>
 
-			<select id="version" bind:value={version} required>
-				{#each versions as v}
-					<option value={v}>{v}</option>
-				{/each}
-			</select>
-			<label for="version">Kubernetes version to provision with.</label>
+			<SelectField
+				id="version"
+				help="Kubernetes version to provision with."
+				bind:options={versions}
+				bind:value={version}
+			/>
 
-			<select id="image" bind:value={image} required>
-				{#each images as i}
-					<option value={i}>{i.name}</option>
-				{/each}
-			</select>
-			<label for="image">Virtual machine image to use.</label>
+			<SelectField
+				id="image"
+				help="Virtual machine image to use."
+				formatter={namedObjectFormatter}
+				bind:options={images}
+				bind:value={image}
+			/>
 
-			<select id="flavor" bind:value={flavor} required>
-				{#each cpFlavors as f}
-					{#if f.gpus}
-						<option value={f}>{f.name} ({f.cpus} core, {f.memory}Gi, {f.gpus} GPU)</option>
-					{:else}
-						<option value={f}>{f.name} ({f.cpus} core, {f.memory}Gi)</option>
-					{/if}
-				{/each}
-			</select>
-			<label for="flavor">Virtual machine type to use.</label>
+			<SelectField
+				id="flavor"
+				help="Virtual machine type to use."
+				formatter={flavorFormatter}
+				bind:options={cpFlavors}
+				bind:value={flavor}
+			/>
 
-			<div class="slider">
-				<input id="disk" type="range" min="50" max="2000" step="50" bind:value={disk} />
-				<span>{disk}GiB</span>
-			</div>
-			<label for="disk">The size of the root disk.</label>
+			<SliderField
+				id="disk"
+				help="The size of the root disk."
+				min="50"
+				max="2000"
+				step="50"
+				formatter={(x) => `${x}GiB`}
+				bind:value={disk}
+			/>
 
 			<details>
 				<summary>Advanced Options</summary>
 
 				<section>
-					<div class="slider">
-						<input id="replicas" type="range" min="1" max="9" step="2" bind:value={replicas} />
-						<span>{replicas}</span>
-					</div>
-					<label for="replicas">
-						Number of virtual machines. The default (3) is generally cost effective while providing
-						high-availability.
-					</label>
+					<SliderField
+						id="replicas"
+						help="Number of virtual machines. The default (3) is generally cost effective while providing
+                                                high-availability."
+						min="1"
+						max="9"
+						step="2"
+						bind:value={replicas}
+					/>
 				</section>
 			</details>
 
@@ -747,25 +751,10 @@
 		padding: var(--padding);
 		gap: var(--padding);
 	}
-	form label {
-		display: block;
-		font-style: italic;
-		font-size: 0.75rem;
-	}
 	form > section {
 		margin: 0;
 		padding: var(--padding);
 		border: 1px solid var(--brand);
 		align-items: stretch;
-	}
-	div.checkbox {
-		display: flex;
-		align-items: center;
-		gap: var(--padding);
-	}
-	div.slider {
-		display: flex;
-		align-items: center;
-		gap: var(--padding);
 	}
 </style>

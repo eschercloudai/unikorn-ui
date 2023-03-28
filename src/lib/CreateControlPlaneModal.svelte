@@ -9,7 +9,11 @@
 		listApplicationBundlesControlPlane
 	} from '$lib/client.js';
 
+	import { applicationBundleFormatter } from '$lib/formatters.js';
+
 	import Modal from '$lib/Modal.svelte';
+	import TextField from '$lib/TextField.svelte';
+	import SelectField from '$lib/SelectField.svelte';
 
 	// list of control planes so we can validate the name is unique.
 	export let controlPlanes;
@@ -109,9 +113,6 @@
 		return true;
 	}
 
-	// Check if the name constraints are valid.
-	$: nameValid = validateName(name, controlPlanes);
-
 	// Roll up validity to enable creation.
 	$: allValid = [nameValid].every((x) => x);
 
@@ -153,11 +154,15 @@
 <Modal {active} fixed="true">
 	<h2 class="modal-header"><iconify-icon icon="bx:edit" />Create Control Plane</h2>
 	<form>
-		<input id="name" type="text" placeholder="Control plane name" bind:value={name} />
-		<label for="name">Control plane name.</label>
-		{#if !nameValid}
-			<label for="name" class="error">{nameValidMessage}</label>
-		{/if}
+		<TextField
+			id="name"
+			placeholder="Control plane name"
+			help="A valid Kubernetes name, unique within the control plane"
+			validator={(x) => validateName(x, controlPlanes)}
+			invalidtext={nameValidMessage}
+			bind:value={name}
+			bind:valid={nameValid}
+		/>
 
 		<details>
 			<summary>Lifecycle (Advanced)</summary>
@@ -169,22 +174,15 @@
 					applicable, allows you to fine tune those settings.
 				</p>
 
-				<select id="appbundle" bind:value={applicationBundle}>
-					{#each applicationBundles as b}
-						{#if b.preview}
-							<option value={b}>{b.version} (Preview)</option>
-						{:else if b.endOfLife}
-							<option value={b}>{b.version} (End-of-Life {b.endOfLife})</option>
-						{:else}
-							<option value={b}>{b.version}</option>
-						{/if}
-					{/each}
-				</select>
-				<label for="appbundle">
-					Selects the control plane version. Versions marked as <em>Preview</em> are early release
-					candidates, and may have undergone less rigorous testing. Versions marked
-					<em>End-of-Life</em> indicate the date when they will be automatically upgraded by the platform.
-				</label>
+				<SelectField
+					id="appbundle"
+					help="Selects the control plane version. Versions marked as <em>Preview</em> are early release
+                                        candidates, and may have undergone less rigorous testing. Versions marked
+                                        <em>End-of-Life</em> indicate the date when they will be automatically upgraded by the platform."
+					formatter={applicationBundleFormatter}
+					bind:options={applicationBundles}
+					bind:value={applicationBundle}
+				/>
 			</section>
 		</details>
 
@@ -218,13 +216,5 @@
 		align-items: stretch;
 		padding: var(--padding);
 		gap: var(--padding);
-	}
-	form label {
-		display: block;
-		font-style: italic;
-		font-size: 0.75rem;
-	}
-	form label > em {
-		font-weight: bold;
 	}
 </style>
