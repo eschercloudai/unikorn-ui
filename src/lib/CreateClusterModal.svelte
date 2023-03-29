@@ -708,7 +708,7 @@
 			<h2>Workload Pools</h2>
 
 			{#each workloadPools as pool, index}
-				<section>
+				<section class="workloadpool">
 					<WorkloadPoolCreate {flavors} {images} {computeAZs} bind:object={pool} />
 					<button on:click={() => removePool(index)}>
 						<iconify-icon icon="mdi:delete" />
@@ -751,10 +751,12 @@
 		padding: var(--padding);
 		gap: var(--padding);
 	}
-	form > section {
-		margin: 0;
+	.workloadpool {
 		padding: var(--padding);
 		border: 1px solid var(--brand);
 		align-items: stretch;
+		display: flex;
+		flex-direction: column;
+		gap: var(--padding);
 	}
 </style>

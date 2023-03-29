@@ -11,6 +11,7 @@
 	import LoginModal from '$lib/LoginModal.svelte';
 	import LabeledInput from '$lib/LabeledInput.svelte';
 
+	import Breadcrumbs from '$lib/Breadcrumbs.svelte';
 	import DashboardView from '$lib/DashboardView.svelte';
 	import ControlPlaneView from '$lib/ControlPlaneView.svelte';
 	import ClusterView from '$lib/ClusterView.svelte';
@@ -184,6 +185,7 @@
 </nav>
 
 <main class:showmenu>
+	<Breadcrumbs />
 	{#if content == 'dashboard'}
 		<DashboardView />
 	{:else if content == 'kubernetes-control-planes'}
@@ -228,7 +230,6 @@
 	}
 	:global(h1, h2, h3, h4, h5, h6) {
 		color: var(--brand);
-		margin-top: 0.5em;
 		text-align: center;
 	}
 	:global(a:link, a:visited) {
@@ -312,6 +313,18 @@
 		background: linear-gradient(0, var(--dark-grey) 0%, var(--mid-grey) 100%);
 		cursor: not-allowed;
 	}
+	:global(details) {
+		background-color: white;
+	}
+	:global(details > section) {
+		padding: var(--padding);
+		border: 1px solid var(--brand);
+		border-top: none;
+		display: flex;
+		flex-direction: column;
+		gap: var(--padding);
+	}
+
 	:global(summary) {
 		padding: var(--padding);
 		color: var(--brand);
@@ -322,21 +335,6 @@
 	:global(summary:hover) {
 		color: var(--brand-dark);
 	}
-	:global(details) {
-		background-color: white;
-	}
-	:global(details > section) {
-		margin: 0;
-		padding: var(--padding);
-		border: 1px solid var(--brand);
-		border-top: none;
-	}
-	:global(section) {
-		margin: var(--padding);
-		display: flex;
-		flex-direction: column;
-		gap: var(--padding);
-	}
 	:global(.selectable) {
 		cursor: pointer;
 	}
@@ -344,7 +342,6 @@
 		color: var(--error);
 	}
 	:global(.modal-header) {
-		margin: 0;
 		padding: var(--padding);
 		background: linear-gradient(0, var(--brand-dark) 0%, var(--brand) 50%, var(--brand-light) 100%);
 		color: white;
@@ -364,6 +361,8 @@
 		background-color: var(--light-grey);
 		transition: all 0.3s ease-in-out;
 		flex: 1;
+		display: flex;
+		flex-direction: column;
 	}
 
 	/* Header/masthead styling */

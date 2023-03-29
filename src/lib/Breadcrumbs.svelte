@@ -4,7 +4,9 @@
 	let trail = [];
 
 	selected.subscribe((value) => {
-		trail = getBreadcrumbs(value);
+		if (value != null) {
+			trail = getBreadcrumbs(value);
+		}
 	});
 </script>
 
@@ -21,7 +23,6 @@
 
 <style>
 	div.breadcrumbs {
-		flex: 1;
 		color: white;
 		background-color: var(--brand);
 		padding: var(--padding);
