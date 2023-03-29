@@ -106,6 +106,7 @@
 			return;
 		}
 
+		// TODO: filter out preview builds.
 		for (const cluster of result) {
 			if (cluster.applicationBundle.name != bundles[0].name) {
 				cluster.upgradable = true;
