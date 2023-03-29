@@ -72,6 +72,7 @@
 			return;
 		}
 
+		// TODO: filter out preview builds.
 		for (const cp of result) {
 			if (cp.applicationBundle.name != bundles[0].name) {
 				cp.upgradable = true;
@@ -204,7 +205,7 @@
 					<dd>{cp.status.status}</dd>
 					<dt>Version:</dt>
 					{#if cp.applicationBundle.preview}
-						<dd>{cp.applicationBundle.version} <span class="detail">Preview)</span></dd>
+						<dd>{cp.applicationBundle.version} <span class="detail">(Preview)</span></dd>
 					{:else if cp.applicationBundle.endOfLife}
 						<dd>
 							{cp.applicationBundle.version}
