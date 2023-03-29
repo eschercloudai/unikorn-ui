@@ -8,11 +8,11 @@
 		listApplicationBundlesControlPlane
 	} from '$lib/client.js';
 
-	import Breadcrumbs from '$lib/Breadcrumbs.svelte';
 	import StatusIcon from '$lib/StatusIcon.svelte';
 	import DropDownIcon from '$lib/DropDownIcon.svelte';
 	import CreateControlPlaneModal from '$lib/CreateControlPlaneModal.svelte';
 	import EditControlPlaneModal from '$lib/EditControlPlaneModal.svelte';
+	import View from '$lib/View.svelte';
 	import ItemView from '$lib/ItemView.svelte';
 	import Item from '$lib/Item.svelte';
 
@@ -150,75 +150,76 @@
 	/>
 {/if}
 
-<Breadcrumbs />
+<View>
+	<section class="blurb">
+		<p>Kubernetes control planes manage the lifecycle of Kubernetes clusters.</p>
+		<details>
+			<summary>What are Control Planes?</summary>
+			<section>
+				<p>
+					Kubernetes control planes manage Kubernetes cluster creation, updates, upgrades, and
+					deletion. A Kubernetes cluster is managed by a single control plane, providing groupings
+					of Kubernetes clusters.
+				</p>
+				<p>
+					You may group clusters based on stability e.g. production, staging, development. This
+					allows upgrades to be tested in a staging control plane before applying those changes to a
+					production one.
+				</p>
+			</section>
+		</details>
+	</section>
 
-<section>
-	<p>Kubernetes control planes manage the lifecycle of Kubernetes clusters.</p>
-	<details>
-		<summary>What are Control Planes?</summary>
-		<section>
-			<p>
-				Kubernetes control planes manage Kubernetes cluster creation, updates, upgrades, and
-				deletion. A Kubernetes cluster is managed by a single control plane, providing groupings of
-				Kubernetes clusters.
-			</p>
-			<p>
-				You may group clusters based on stability e.g. production, staging, development. This allows
-				upgrades to be tested in a staging control plane before applying those changes to a
-				production one.
-			</p>
-		</section>
-	</details>
-</section>
+	<section class="buttons">
+		<button on:click={showCreateModal}>
+			<iconify-icon icon="material-symbols:add" />
+			<div>Create</div>
+		</button>
+	</section>
 
-<section class="nx">
-	<button on:click={showCreateModal}>
-		<iconify-icon icon="material-symbols:add" />
-		<div>Create</div>
-	</button>
-</section>
-
-<ItemView>
-	{#each controlPlanes as cp}
-		<Item>
-			<div class="header">
-				<div class="title">
-					<StatusIcon status={statusFromResource(cp.status)} />
-					<div class="name">{cp.status.name}</div>
+	<ItemView>
+		{#each controlPlanes as cp}
+			<Item>
+				<div class="header">
+					<div class="title">
+						<StatusIcon status={statusFromResource(cp.status)} />
+						<div class="name">{cp.status.name}</div>
+					</div>
+					<div class="widgets">
+						{#if cp.upgradable}
+							<iconify-icon class="upgrade" icon="material-symbols:upgrade-rounded" />
+						{/if}
+						<DropDownIcon
+							icon="mdi:dots-vertical"
+							resource={cp}
+							items={dropdownItems}
+							disabled={cp.status.status != 'Provisioned'}
+						/>
+					</div>
 				</div>
-				<div class="widgets">
-					{#if cp.upgradable}
-						<iconify-icon class="upgrade" icon="material-symbols:upgrade-rounded" />
+				<dl>
+					<dt>Age:</dt>
+					<dd>{age(cp.status.creationTime)}</dd>
+					<dt>Status:</dt>
+					<dd>{cp.status.status}</dd>
+					<dt>Version:</dt>
+					{#if cp.applicationBundle.preview}
+						<dd>{cp.applicationBundle.version} <span class="detail">Preview)</span></dd>
+					{:else if cp.applicationBundle.endOfLife}
+						<dd>
+							{cp.applicationBundle.version}
+							<span class="detail"
+								>EOL {new Date(cp.applicationBundle.endOfLife).toDateString()}</span
+							>
+						</dd>
+					{:else}
+						<dd>{cp.applicationBundle.version}</dd>
 					{/if}
-					<DropDownIcon
-						icon="mdi:dots-vertical"
-						resource={cp}
-						items={dropdownItems}
-						disabled={cp.status.status != 'Provisioned'}
-					/>
-				</div>
-			</div>
-			<dl>
-				<dt>Age:</dt>
-				<dd>{age(cp.status.creationTime)}</dd>
-				<dt>Status:</dt>
-				<dd>{cp.status.status}</dd>
-				<dt>Version:</dt>
-				{#if cp.applicationBundle.preview}
-					<dd>{cp.applicationBundle.version} <span class="detail">Preview)</span></dd>
-				{:else if cp.applicationBundle.endOfLife}
-					<dd>
-						{cp.applicationBundle.version}
-						<span class="detail">EOL {new Date(cp.applicationBundle.endOfLife).toDateString()}</span
-						>
-					</dd>
-				{:else}
-					<dd>{cp.applicationBundle.version}</dd>
-				{/if}
-			</dl>
-		</Item>
-	{/each}
-</ItemView>
+				</dl>
+			</Item>
+		{/each}
+	</ItemView>
+</View>
 
 <style>
 	iconify-icon {
@@ -259,7 +260,13 @@
 		font-size: 0.75rem;
 		color: var(--mid-grey);
 	}
-	.nx {
-		flex-direction: revert;
+	.blurb {
+		display: flex;
+		flex-direction: column;
+		gap: var(--padding);
+	}
+	.buttons {
+		display: flex;
+		gap: var(--padding);
 	}
 </style>

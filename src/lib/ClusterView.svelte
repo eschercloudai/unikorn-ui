@@ -11,12 +11,12 @@
 		listApplicationBundlesCluster
 	} from '$lib/client.js';
 
-	import Breadcrumbs from '$lib/Breadcrumbs.svelte';
 	import StatusIcon from '$lib/StatusIcon.svelte';
 	import DropDownIcon from '$lib/DropDownIcon.svelte';
 	import LabeledInput from '$lib/LabeledInput.svelte';
 	import CreateClusterModal from '$lib/CreateClusterModal.svelte';
 	import EditClusterModal from '$lib/EditClusterModal.svelte';
+	import View from '$lib/View.svelte';
 	import ItemView from '$lib/ItemView.svelte';
 	import Item from '$lib/Item.svelte';
 
@@ -220,8 +220,6 @@
 	/>
 {/if}
 
-<Breadcrumbs />
-
 <LabeledInput id="control-plane-select" value="Control Plane to display clusters for">
 	<select id="control-plane-select" bind:value={controlPlane} on:change={updateClusters}>
 		{#each controlPlanes as choice}
@@ -230,64 +228,66 @@
 	</select>
 </LabeledInput>
 
-{#if controlPlanes.length == 0}
-	<section class="sad-kitty">
-		<iconify-icon icon="emojione:crying-cat-face" />
-		<p>No control planes found. Create one first to enable cluster creation.</p>
-	</section>
-{:else}
-	<section class="nx">
-		<button on:click={showCreateModal}>
-			<iconify-icon icon="material-symbols:add" />
-			<div>Create</div>
-		</button>
-	</section>
+<View>
+	{#if controlPlanes.length == 0}
+		<section class="sad-kitty">
+			<iconify-icon icon="emojione:crying-cat-face" />
+			<p>No control planes found. Create one first to enable cluster creation.</p>
+		</section>
+	{:else}
+		<section class="buttons">
+			<button on:click={showCreateModal}>
+				<iconify-icon icon="material-symbols:add" />
+				<div>Create</div>
+			</button>
+		</section>
 
-	<ItemView>
-		{#each clusters as cl}
-			<Item>
-				<div class="header">
-					<div class="title">
-						<StatusIcon status={statusFromResource(cl.status)} />
-						<div class="name">{cl.status.name}</div>
+		<ItemView>
+			{#each clusters as cl}
+				<Item>
+					<div class="header">
+						<div class="title">
+							<StatusIcon status={statusFromResource(cl.status)} />
+							<div class="name">{cl.status.name}</div>
+						</div>
+						<div class="widgets">
+							{#if cl.upgradable}
+								<iconify-icon class="upgrade" icon="material-symbols:upgrade-rounded" />
+							{/if}
+							<DropDownIcon
+								icon="mdi:dots-vertical"
+								resource={cl}
+								items={dropdownItems}
+								disabled={cl.status.status != 'Provisioned'}
+							/>
+						</div>
 					</div>
-					<div class="widgets">
-						{#if cl.upgradable}
-							<iconify-icon class="upgrade" icon="material-symbols:upgrade-rounded" />
+					<dl>
+						<dt>Age:</dt>
+						<dd>{age(cl.status.creationTime)}</dd>
+						<dt>Status:</dt>
+						<dd>{cl.status.status}</dd>
+						<dt>Version:</dt>
+						{#if cl.applicationBundle.preview}
+							<dd>{cl.applicationBundle.version} <span class="detail">Preview</span></dd>
+						{:else if cl.applicationBundle.endOfLife}
+							<dd>
+								{cl.applicationBundle.version}
+								<span class="detail"
+									>EOL {new Date(cl.applicationBundle.endOfLife).toDateString()}</span
+								>
+							</dd>
+						{:else}
+							<dd>{cl.applicationBundle.version}</dd>
 						{/if}
-						<DropDownIcon
-							icon="mdi:dots-vertical"
-							resource={cl}
-							items={dropdownItems}
-							disabled={cl.status.status != 'Provisioned'}
-						/>
-					</div>
-				</div>
-				<dl>
-					<dt>Age:</dt>
-					<dd>{age(cl.status.creationTime)}</dd>
-					<dt>Status:</dt>
-					<dd>{cl.status.status}</dd>
-					<dt>Version:</dt>
-					{#if cl.applicationBundle.preview}
-						<dd>{cl.applicationBundle.version} <span class="detail">Preview</span></dd>
-					{:else if cl.applicationBundle.endOfLife}
-						<dd>
-							{cl.applicationBundle.version}
-							<span class="detail"
-								>EOL {new Date(cl.applicationBundle.endOfLife).toDateString()}</span
-							>
-						</dd>
-					{:else}
-						<dd>{cl.applicationBundle.version}</dd>
-					{/if}
-					<dt>Kubernetes:</dt>
-					<dd>{cl.controlPlane.version}</dd>
-				</dl>
-			</Item>
-		{/each}
-	</ItemView>
-{/if}
+						<dt>Kubernetes:</dt>
+						<dd>{cl.controlPlane.version}</dd>
+					</dl>
+				</Item>
+			{/each}
+		</ItemView>
+	{/if}
+</View>
 
 <style>
 	iconify-icon {
@@ -339,7 +339,8 @@
 		font-size: 0.75rem;
 		color: var(--mid-grey);
 	}
-	.nx {
-		flex-direction: revert;
+	.buttons {
+		display: flex;
+		gap: var(--padding);
 	}
 </style>

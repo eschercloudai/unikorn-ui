@@ -630,7 +630,7 @@
 			<h2>Workload Pools</h2>
 
 			{#each workloadPools as pool, index}
-				<section>
+				<section class="workloadpool">
 					<WorkloadPoolEdit
 						existing={pool.existing}
 						{flavors}
@@ -679,11 +679,13 @@
 		padding: var(--padding);
 		gap: var(--padding);
 	}
-	form > section {
-		margin: 0;
+	.workloadpool {
 		padding: var(--padding);
 		border: 1px solid var(--brand);
 		align-items: stretch;
+		display: flex;
+		flex-direction: column;
+		gap: var(--padding);
 	}
 	dl {
 		grid-row: 2;

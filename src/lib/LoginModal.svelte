@@ -96,12 +96,4 @@
 		gap: var(--padding);
 		padding: var(--padding);
 	}
-
-	/* Desktop overrides */
-	@media only screen and (min-width: 720px) {
-		.login-modal-header > img {
-			padding-left: 5em;
-			padding-right: 5em;
-		}
-	}
 </style>

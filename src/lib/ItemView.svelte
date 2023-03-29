@@ -8,9 +8,6 @@
 		display: flex;
 		flex-direction: column;
 		gap: var(--padding);
-		/* TODO: this is a bit of hack due to the shadows... */
-		margin: var(--padding);
-		margin-top: 0;
 	}
 
 	@media only screen and (min-width: 720px) {
