@@ -170,7 +170,11 @@
 
 	// When images update, or the version, then trigger an update to the
 	// version filtered view of images.
-	$: if (allImages.length > 0 && version != null) {
+	function updateCPImages(allImages, version) {
+		if (allImages.length == 0 || version == null) {
+			return;
+		}
+
 		let i = [];
 
 		for (const image of allImages) {
@@ -182,6 +186,8 @@
 		images = i;
 		image = images[0];
 	}
+
+	$: updateCPImages(allImages, version);
 
 	// Update the flavors available.
 	async function updateFlavors(t) {
