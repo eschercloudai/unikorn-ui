@@ -108,13 +108,13 @@
 	let autoUpgradeDaysOfWeek = false;
 
 	let daysOfTheWeekWindows = {
-		Sunday: {},
-		Monday: {},
-		Tuesday: {},
-		Wednesday: {},
-		Thursday: {},
-		Friday: {},
-		Saturday: {}
+		sunday: {},
+		monday: {},
+		tuesday: {},
+		wednesday: {},
+		thursday: {},
+		friday: {},
+		saturday: {}
 	};
 
 	// Add a new workload pool to the list.
@@ -459,7 +459,7 @@
 						continue;
 					}
 
-					Object.defineProperty(dow, day.toLowerCase(), {
+					Object.defineProperty(dow, day, {
 						enumerable: true,
 						value: {
 							start: o.start,
@@ -601,8 +601,8 @@
 							{#if autoUpgradeDaysOfWeek}
 								{#each Object.keys(daysOfTheWeekWindows) as day}
 									<TimeWindowField
-										id="autoupgrade-{day.toLowerCase()}"
-										label={day}
+										id="autoupgrade-{day}"
+										label="Enable {day}?"
 										bind:object={daysOfTheWeekWindows[day]}
 									/>
 								{/each}
@@ -818,6 +818,14 @@
 		flex-direction: column;
 		align-items: stretch;
 		padding: var(--padding);
+		gap: var(--padding);
+	}
+	.autoupgrade {
+		padding: var(--padding);
+		border: 1px solid var(--brand);
+		align-items: stretch;
+		display: flex;
+		flex-direction: column;
 		gap: var(--padding);
 	}
 	.workloadpool {

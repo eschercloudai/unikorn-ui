@@ -39,13 +39,13 @@
 	let autoUpgradeDaysOfWeek = false;
 
 	let daysOfTheWeekWindows = {
-		Sunday: {},
-		Monday: {},
-		Tuesday: {},
-		Wednesday: {},
-		Thursday: {},
-		Friday: {},
-		Saturday: {}
+		sunday: {},
+		monday: {},
+		tuesday: {},
+		wednesday: {},
+		thursday: {},
+		friday: {},
+		saturday: {}
 	};
 
 	function reset() {
@@ -159,7 +159,7 @@
 						continue;
 					}
 
-					Object.defineProperty(dow, day.toLowerCase(), {
+					Object.defineProperty(dow, day, {
 						enumerable: true,
 						value: {
 							start: o.start,
@@ -245,8 +245,8 @@
 						{#if autoUpgradeDaysOfWeek}
 							{#each Object.keys(daysOfTheWeekWindows) as day}
 								<TimeWindowField
-									id="autoupgrade-{day.toLowerCase()}"
-									label={day}
+									id="autoupgrade-{day}"
+									label="Enable {day}?"
 									bind:object={daysOfTheWeekWindows[day]}
 								/>
 							{/each}

@@ -6,11 +6,19 @@
 	export let id;
 	export let label;
 
+	export let existing = null;
+
 	export let enabled = false;
 	export let start = 0;
 	export let end = 7;
 
 	export let object;
+
+	if (existing) {
+		enabled = true;
+		start = existing.start;
+		end = existing.end;
+	}
 
 	$: {
 		object = {
