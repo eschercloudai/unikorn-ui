@@ -19,3 +19,11 @@ export function flavorFormatter(f) {
 		return `${f.name} (${f.cpus} core, ${f.memory}Gi)`;
 	}
 }
+
+export function timeOfDayFormatter(x) {
+	if (x < 10) {
+		return `0${x}:00 UTC`;
+	}
+
+	return `${x}:00 UTC`;
+}
