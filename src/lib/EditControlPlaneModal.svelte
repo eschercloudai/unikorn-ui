@@ -9,6 +9,8 @@
 
 	import Modal from '$lib/Modal.svelte';
 	import SelectField from '$lib/SelectField.svelte';
+	import CheckBoxField from '$lib/CheckBoxField.svelte';
+	import TimeWindowField from '$lib/TimeWindowField.svelte';
 
 	// control planes to edit.
 	export let controlPlane;
@@ -22,6 +24,41 @@
 	// Control plane versioning support.
 	let applicationBundles = [];
 	let applicationBundle = null;
+
+	let autoUpgrade = controlPlane.applicationBundleAutoUpgrade != null;
+	let autoUpgradeDaysOfWeek =
+		controlPlane.applicationBundleAutoUpgrade != null &&
+		controlPlane.applicationBundleAutoUpgrade.daysOfWeek != null;
+
+	let daysOfTheWeekWindows = {
+		sunday: {},
+		monday: {},
+		tuesday: {},
+		wednesday: {},
+		thursday: {},
+		friday: {},
+		saturday: {}
+	};
+
+	function getExistingDayOfWeek(day) {
+		if (!controlPlane.applicationBundleAutoUpgrade) {
+			return null;
+		}
+
+		if (!controlPlane.applicationBundleAutoUpgrade.daysOfWeek) {
+			return null;
+		}
+
+		const desc = Object.getOwnPropertyDescriptor(
+			controlPlane.applicationBundleAutoUpgrade.daysOfWeek,
+			day
+		);
+		if (!desc) {
+			return null;
+		}
+
+		return desc.value;
+	}
 
 	function reset() {
 		applicationBundles = [];
@@ -83,6 +120,35 @@
 
 		body.applicationBundle = applicationBundle;
 
+		delete body.applicationBundleAutoUpgrade;
+
+		if (autoUpgrade) {
+			// Empty object means platform managed.
+			const aa = {};
+
+			if (autoUpgradeDaysOfWeek) {
+				let dow = {};
+
+				for (const [day, o] of Object.entries(daysOfTheWeekWindows)) {
+					if (!o.enabled) {
+						continue;
+					}
+
+					Object.defineProperty(dow, day, {
+						enumerable: true,
+						value: {
+							start: o.start,
+							end: o.end
+						}
+					});
+				}
+
+				aa.daysOfWeek = dow;
+			}
+
+			body.applicationBundleAutoUpgrade = aa;
+		}
+
 		await updateControlPlane(controlPlane.name, {
 			token: token.get().token,
 			body: body,
@@ -127,6 +193,35 @@
 					bind:options={applicationBundles}
 					bind:value={applicationBundle}
 				/>
+
+				<CheckBoxField
+					id="autoUpgrade"
+					label="Enable auto-upgrade?"
+					help="Enables auto-upgrade of the control plane application bundle.  When checked the default setting will be to perform upgrades randomly from Monday-Friday 00:00-07:00 UTC.  This allows support to be be readily available in the rare event of disruption."
+					bind:checked={autoUpgrade}
+				/>
+
+				{#if autoUpgrade}
+					<section class="autoupgrade">
+						<CheckBoxField
+							id="autoUpgradeDaysOfWeek"
+							label="Enable auto-upgrade scheduling?"
+							help="The default auto-upgrade time-windows are recommended.  If this isn't suitable for your use case, this allows the days and time-windows to be manually specified."
+							bind:checked={autoUpgradeDaysOfWeek}
+						/>
+
+						{#if autoUpgradeDaysOfWeek}
+							{#each Object.keys(daysOfTheWeekWindows) as day}
+								<TimeWindowField
+									id="autoupgrade-{day}"
+									label="Enable {day}?"
+									existing={getExistingDayOfWeek(day)}
+									bind:object={daysOfTheWeekWindows[day]}
+								/>
+							{/each}
+						{/if}
+					</section>
+				{/if}
 			</section>
 		</details>
 
@@ -144,6 +239,14 @@
 </Modal>
 
 <style>
+	.autoupgrade {
+		padding: var(--padding);
+		border: 1px solid var(--brand);
+		align-items: stretch;
+		display: flex;
+		flex-direction: column;
+		gap: var(--padding);
+	}
 	div.buttons {
 		display: flex;
 		justify-content: center;
