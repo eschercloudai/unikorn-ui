@@ -754,7 +754,18 @@
 			</div>
 		</form>
 	{:else}
-		<h3>Loading ...</h3>
+		<div class="loader">
+			<div class="loader-content">
+				<h2>Loading ...</h2>
+				<img src="img/wait.png" alt="A sleepy cat" />
+				<p>
+					<a
+						href="https://www.freepik.com/free-vector/cute-cat-sleeping-with-chick-cartoon-vector-icon-illustration-animal-nature-icon-concept-isolated_28268935.htm#query=sleeping%20cat&position=40&from_view=keyword&track=ais"
+						>Image by catalyststuff</a
+					> on Freepik
+				</p>
+			</div>
+		</div>
 	{/if}
 </Modal>
 
@@ -770,6 +781,22 @@
 		align-items: stretch;
 		padding: var(--padding);
 		gap: var(--padding);
+	}
+	.loader {
+		display: flex;
+		flex-direction: column;
+		justify-content: center;
+		flex: 1;
+	}
+	.loader-content {
+		display: flex;
+		flex-direction: column;
+		align-items: center;
+		gap: var(--padding);
+		padding: var(--padding);
+	}
+	.loader-content > img {
+		max-width: 300px;
 	}
 	.autoupgrade {
 		padding: var(--padding);
