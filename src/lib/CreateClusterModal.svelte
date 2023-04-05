@@ -810,12 +810,12 @@
 			<div class="loader-content">
 				<h2>Loading ...</h2>
 				<img src="img/wait.png" alt="A sleepy cat" />
-				<p>
+				<div class="attribution">
 					<a
 						href="https://www.freepik.com/free-vector/cute-cat-sleeping-with-chick-cartoon-vector-icon-illustration-animal-nature-icon-concept-isolated_28268935.htm#query=sleeping%20cat&position=40&from_view=keyword&track=ais"
 						>Image by catalyststuff</a
 					> on Freepik
-				</p>
+				</div>
 			</div>
 		</div>
 	{/if}
@@ -849,6 +849,9 @@
 	}
 	.loader-content > img {
 		max-width: 300px;
+	}
+	.attribution {
+		font-size: 0.75em;
 	}
 	.autoupgrade {
 		padding: var(--padding);

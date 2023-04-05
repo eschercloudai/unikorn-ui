@@ -232,7 +232,14 @@
 <View>
 	{#if controlPlanes.length == 0}
 		<section class="sad-kitty">
-			<iconify-icon icon="emojione:crying-cat-face" />
+			<img src="img/sad.png" alt="A sad kitty" />
+			<div class="attribution">
+				<a
+					href="https://www.freepik.com/free-vector/cute-cat-crying-cartoon-vector-icon-illustration-animal-nature-icon-concept-isolated-premium-vector_30924706.htm#query=cat%20sad&position=0&from_view=author"
+					>Image by catalyststuff</a
+				>
+				on Freepik
+			</div>
 			<p>No control planes found. Create one first to enable cluster creation.</p>
 		</section>
 	{:else}
@@ -318,12 +325,17 @@
 		display: flex;
 		flex-direction: column;
 		align-items: center;
+		gap: var(--padding);
 	}
-	section.sad-kitty iconify-icon {
-		font-size: 5rem;
+	section.sad-kitty > img {
+		max-width: 200px;
+		padding-right: 40px;
 	}
 	section.sad-kitty p {
 		color: var(--mid-grey);
+	}
+	.attribution {
+		font-size: 0.75em;
 	}
 	dl {
 		display: grid;
