@@ -202,9 +202,6 @@
 			return;
 		}
 
-		// TODO: push this into server.
-		results.sort((a, b) => a.name < b.name);
-
 		const cpf = [];
 
 		for (const result of results) {

@@ -259,9 +259,6 @@
 			return;
 		}
 
-		// TODO: push this into server.
-		results.sort((a, b) => a.name < b.name);
-
 		flavors = results;
 		cpFlavors = flavors.filter((x) => x.gpus == null);
 	}
