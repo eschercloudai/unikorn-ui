@@ -76,6 +76,8 @@
 		saturday: {}
 	};
 
+	let advanced = false;
+
 	function getExistingDayOfWeek(day) {
 		if (!cluster.applicationBundleAutoUpgrade) {
 			return null;
@@ -542,110 +544,126 @@
 				<dd>{controlPlane.name}</dd>
 			</dl>
 
-			<details>
-				<summary>Lifecycle (Advanced)</summary>
+			<SelectField
+				id="version"
+				help="Kubernetes version to provision with."
+				bind:options={versions}
+				bind:value={version}
+			/>
 
-				<section>
-					<p>
-						The platform will automatically upgrade clusters to provide confidence in security, and
-						periodically enable new features. This section describes those defaults and, where
-						applicable, allows you to fine tune those settings.
-					</p>
+			<CheckBoxField
+				id="advanced"
+				label="Enable advanced options?"
+				help="Enables advanced configuration options."
+				bind:checked={advanced}
+			/>
 
-					<SelectField
-						id="appbundle"
-						help="Selects the cluster version. Versions marked as <em>Preview</em> are early release
+			{#if advanced}
+				<details>
+					<summary>Lifecycle (Advanced)</summary>
+
+					<section>
+						<p>
+							The platform will automatically upgrade clusters to provide confidence in security,
+							and periodically enable new features. This section describes those defaults and, where
+							applicable, allows you to fine tune those settings.
+						</p>
+
+						<SelectField
+							id="appbundle"
+							help="Selects the cluster version. Versions marked as <em>Preview</em> are early release
                                                 candidates, and may have undergone less rigorous testing. Versions marked
                                                 <em>End-of-Life</em> indicate the date when they will be automatically upgraded by the platform."
-						formatter={applicationBundleFormatter}
-						bind:options={applicationBundles}
-						bind:value={applicationBundle}
-					/>
+							formatter={applicationBundleFormatter}
+							bind:options={applicationBundles}
+							bind:value={applicationBundle}
+						/>
 
-					<CheckBoxField
-						id="autoUpgrade"
-						label="Enable auto-upgrade?"
-						help="Enables auto-upgrade of the cluster application bundle.  When checked the default setting will be to perform upgrades randomly from Monday-Friday 00:00-07:00 UTC.  This allows support to be be readily available in the rare event of disruption."
-						bind:checked={autoUpgrade}
-					/>
+						<CheckBoxField
+							id="autoUpgrade"
+							label="Enable auto-upgrade?"
+							help="Enables auto-upgrade of the cluster application bundle.  When checked the default setting will be to perform upgrades randomly from Monday-Friday 00:00-07:00 UTC.  This allows support to be be readily available in the rare event of disruption."
+							bind:checked={autoUpgrade}
+						/>
 
-					{#if autoUpgrade}
-						<section class="autoupgrade">
-							<CheckBoxField
-								id="autoUpgradeDaysOfWeek"
-								label="Enable auto-upgrade scheduling?"
-								help="The default auto-upgrade time-windows are recommended.  If this isn't suitable for your use case, this allows the days and time-windows to be manually specified."
-								bind:checked={autoUpgradeDaysOfWeek}
-							/>
+						{#if autoUpgrade}
+							<section class="autoupgrade">
+								<CheckBoxField
+									id="autoUpgradeDaysOfWeek"
+									label="Enable auto-upgrade scheduling?"
+									help="The default auto-upgrade time-windows are recommended.  If this isn't suitable for your use case, this allows the days and time-windows to be manually specified."
+									bind:checked={autoUpgradeDaysOfWeek}
+								/>
 
-							{#if autoUpgradeDaysOfWeek}
-								{#each Object.keys(daysOfTheWeekWindows) as day}
-									<TimeWindowField
-										id="autoupgrade-{day}"
-										label="Enable {day}?"
-										existing={getExistingDayOfWeek(day)}
-										bind:object={daysOfTheWeekWindows[day]}
-									/>
-								{/each}
-							{/if}
-						</section>
-					{/if}
-				</section>
-			</details>
+								{#if autoUpgradeDaysOfWeek}
+									{#each Object.keys(daysOfTheWeekWindows) as day}
+										<TimeWindowField
+											id="autoupgrade-{day}"
+											label="Enable {day}?"
+											existing={getExistingDayOfWeek(day)}
+											bind:object={daysOfTheWeekWindows[day]}
+										/>
+									{/each}
+								{/if}
+							</section>
+						{/if}
+					</section>
+				</details>
 
-			<details>
-				<summary>Topology (Advanced)</summary>
+				<details>
+					<summary>Topology (Advanced)</summary>
 
-				<section>
-					<p>
-						Cluster topology defines top-level scheduling/placement, and allows you to explicitly
-						define availability zones in which to provision infrastructure for high-availability.
-					</p>
-					<p>By default the platform will schedule across any availabilty zone.</p>
+					<section>
+						<p>
+							Cluster topology defines top-level scheduling/placement, and allows you to explicitly
+							define availability zones in which to provision infrastructure for high-availability.
+						</p>
+						<p>By default the platform will schedule across any availabilty zone.</p>
 
-					<SelectField
-						id="compute-az"
-						help="Select the global availability zone for compute instances. You can override this on a
+						<SelectField
+							id="compute-az"
+							help="Select the global availability zone for compute instances. You can override this on a
                                                 per-workload pool basis to improve cluster availability."
-						formatter={namedObjectFormatter}
-						bind:options={computeAZs}
-						bind:value={computeAZ}
-					/>
-				</section>
-			</details>
+							formatter={namedObjectFormatter}
+							bind:options={computeAZs}
+							bind:value={computeAZ}
+						/>
+					</section>
+				</details>
 
-			<details>
-				<summary>Networking (Advanced)</summary>
+				<details>
+					<summary>Networking (Advanced)</summary>
 
-				<section>
-					<p>
-						Network settings are optional, and if not specified will yield stable and scalable
-						defaults.
-					</p>
-					<p>
-						It is possible to connect Kubernetes clusters together with virtual private networks
-						(VPNs). While this is discouraged, you must ensure that network CIDRs are globally
-						unique and do not overlap.
-					</p>
+					<section>
+						<p>
+							Network settings are optional, and if not specified will yield stable and scalable
+							defaults.
+						</p>
+						<p>
+							It is possible to connect Kubernetes clusters together with virtual private networks
+							(VPNs). While this is discouraged, you must ensure that network CIDRs are globally
+							unique and do not overlap.
+						</p>
 
-					<SelectField
-						id="keypair"
-						help="SSH key pair to include on each node. It is advised this not be used to improve
+						<SelectField
+							id="keypair"
+							help="SSH key pair to include on each node. It is advised this not be used to improve
                                                 security."
-						nullable="true"
-						formatter={namedObjectFormatter}
-						bind:options={keyPairs}
-						bind:value={keyPair}
-					/>
+							nullable="true"
+							formatter={namedObjectFormatter}
+							bind:options={keyPairs}
+							bind:value={keyPair}
+						/>
 
-					<TextField
-						id="allowedPrefixes"
-						placeholder="1.2.3.4/32,7.8.0.0/16"
-						help="Comma separated list of IPv4 CIDR blocks to permit access to the Kubernetes API."
-						bind:value={allowedPrefixes}
-					/>
-				</section>
-			</details>
+						<TextField
+							id="allowedPrefixes"
+							placeholder="1.2.3.4/32,7.8.0.0/16"
+							help="Comma separated list of IPv4 CIDR blocks to permit access to the Kubernetes API."
+							bind:value={allowedPrefixes}
+						/>
+					</section>
+				</details>
+			{/if}
 
 			<details>
 				<summary>Add-on Features</summary>
@@ -668,56 +686,51 @@
 				</section>
 			</details>
 
-			<h2>Control Plane</h2>
+			{#if advanced}
+				<h2>Control Plane</h2>
 
-			<SelectField
-				id="version"
-				help="Kubernetes version to provision with."
-				bind:options={versions}
-				bind:value={version}
-			/>
+				<SelectField
+					id="image"
+					help="Virtual machine image to use."
+					formatter={namedObjectFormatter}
+					bind:options={images}
+					bind:value={image}
+				/>
 
-			<SelectField
-				id="image"
-				help="Virtual machine image to use."
-				formatter={namedObjectFormatter}
-				bind:options={images}
-				bind:value={image}
-			/>
+				<SelectField
+					id="flavor"
+					help="Virtual machine type to use."
+					formatter={flavorFormatter}
+					bind:options={cpFlavors}
+					bind:value={flavor}
+				/>
 
-			<SelectField
-				id="flavor"
-				help="Virtual machine type to use."
-				formatter={flavorFormatter}
-				bind:options={cpFlavors}
-				bind:value={flavor}
-			/>
+				<SliderField
+					id="disk"
+					help="The size of the root disk."
+					min="50"
+					max="2000"
+					step="50"
+					formatter={(x) => `${x}GiB`}
+					bind:value={disk}
+				/>
 
-			<SliderField
-				id="disk"
-				help="The size of the root disk."
-				min="50"
-				max="2000"
-				step="50"
-				formatter={(x) => `${x}GiB`}
-				bind:value={disk}
-			/>
+				<details>
+					<summary>Advanced Options</summary>
 
-			<details>
-				<summary>Advanced Options</summary>
-
-				<section>
-					<SliderField
-						id="replicas"
-						help="Number of virtual machines. The default (3) is generally cost effective while providing
+					<section>
+						<SliderField
+							id="replicas"
+							help="Number of virtual machines. The default (3) is generally cost effective while providing
                                                 high-availability."
-						min="1"
-						max="9"
-						step="2"
-						bind:value={replicas}
-					/>
-				</section>
-			</details>
+							min="1"
+							max="9"
+							step="2"
+							bind:value={replicas}
+						/>
+					</section>
+				</details>
+			{/if}
 
 			<h2>Workload Pools</h2>
 
@@ -729,6 +742,7 @@
 						{images}
 						{computeAZs}
 						bind:object={pool.object}
+						bind:advanced
 					/>
 					<button on:click={() => removePool(index)}>
 						<iconify-icon icon="mdi:delete" />

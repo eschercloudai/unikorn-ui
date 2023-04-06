@@ -13,6 +13,7 @@
 	export let flavors;
 	export let images;
 	export let computeAZs;
+	export let advanced;
 
 	// These are all the things that can be configured.  With defaults for
 	// creating a new pool...
@@ -151,13 +152,15 @@
 	/>
 {/if}
 
-<SelectField
-	id="image"
-	help="Virtual machine image to use."
-	formatter={namedObjectFormatter}
-	bind:options={images}
-	bind:value={image}
-/>
+{#if advanced}
+	<SelectField
+		id="image"
+		help="Virtual machine image to use."
+		formatter={namedObjectFormatter}
+		bind:options={images}
+		bind:value={image}
+	/>
+{/if}
 
 <SelectField
 	id="flavor"
@@ -211,27 +214,29 @@
 	/>
 {/if}
 
-<details>
-	<summary>Advanced Options</summary>
+{#if advanced}
+	<details>
+		<summary>Advanced Options</summary>
 
-	<section>
-		<TextField
-			id="labels"
-			placeholder="key1=value1,key2=value2"
-			help="Comma separated set of labels to apply to Kubernetes nodes on creation."
-			bind:value={labels}
-		/>
+		<section>
+			<TextField
+				id="labels"
+				placeholder="key1=value1,key2=value2"
+				help="Comma separated set of labels to apply to Kubernetes nodes on creation."
+				bind:value={labels}
+			/>
 
-		<SelectField
-			id="computeAZ"
-			help="Availability zone to provision the pool in."
-			formatter={namedObjectFormatter}
-			nullable="true"
-			bind:options={computeAZs}
-			bind:value={computeAZ}
-		/>
-	</section>
-</details>
+			<SelectField
+				id="computeAZ"
+				help="Availability zone to provision the pool in."
+				formatter={namedObjectFormatter}
+				nullable="true"
+				bind:options={computeAZs}
+				bind:value={computeAZ}
+			/>
+		</section>
+	</details>
+{/if}
 
 <style>
 	dl {
