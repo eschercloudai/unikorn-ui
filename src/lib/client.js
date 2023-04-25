@@ -18,23 +18,40 @@ async function request(method, path, opts) {
 
 		const response = await fetch(path, options);
 
+		const contentType = response.headers.get('Content-Type');
+
 		if (!response.ok) {
+			let message = null;
+
+			if (contentType == 'application/json') {
+				let error = await response.json();
+
+				message = `Error: ${error.error}, Description: ${error.error_description}`;
+			}
+
 			if (response.status == 400 && opts.onBadRequest) {
-				opts.onBadRequest();
+				opts.onBadRequest(message);
 			} else if (response.status == 401 && opts.onUnauthorized) {
-				opts.onUnauthorized();
+				opts.onUnauthorized(message);
 			} else if (response.status == 404 && opts.onNotFound) {
-				opts.onNotFound();
+				opts.onNotFound(message);
 			} else if (response.status == 409 && opts.onConflict) {
-				opts.onConflict();
+				opts.onConflict(message);
 			} else {
-				console.log('unhandled status', response.status, 'method', method, 'path', path);
+				console.log(
+					'unhandled status',
+					response.status,
+					'method',
+					method,
+					'path',
+					path,
+					'message',
+					message
+				);
 			}
 
 			return null;
 		}
-
-		const contentType = response.headers.get('Content-Type');
 
 		if (contentType == null) {
 			return null;
@@ -102,6 +119,10 @@ export function listExternalNetworks(opts) {
 
 export function createProject(opts) {
 	return request('POST', `/api/v1/project`, opts);
+}
+
+export function getProject(opts) {
+	return request('GET', `/api/v1/project`, opts);
 }
 
 export function listControlPlanes(opts) {

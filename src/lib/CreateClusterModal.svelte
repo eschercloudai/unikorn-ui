@@ -1,6 +1,7 @@
 <script>
 	import { onMount, onDestroy } from 'svelte';
 	import { token } from '$lib/credentials.js';
+	import { errors } from '$lib/errors.js';
 	import { createEventDispatcher } from 'svelte';
 
 	import {
@@ -541,6 +542,11 @@
 
 		await createCluster(controlPlane.name, {
 			token: token.get().token,
+			onBadRequest: (message) => {
+				if (message) {
+					errors.add(message);
+				}
+			},
 			onUnauthorized: () => {
 				token.remove();
 			},
