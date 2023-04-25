@@ -33,6 +33,8 @@ async function request(method, path, opts) {
 				opts.onBadRequest(message);
 			} else if (response.status == 401 && opts.onUnauthorized) {
 				opts.onUnauthorized(message);
+			} else if (response.status == 403 && opts.onForbidden) {
+				opts.onForbidden(message);
 			} else if (response.status == 404 && opts.onNotFound) {
 				opts.onNotFound(message);
 			} else if (response.status == 409 && opts.onConflict) {

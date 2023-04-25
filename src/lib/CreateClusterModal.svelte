@@ -416,12 +416,18 @@
 			onUnauthorized: () => {
 				token.remove();
 			},
+			onForbidden: (message) => {
+				if (message) {
+					errors.add(message);
+				}
+			},
 			body: {
 				name: appCredName(name)
 			}
 		});
 
 		if (ac == null) {
+			active = false;
 			return;
 		}
 
