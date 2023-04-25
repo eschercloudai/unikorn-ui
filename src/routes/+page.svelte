@@ -15,6 +15,7 @@
 	import DashboardView from '$lib/DashboardView.svelte';
 	import ControlPlaneView from '$lib/ControlPlaneView.svelte';
 	import ClusterView from '$lib/ClusterView.svelte';
+	import Errors from '$lib/Errors.svelte';
 
 	let showmenu = false;
 
@@ -186,6 +187,7 @@
 
 <main class:showmenu>
 	<Breadcrumbs />
+	<Errors />
 	{#if content == 'dashboard'}
 		<DashboardView />
 	{:else if content == 'kubernetes-control-planes'}

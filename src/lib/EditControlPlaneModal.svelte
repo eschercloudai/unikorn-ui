@@ -1,6 +1,7 @@
 <script>
 	import { onMount, onDestroy } from 'svelte';
 	import { token } from '$lib/credentials.js';
+	import { errors } from '$lib/errors.js';
 	import { createEventDispatcher } from 'svelte';
 
 	import { updateControlPlane, listApplicationBundlesControlPlane } from '$lib/client.js';
@@ -152,8 +153,10 @@
 		await updateControlPlane(controlPlane.name, {
 			token: token.get().token,
 			body: body,
-			onBadRequest: () => {
-				console.log('you have made a mistake');
+			onBadRequest: (message) => {
+				if (message) {
+					errors.add(message);
+				}
 			},
 			onUnauthorized: () => {
 				token.remove();
