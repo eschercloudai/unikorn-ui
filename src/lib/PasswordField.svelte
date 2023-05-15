@@ -29,7 +29,7 @@
 	$: valid = validator ? validator(value) : true;
 </script>
 
-<input {id} type="text" {placeholder} {autocomplete} {required} bind:value />
+<input {id} type="password" {placeholder} {autocomplete} {required} bind:value />
 {#if help}
 	<label for={id} class="fieldlabel">{@html help}</label>
 {/if}
