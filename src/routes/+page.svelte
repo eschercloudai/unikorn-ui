@@ -126,7 +126,7 @@
 			return;
 		}
 
-		token.set(result.token, token.scoped, result.email, project.id);
+		token.set(result.access_token, token.scoped, t.email, project.id);
 	}
 
 	// When a menu item is selected, hide the menu and update the

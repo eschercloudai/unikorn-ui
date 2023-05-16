@@ -2,7 +2,6 @@
 	import { browser } from '$app/environment';
 	import { onMount, onDestroy } from 'svelte';
 	import { token } from '$lib/credentials.js';
-	import { createToken } from '$lib/client.js';
 
 	import Base64url from 'crypto-js/enc-base64url';
 	import SHA256 from 'crypto-js/sha256';
@@ -72,20 +71,29 @@
 
 			case 'OpenStack Keystone':
 				{
-					// TODO: need an error reporting mechanism in the
-					// login modal, also need to do this for the oauth2
-					// callback.
-					const result = await createToken({
+					const form = new URLSearchParams({
+						grant_type: 'password',
 						username: username,
-						password: password,
-						onUnauthorized: () => {}
+						password: password
 					});
 
-					if (token == null) {
-						return;
-					}
+					const options = {
+						method: 'POST',
+						headers: {
+							'Content-Type': 'application/x-www-form-urlencoded'
+						},
+						body: form.toString()
+					};
 
-					token.set(result.token, token.unscoped, result.email);
+					const response = await fetch(
+						`https://${window.location.host}/api/v1/auth/oauth2/tokens`,
+						options
+					);
+
+					// TODO: error handling.
+					const result = await response.json();
+
+					token.set(result.access_token, token.unscoped, result.email);
 				}
 
 				break;
