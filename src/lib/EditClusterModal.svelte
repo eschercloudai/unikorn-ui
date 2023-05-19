@@ -105,6 +105,7 @@
 	let allowedPrefixes = cluster.api ? cluster.api.allowedPrefixes.join(',') : null;
 	let autoscaling = cluster.features && cluster.features.autoscaling;
 	let ingress = cluster.features && cluster.features.ingress;
+	let certManager = cluster.features && cluster.features.certManager;
 
 	let workloadPools = [];
 
@@ -489,6 +490,18 @@
 			}
 		}
 
+		if (certManager) {
+			if (!body.features) {
+				body.features = {};
+			}
+
+			body.features.certManager = true;
+		} else {
+			if (body.features) {
+				delete body.features.certManager;
+			}
+		}
+
 		for (const p of workloadPools) {
 			const wp = p.object;
 
@@ -677,7 +690,7 @@
 				<section>
 					<p>
 						Add-on features allow the management of typical Kubernetes componenents that are not
-						include by default, but are considered standard.
+						included by default, but are considered standard.
 					</p>
 					<p>
 						They are not enabled by default to improve baseline security and resource utilisation.
@@ -688,6 +701,13 @@
 						label="Enable ingress controller?"
 						help="Enables Nginx ingress controller"
 						bind:checked={ingress}
+					/>
+
+					<CheckBoxField
+						id="cert-manager"
+						label="Enable cert-manager controller?"
+						help="Enables cert-manager TLS certificate management controller"
+						bind:checked={certManager}
 					/>
 				</section>
 			</details>
