@@ -87,6 +87,7 @@
 	// Whether the cluster-autoscaler add-on is provisioned.
 	let autoscaling = false;
 	let ingress = false;
+	let certManager = false;
 
 	// A set of workload pools for the cluster.
 	let workloadPools = [];
@@ -502,7 +503,7 @@
 			}
 		}
 
-		if (autoscaling || ingress) {
+		if (autoscaling || ingress || certManager) {
 			body.features = {};
 
 			if (autoscaling) {
@@ -511,6 +512,10 @@
 
 			if (ingress) {
 				body.features.ingress = true;
+			}
+
+			if (certManager) {
+				body.features.certManager = true;
 			}
 		}
 
@@ -741,7 +746,7 @@
 				<section>
 					<p>
 						Add-on features allow the management of typical Kubernetes componenents that are not
-						include by default, but are considered standard.
+						included by default, but are considered standard.
 					</p>
 					<p>
 						They are not enabled by default to improve baseline security and resource utilisation.
@@ -752,6 +757,13 @@
 						label="Enable ingress controller?"
 						help="Enables Nginx ingress controller"
 						bind:checked={ingress}
+					/>
+
+					<CheckBoxField
+						id="cert-manager"
+						label="Enable cert-manager controller?"
+						help="Enables cert-manager TLS certificate management controller"
+						bind:checked={certManager}
 					/>
 				</section>
 			</details>

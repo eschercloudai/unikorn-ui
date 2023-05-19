@@ -2,12 +2,16 @@
 	import { browser } from '$app/environment';
 	import { token } from '$lib/credentials.js';
 
+	let error;
+	let description;
+
 	async function handleCallback() {
 		if (browser) {
 			const location = new URL(window.location.href);
 
 			if (location.searchParams.has('error')) {
-				console.log('TODO: handle code exchange errors');
+				error = location.searchParams.get('error');
+				description = location.searchParams.get('description');
 			} else if (location.searchParams.has('code')) {
 				const code = location.searchParams.get('code');
 
@@ -46,4 +50,15 @@
 	handleCallback();
 </script>
 
-<h1>Exchanging Credentials: Just a Moment...</h1>
+{#if error}
+	<h1>An Error Occurred</h1>
+	<dl>
+		<dt>Error</dt>
+		<dd>{error}</dd>
+
+		<dt>Description</dt>
+		<dd>{description}</dd>
+	</dl>
+{:else}
+	<h1>Exchanging Credentials: Just a Moment...</h1>
+{/if}
