@@ -279,6 +279,9 @@
 		height: 1.5em;
 		border: 2px solid var(--brand);
 	}
+	:global(input[type='checkbox']:disabled) {
+		border: 2px solid var(--mid-grey);
+	}
 	:global(input[type='checkbox']::before) {
 		content: '';
 		width: 0.75em;
@@ -286,6 +289,9 @@
 		transform: scale(0);
 		transition: all 0.2s ease-in;
 		background-color: var(--brand);
+	}
+	:global(input[type='checkbox']:disabled::before) {
+		background-color: var(--mid-grey);
 	}
 	:global(input[type='checkbox']:checked::before) {
 		transform: scale(1);
