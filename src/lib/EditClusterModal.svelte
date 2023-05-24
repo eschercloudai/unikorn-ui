@@ -106,6 +106,11 @@
 	let autoscaling = cluster.features && cluster.features.autoscaling;
 	let ingress = cluster.features && cluster.features.ingress;
 	let certManager = cluster.features && cluster.features.certManager;
+	let kubernetesDashboard = cluster.features && cluster.features.kubernetesDashboard;
+
+	$: if (kubernetesDashboard) {
+		ingress = certManager = true;
+	}
 
 	let workloadPools = [];
 
@@ -502,6 +507,18 @@
 			}
 		}
 
+		if (kubernetesDashboard) {
+			if (!body.features) {
+				body.features = {};
+			}
+
+			body.features.kubernetesDashboard = true;
+		} else {
+			if (body.features) {
+				delete body.features.kubernetesDashboard;
+			}
+		}
+
 		for (const p of workloadPools) {
 			const wp = p.object;
 
@@ -701,6 +718,7 @@
 						label="Enable ingress controller?"
 						help="Enables Nginx ingress controller"
 						bind:checked={ingress}
+						disabled={kubernetesDashboard}
 					/>
 
 					<CheckBoxField
@@ -708,6 +726,14 @@
 						label="Enable cert-manager controller?"
 						help="Enables cert-manager TLS certificate management controller"
 						bind:checked={certManager}
+						disabled={kubernetesDashboard}
+					/>
+
+					<CheckBoxField
+						id="kubernetes-dashboard"
+						label="Enable Kubernetes dashboard?"
+						help="Enables Kubernetes dashboard, automatically requires ingress and cert-manager add-ons"
+						bind:checked={kubernetesDashboard}
 					/>
 				</section>
 			</details>
