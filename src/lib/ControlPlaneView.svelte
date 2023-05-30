@@ -56,7 +56,7 @@
 			return;
 		}
 
-		const bundles = bresult.reverse().filter((x) => !x.endOfLife);
+		const bundles = bresult.reverse().filter((x) => !x.endOfLife && !x.preview);
 
 		const result = await listControlPlanes({
 			token: token.get().token,
@@ -72,7 +72,6 @@
 			return;
 		}
 
-		// TODO: filter out preview builds.
 		for (const cp of result) {
 			if (cp.applicationBundle.name != bundles[0].name) {
 				cp.upgradable = true;
