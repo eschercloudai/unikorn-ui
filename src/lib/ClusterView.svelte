@@ -93,7 +93,7 @@
 			return;
 		}
 
-		const bundles = bresult.reverse().filter((x) => !x.endOfLife);
+		const bundles = bresult.reverse().filter((x) => !x.endOfLife && !x.preview);
 
 		const result = await listClusters(controlPlane.status.name, {
 			token: token.get().token,
@@ -106,7 +106,6 @@
 			return;
 		}
 
-		// TODO: filter out preview builds.
 		for (const cluster of result) {
 			if (cluster.applicationBundle.name != bundles[0].name) {
 				cluster.upgradable = true;
