@@ -1,7 +1,7 @@
 <script>
-	import { onMount, onDestroy } from 'svelte';
+	import { onDestroy } from 'svelte';
 	import { browser } from '$app/environment';
-	import { token } from '$lib/credentials.js';
+	import { token, removeCredentials } from '$lib/credentials.js';
 	import { age } from '$lib/time.js';
 	import {
 		listControlPlanes,
@@ -20,47 +20,39 @@
 	import ItemView from '$lib/ItemView.svelte';
 	import Item from '$lib/Item.svelte';
 
+	let accessToken;
+
 	let controlPlanes = [];
 	let controlPlane = null;
 	let clusters = [];
 
-	function reset() {
-		controlPlanes = [];
-		controlPlane = null;
-		clusters = [];
-	}
+	const tokenUnsubscribe = token.subscribe(changeToken);
 
-	// id is a unique identifier for the component instance.
-	let id = Symbol();
-
-	// ticker does periodic updates.
-	let ticker = null;
-
-	onMount(() => {
-		token.subscribe(id, updateControlPlanes);
-		ticker = setInterval(updateClusters, 10000);
-	});
+	const ticker = setInterval(() => updateClusters(accessToken, controlPlane), 10000);
 
 	onDestroy(() => {
 		clearInterval(ticker);
-		token.unsubscribe(id);
+		tokenUnsubscribe();
 	});
 
-	async function updateControlPlanes() {
-		let t = token.get();
+	function changeToken(value) {
+		accessToken = value;
+	}
 
-		if (t == null || t.scope == token.unscoped) {
-			reset();
+	async function updateControlPlanes(accessToken) {
+		if (accessToken == null) {
+			controlPlanes = [];
+			controlPlane = null;
 			return;
 		}
 
 		const result = await listControlPlanes({
-			token: token.get().token,
+			token: accessToken,
 			onUnauthorized: () => {
-				token.remove();
+				removeCredentials();
 			},
 			onNotFound: () => {
-				reset();
+				// no project has been created yet.
 			}
 		});
 
@@ -69,23 +61,22 @@
 		}
 
 		controlPlanes = result;
-
-		if (controlPlanes.length != 0) {
-			controlPlane = controlPlanes[0];
-
-			updateClusters();
-		}
+		controlPlane = controlPlanes.length != 0 ? controlPlanes[0] : null;
 	}
 
-	async function updateClusters() {
-		if (controlPlane == null) {
+	$: updateControlPlanes(accessToken);
+
+	// TODO: clusters update should rely on application bundles, saving API traffic.
+	async function updateClusters(accessToken, controlPlane) {
+		if (accessToken == null || controlPlane == null) {
+			clusters = [];
 			return;
 		}
 
 		const bresult = await listApplicationBundlesCluster({
-			token: token.get().token,
+			token: accessToken,
 			onUnauthorized: () => {
-				token.remove();
+				removeCredentials();
 			}
 		});
 
@@ -96,9 +87,9 @@
 		const bundles = bresult.reverse().filter((x) => !x.endOfLife && !x.preview);
 
 		const result = await listClusters(controlPlane.status.name, {
-			token: token.get().token,
+			token: accessToken,
 			onUnauthorized: () => {
-				token.remove();
+				removeCredentials();
 			}
 		});
 
@@ -114,6 +105,8 @@
 
 		clusters = result;
 	}
+
+	$: updateClusters(accessToken, controlPlane);
 
 	function statusFromResource(status) {
 		if (status.deletionTime) {
@@ -132,9 +125,9 @@
 	// Define dropdown callback handlers.
 	async function handleKubeconfig(cl) {
 		const blob = await getClusterKubeconfig(controlPlane.name, cl.name, {
-			token: token.get().token,
+			token: accessToken,
 			onUnauthorized: () => {
-				token.remove();
+				removeCredentials();
 			}
 		});
 
@@ -169,13 +162,13 @@
 
 	async function handleDelete(cl) {
 		await deleteCluster(controlPlane.name, cl.name, {
-			token: token.get().token,
+			token: accessToken,
 			onUnauthorized: () => {
-				token.remove();
+				removeCredentials();
 			}
 		});
 
-		updateClusters();
+		updateClusters(accessToken, controlPlane);
 	}
 
 	// Define the per-control plane drop down menu.
@@ -198,7 +191,7 @@
 	}
 
 	function clustersMutated() {
-		updateClusters();
+		updateClusters(accessToken, controlPlane);
 	}
 </script>
 
@@ -221,7 +214,11 @@
 {/if}
 
 <LabeledInput id="control-plane-select" value="Control Plane to display clusters for">
-	<select id="control-plane-select" bind:value={controlPlane} on:change={updateClusters}>
+	<select
+		id="control-plane-select"
+		bind:value={controlPlane}
+		on:change={() => updateClusters(accessToken, controlPlane)}
+	>
 		{#each controlPlanes as choice}
 			<option value={choice}>{choice.status.name}</option>
 		{/each}

@@ -1,6 +1,10 @@
 <script>
+	// The key to security here is to not import anything that could
+	// potentially compromise the code or tokens with a supply chain attack,
+	// so keep imports deliberately sparese please!
 	import { browser } from '$app/environment';
-	import { token } from '$lib/credentials.js';
+	import { createRemoteJWKSet, jwtVerify } from 'jose';
+	import { setCredentials } from '$lib/credentials.js';
 
 	let error;
 	let description;
@@ -40,7 +44,16 @@
 				// TODO: error handling.
 				const result = await response.json();
 
-				token.set(result.access_token, token.unscoped, result.email);
+				const jwks = createRemoteJWKSet(
+					new URL(`https://${window.location.host}/api/v1/auth/jwks`)
+				);
+
+				const jwt = await jwtVerify(result.id_token, jwks, {
+					issuer: `https://${window.location.host}`,
+					audience: '9a719e1e-aa85-4a21-a221-324e787efd78'
+				});
+
+				await setCredentials(result.access_token, jwt.payload.email);
 
 				window.location = '/';
 			}

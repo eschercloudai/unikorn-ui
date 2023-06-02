@@ -1,74 +1,100 @@
-import { browser } from '$app/environment';
+import { sessionStorage } from '$lib/sessionStorage.js';
+import { localStorage } from '$lib/localStorage.js';
+import { listProjects, createToken } from '$lib/client.js';
 
-export function writable(key) {
-	// Read the initial value;
-	let value = null;
+// project is the platform's project we are scoped to.
+export const project = localStorage('project');
 
-	if (browser) {
-		value = JSON.parse(window.sessionStorage.getItem(key));
+// token is the authorization bearer token for making API requests.
+export const token = sessionStorage('token');
+
+// email is the user's email address.
+export const email = sessionStorage('email');
+
+// This is called when the initial access token is acquired from the oauth
+// exchange.  It uses the token to rescope to a project, that's either selected
+// from persistent storage, and as a fallback, just selects the first one the
+// user has access too as a default.
+export async function setCredentials(accessToken, emailAddress) {
+	// List all projects first.
+	const projects = await listProjects({
+		token: accessToken
+	});
+
+	if (projects == null || projects.length == 0) {
+		console.log('failed to list projects, or no active projects');
+		return;
 	}
 
-	// Keep a set of subscribers.
-	const subscribers = new Map();
+	// Get the current project ID from persistent storage.  This is guaranteed
+	// to be unique, unlike names that are unique with a domain and needs more
+	// stuff storing.
+	let currentProjectID;
 
-	// Provide some constants so we know what type of token this is.
-	const scoped = 'scoped';
-	const unscoped = 'unscoped';
-
-	// get gets the initial value.
-	function get() {
-		return value;
+	function updateProject(value) {
+		currentProjectID = value;
 	}
 
-	// set sets the value and notifies all subscribers.
-	function set(new_value, kind, email, project = null) {
-		value = {
-			token: new_value,
-			scope: kind,
-			project: project,
-			email: email
-		};
+	const unsubscribe = project.subscribe(updateProject);
+	unsubscribe();
 
-		if (browser) {
-			window.sessionStorage.setItem(key, JSON.stringify(value));
+	// If the project isn't set, or doesn't exist, then we need to select one.
+	if (!currentProjectID || projects.filter((x) => x.id == currentProjectID).length == 0) {
+		currentProjectID = projects[0].id;
+	}
+
+	// Now we rescope to the project.
+	const body = {
+		project: {
+			id: currentProjectID
 		}
+	};
 
-		subscribers.forEach((run) => {
-			run(value);
-		});
+	const scopedToken = await createToken({
+		token: accessToken,
+		body: body
+	});
+
+	if (scopedToken == null) {
+		console.log('failed to rescope token');
+		return;
 	}
 
-	// remove unsets the session storage and notifies subscribers.
-	function remove() {
-		value = null;
-
-		if (browser) {
-			window.sessionStorage.removeItem(key);
-		}
-
-		subscribers.forEach((run) => {
-			run(null);
-		});
-	}
-
-	// subscribe registers the new callback and notifies
-	// it of the current value.
-	function subscribe(id, run) {
-		subscribers.set(id, run);
-
-		// Only notify the subscriber of an initial value if there is one.
-		if (value != null) {
-			run(value);
-		}
-	}
-
-	// unsubscribe removes the subscription on unmount.
-	function unsubscribe(id) {
-		subscribers.delete(id);
-	}
-
-	return { get, set, remove, subscribe, unsubscribe, scoped, unscoped };
+	// Set everything else up first, then update the token.
+	// Everything should hang off the presence of a token, so we expect the
+	// other details to be ready to be consumed by that point.
+	project.set(currentProjectID);
+	email.set(emailAddress);
+	token.set(scopedToken.access_token);
 }
 
-// token is the main token storage.
-export let token = writable('token');
+// updateCredentials rescopes the access token to the new project.
+export async function updateCredentials(accessToken, projectID) {
+	const body = {
+		project: {
+			id: projectID
+		}
+	};
+
+	const result = await createToken({
+		token: accessToken,
+		body: body,
+		onUnauthorized: () => {
+			removeCredentials();
+		}
+	});
+
+	if (result == null) {
+		return;
+	}
+
+	project.set(projectID);
+	token.set(result.access_token);
+}
+
+// Remove credentials i.e. on token expiry.
+export function removeCredentials() {
+	token.set(null);
+	email.set(null);
+	project.set(null);
+}

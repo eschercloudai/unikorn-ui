@@ -1,6 +1,6 @@
 <script>
-	import { onMount, onDestroy } from 'svelte';
-	import { token } from '$lib/credentials.js';
+	import { onDestroy } from 'svelte';
+	import { token, removeCredentials } from '$lib/credentials.js';
 	import { age } from '$lib/time.js';
 	import {
 		listControlPlanes,
@@ -16,39 +16,34 @@
 	import ItemView from '$lib/ItemView.svelte';
 	import Item from '$lib/Item.svelte';
 
+	let accessToken;
+
 	let controlPlanes = [];
 
-	function reset() {
-		controlPlanes = [];
-	}
+	const tokenUnsubscribe = token.subscribe(changeToken);
 
-	// id is a unique identifier for the component instance.
-	let id = Symbol();
-
-	let ticker = null;
-
-	onMount(() => {
-		token.subscribe(id, updateControlPlanes);
-		ticker = setInterval(updateControlPlanes, 10000);
-	});
+	const ticker = setInterval(() => updateControlPlanes(accessToken), 10000);
 
 	onDestroy(() => {
 		clearInterval(ticker);
-		token.unsubscribe(id);
+		tokenUnsubscribe();
 	});
 
-	async function updateControlPlanes() {
-		let t = token.get();
+	function changeToken(value) {
+		accessToken = value;
+	}
 
-		if (t == null || t.scope == token.unscoped) {
-			reset();
+	// TODO: control planes update should rely on application bundles, saving API traffic.
+	async function updateControlPlanes(accessToken) {
+		if (accessToken == null) {
+			controlPlanes = [];
 			return;
 		}
 
 		const bresult = await listApplicationBundlesControlPlane({
-			token: token.get().token,
+			token: accessToken,
 			onUnauthorized: () => {
-				token.remove();
+				removeCredentials();
 			}
 		});
 
@@ -59,9 +54,9 @@
 		const bundles = bresult.reverse().filter((x) => !x.endOfLife && !x.preview);
 
 		const result = await listControlPlanes({
-			token: token.get().token,
+			token: accessToken,
 			onUnauthorized: () => {
-				token.remove();
+				removeCredentials();
 			},
 			onNotFound: () => {
 				// This means the project hasn't been provisioned yet.
@@ -80,6 +75,8 @@
 
 		controlPlanes = result;
 	}
+
+	$: updateControlPlanes(accessToken);
 
 	function statusFromResource(status) {
 		if (status.deletionTime) {
@@ -108,13 +105,13 @@
 
 	async function handleDelete(cp) {
 		await deleteControlPlane(cp.name, {
-			token: token.get().token,
+			token: accessToken,
 			onUnauthorized: () => {
-				token.remove();
+				removeCredentials();
 			}
 		});
 
-		updateControlPlanes();
+		updateControlPlanes(accessToken);
 	}
 
 	// Define the per-control plane drop down menu.
@@ -130,7 +127,7 @@
 	}
 
 	function controlPlanesMutated() {
-		updateControlPlanes();
+		updateControlPlanes(accessToken);
 	}
 </script>
 
