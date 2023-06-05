@@ -1,5 +1,6 @@
 <script>
 	import { onDestroy } from 'svelte';
+	import { lt } from 'semver';
 	import { browser } from '$app/environment';
 	import { token, removeCredentials } from '$lib/credentials.js';
 	import { age } from '$lib/time.js';
@@ -98,7 +99,7 @@
 		}
 
 		for (const cluster of result) {
-			if (cluster.applicationBundle.name != bundles[0].name) {
+			if (lt(cluster.applicationBundle.version, bundles[0].version)) {
 				cluster.upgradable = true;
 			}
 		}
