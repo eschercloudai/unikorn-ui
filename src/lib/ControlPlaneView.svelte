@@ -1,5 +1,6 @@
 <script>
 	import { onDestroy } from 'svelte';
+	import { lt } from 'semver';
 	import { token, removeCredentials } from '$lib/credentials.js';
 	import { age } from '$lib/time.js';
 	import {
@@ -68,7 +69,7 @@
 		}
 
 		for (const cp of result) {
-			if (cp.applicationBundle.name != bundles[0].name) {
+			if (lt(cp.applicationBundle.version, bundles[0].version)) {
 				cp.upgradable = true;
 			}
 		}
