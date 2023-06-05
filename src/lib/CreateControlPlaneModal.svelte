@@ -1,6 +1,6 @@
 <script>
-	import { onMount, onDestroy } from 'svelte';
-	import { token } from '$lib/credentials.js';
+	import { onDestroy } from 'svelte';
+	import { token, removeCredentials } from '$lib/credentials.js';
 	import { errors } from '$lib/errors.js';
 	import { createEventDispatcher } from 'svelte';
 
@@ -24,6 +24,8 @@
 
 	// active reports whether this modal is visible or not.
 	export let active;
+
+	let accessToken;
 
 	// We will raise clusterCreated on successful cluster creation.
 	const dispatch = createEventDispatcher();
@@ -60,29 +62,22 @@
 		active = false;
 	}
 
-	// id is a unique identifier for the component instance.
-	let id = Symbol();
+	const tokenUnsubscribe = token.subscribe(updateApplicationBundles);
 
-	onMount(() => {
-		token.subscribe(id, updateApplicationBundles);
-	});
+	onDestroy(tokenUnsubscribe);
 
-	onDestroy(() => {
-		token.unsubscribe(id);
-	});
-
-	async function updateApplicationBundles() {
-		let t = token.get();
-
-		if (t == null || t.scope == token.unscoped) {
+	async function updateApplicationBundles(t) {
+		if (t == null) {
 			reset();
 			return;
 		}
 
+		accessToken = t;
+
 		const result = await listApplicationBundlesControlPlane({
-			token: token.get().token,
+			token: accessToken,
 			onUnauthorized: () => {
-				token.remove();
+				removeCredentials();
 			}
 		});
 
@@ -137,9 +132,9 @@
 	// project itself.
 	async function projectReady() {
 		const project = await getProject({
-			token: token.get().token,
+			token: accessToken,
 			onUnauthorized: () => {
-				token.remove();
+				removeCredentials();
 			}
 		});
 
@@ -185,10 +180,10 @@
 		let success = true;
 
 		await createProject({
-			token: token.get().token,
+			token: accessToken,
 			onUnauthorized: () => {
 				success = false;
-				token.remove();
+				removeCredentials();
 			}
 		});
 
@@ -209,9 +204,9 @@
 		let create = false;
 
 		let project = await getProject({
-			token: token.get().token,
+			token: accessToken,
 			onUnauthorized: () => {
-				token.remove();
+				removeCredentials();
 			},
 			onNotFound: () => {
 				create = true;
@@ -261,7 +256,7 @@
 		}
 
 		await createControlPlane({
-			token: token.get().token,
+			token: accessToken,
 			body: body,
 			onBadRequest: (message) => {
 				if (message) {
@@ -269,7 +264,7 @@
 				}
 			},
 			onUnauthorized: () => {
-				token.remove();
+				removeCredentials();
 			},
 			onConflict: (message) => {
 				if (message) {

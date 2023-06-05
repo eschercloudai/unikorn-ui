@@ -1,6 +1,6 @@
 <script>
-	import { onMount, onDestroy } from 'svelte';
-	import { token } from '$lib/credentials.js';
+	import { onDestroy } from 'svelte';
+	import { token, removeCredentials } from '$lib/credentials.js';
 	import { errors } from '$lib/errors.js';
 	import { createEventDispatcher } from 'svelte';
 
@@ -21,6 +21,8 @@
 
 	// We will raise controlPlaneUpdated on successful cluster update.
 	const dispatch = createEventDispatcher();
+
+	let accessToken;
 
 	// Control plane versioning support.
 	let applicationBundles = [];
@@ -70,29 +72,22 @@
 		active = false;
 	}
 
-	// id is a unique identifier for the component instance.
-	let id = Symbol();
+	const tokenUnsubscribe = token.subscribe(updateApplicationBundles);
 
-	onMount(() => {
-		token.subscribe(id, updateApplicationBundles);
-	});
+	onDestroy(tokenUnsubscribe);
 
-	onDestroy(() => {
-		token.unsubscribe(id);
-	});
-
-	async function updateApplicationBundles() {
-		let t = token.get();
-
-		if (t == null || t.scope == token.unscoped) {
+	async function updateApplicationBundles(t) {
+		if (t == null) {
 			reset();
 			return;
 		}
 
+		accessToken = t;
+
 		const result = await listApplicationBundlesControlPlane({
-			token: token.get().token,
+			token: accessToken,
 			onUnauthorized: () => {
-				token.remove();
+				removeCredentials();
 			}
 		});
 
@@ -151,7 +146,7 @@
 		}
 
 		await updateControlPlane(controlPlane.name, {
-			token: token.get().token,
+			token: accessToken,
 			body: body,
 			onBadRequest: (message) => {
 				if (message) {
@@ -159,7 +154,7 @@
 				}
 			},
 			onUnauthorized: () => {
-				token.remove();
+				removeCredentials();
 			}
 		});
 

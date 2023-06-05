@@ -1,11 +1,11 @@
 <script>
 	import { browser } from '$app/environment';
-	import { onMount, onDestroy } from 'svelte';
+	import { onDestroy } from 'svelte';
 	import MD5 from 'crypto-js/md5';
 
-	import { token } from '$lib/credentials.js';
+	import { token, email, project, updateCredentials, removeCredentials } from '$lib/credentials.js';
 	import { getMenu, selected } from '$lib/menu.js';
-	import { createToken, listProjects } from '$lib/client.js';
+	import { listProjects } from '$lib/client.js';
 
 	import Menu from '$lib/Menu.svelte';
 	import LoginModal from '$lib/LoginModal.svelte';
@@ -17,7 +17,45 @@
 	import ClusterView from '$lib/ClusterView.svelte';
 	import Errors from '$lib/Errors.svelte';
 
+	// Access token, this changing should trigger all the things.
+	let accessToken;
+
+	// OpenStack project ID.
+	let projectID;
+
+	// User email address from OIDC.
+	let emailAddress = '';
+
+	// TODO: we should probably cache this in session storage.
 	let showmenu = false;
+
+	// Menu to display.
+	let menu;
+
+	// Content to display.
+	let content;
+
+	// Whether or not to behave as if it's a large desktop window.
+	let desktop;
+
+	if (browser) {
+		desktop = window.matchMedia('(min-width: 720px)');
+	}
+
+	let projects = [];
+	let currentProject = null;
+
+	const emailUnsubscribe = email.subscribe(changeEmail);
+	const tokenUnsubscribe = token.subscribe(changeToken);
+	const projectUnsubscribe = project.subscribe(changeProjectID);
+	const selectedUnsubscribe = selected.subscribe(changeMenuItem);
+
+	onDestroy(() => {
+		tokenUnsubscribe();
+		emailUnsubscribe();
+		projectUnsubscribe();
+		selectedUnsubscribe();
+	});
 
 	function toggleMenu() {
 		showmenu = !showmenu;
@@ -25,50 +63,32 @@
 
 	// logout flushes the token.
 	function logout() {
-		token.remove();
+		removeCredentials();
 	}
 
-	// Watch for the token being set, then we can trigger a projects
-	// update.
-	let projects = [];
-	let project = null;
-
-	// Email address from the token.
-	let email = '';
-
-	function reset() {
-		projects = [];
-		project = null;
+	function changeProjectID(value) {
+		projectID = value;
 	}
 
-	// id is a unique identifier for the component instance.
-	let id = Symbol();
+	function changeEmail(value) {
+		emailAddress = value;
+	}
 
-	onMount(() => {
-		token.subscribe(id, changeToken);
-	});
+	function changeToken(value) {
+		accessToken = value;
+	}
 
-	onDestroy(() => {
-		token.unsubscribe(id);
-	});
-
-	async function changeToken(value) {
-		if (value == null) {
-			reset();
+	async function updateProjects(accessToken) {
+		if (accessToken == null) {
+			projects = [];
+			currentProject = null;
 			return;
 		}
-
-		// Already set, don't do it again, we only do this on initial load.
-		if (projects.length != 0) {
-			return;
-		}
-
-		email = value.email;
 
 		const result = await listProjects({
-			token: value.token,
+			token: accessToken,
 			onUnauthorized: () => {
-				token.remove();
+				removeCredentials();
 			}
 		});
 
@@ -76,78 +96,28 @@
 			return;
 		}
 
-		// Set the projects.
 		projects = result;
 
-		// If the project is present for the token, select that one
-		// e.g. reload a session.
-		if (value.project) {
-			for (const p of projects) {
-				if (p.id == value.project) {
-					project = p;
-					break;
-				}
-			}
-		}
-
-		// If nothing is found, pick one.
-		if (project == null) {
-			project = projects[0];
-		}
-
-		// onChange will not get raised automatically.
-		// TODO: is there another event that will trigger this?
-		await changeProject();
+		// projectID *should* be set before the access token changes.
+		currentProject = projects.filter((p) => p.id == projectID)[0];
 	}
 
-	// When the project updates, rescope the token.
+	$: updateProjects(accessToken);
+
+	// When the project changes, rescope the token.
 	async function changeProject() {
-		let t = token.get();
-
-		if (t.scope == token.scoped && t.project == project.id) {
-			return;
-		}
-
-		let body = {
-			project: {
-				id: project.id
-			}
-		};
-
-		const result = await createToken({
-			token: t.token,
-			body: body,
-			onUnauthorized: () => {
-				token.remove();
-			}
-		});
-
-		if (result == null) {
-			return;
-		}
-
-		token.set(result.access_token, token.scoped, t.email, project.id);
+		await updateCredentials(accessToken, currentProject.id);
 	}
 
-	// When a menu item is selected, hide the menu and update the
-	// main view.
-	let content;
-	let menu;
-
-	let desktop;
-
-	if (browser) {
-		desktop = window.matchMedia('(min-width: 720px)');
-	}
-
-	selected.subscribe((value) => {
+	function changeMenuItem(value) {
 		// Hide the menu on mobile view, it's covering everything.
 		if (desktop && !desktop.matches) {
 			showmenu = false;
 		}
+
 		content = value;
 		menu = getMenu(value);
-	});
+	}
 </script>
 
 <LoginModal />
@@ -162,8 +132,8 @@
 
 <nav class:showmenu>
 	<div class="user">
-		<img src="https://www.gravatar.com/avatar/{MD5(email)}" alt="User Gravatar" />
-		<span>{email}</span>
+		<img src="https://www.gravatar.com/avatar/{MD5(emailAddress)}" alt="User Gravatar" />
+		<span>{emailAddress}</span>
 		<iconify-icon
 			class="selectable"
 			icon="material-symbols:logout"
@@ -173,7 +143,12 @@
 	</div>
 
 	<LabeledInput id="project-select" value="Project">
-		<select id="project-select" name="project" bind:value={project} on:change={changeProject}>
+		<select
+			id="project-select"
+			name="project"
+			bind:value={currentProject}
+			on:change={changeProject}
+		>
 			{#each projects as choice}
 				<option value={choice}>{choice.name}</option>
 			{/each}

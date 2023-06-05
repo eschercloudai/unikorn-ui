@@ -1,7 +1,8 @@
 <script>
 	import { browser } from '$app/environment';
-	import { onMount, onDestroy } from 'svelte';
-	import { token } from '$lib/credentials.js';
+	import { onDestroy } from 'svelte';
+	import { createRemoteJWKSet, jwtVerify } from 'jose';
+	import { token, setCredentials } from '$lib/credentials.js';
 
 	import Base64url from 'crypto-js/enc-base64url';
 	import SHA256 from 'crypto-js/sha256';
@@ -13,19 +14,11 @@
 
 	// showlogin depends on the value of the token, get the initial value
 	// from the store and update accordingly.
-	//let showlogin = sessionStorage.get('token') == null;
-	let showlogin = token.get() == null;
+	let showlogin;
 
-	// id is a unique identifier for the component instance.
-	let id = Symbol();
+	const tokenUnsubscribe = token.subscribe(changeToken);
 
-	onMount(() => {
-		token.subscribe(id, changeToken);
-	});
-
-	onDestroy(() => {
-		token.unsubscribe(id);
-	});
+	onDestroy(tokenUnsubscribe);
 
 	function changeToken(value) {
 		showlogin = value == null;
@@ -53,12 +46,15 @@
 					const codeChallenge = SHA256(codeChallengeVerifier).toString(Base64url);
 
 					window.sessionStorage.setItem('oauth2_code_challenge_verifier', codeChallengeVerifier);
+
+					// TODO: set a nonce
 					const query = new URLSearchParams({
 						response_type: 'code',
 						client_id: '9a719e1e-aa85-4a21-a221-324e787efd78',
 						redirect_uri: `https://${window.location.host}/oauth2/callback`,
 						code_challenge_method: 'S256',
-						code_challenge: codeChallenge
+						code_challenge: codeChallenge,
+						scope: 'openid email picture'
 					});
 
 					const url = new URL(`https://${window.location.host}/api/v1/auth/oauth2/authorization`);
@@ -73,8 +69,10 @@
 				{
 					const form = new URLSearchParams({
 						grant_type: 'password',
+						client_id: '9a719e1e-aa85-4a21-a221-324e787efd78',
 						username: username,
-						password: password
+						password: password,
+						scope: 'openid email picture'
 					});
 
 					const options = {
@@ -93,7 +91,17 @@
 					// TODO: error handling.
 					const result = await response.json();
 
-					token.set(result.access_token, token.unscoped, result.email);
+					const jwks = createRemoteJWKSet(
+						new URL(`https://${window.location.host}/api/v1/auth/jwks`)
+					);
+
+					const jwt = await jwtVerify(result.id_token, jwks, {
+						issuer: `https://${window.location.host}`,
+						audience: '9a719e1e-aa85-4a21-a221-324e787efd78'
+					});
+
+					// Get this from the id_token.
+					await setCredentials(result.access_token, jwt.payload.email);
 				}
 
 				break;

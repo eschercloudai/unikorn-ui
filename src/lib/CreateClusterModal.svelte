@@ -1,6 +1,6 @@
 <script>
-	import { onMount, onDestroy } from 'svelte';
-	import { token } from '$lib/credentials.js';
+	import { onDestroy } from 'svelte';
+	import { token, removeCredentials } from '$lib/credentials.js';
 	import { errors } from '$lib/errors.js';
 	import { createEventDispatcher } from 'svelte';
 
@@ -39,6 +39,11 @@
 
 	// active reports whether this modal is visible or not.
 	export let active;
+
+	let loaded = false;
+
+	// When we get a token
+	let accessToken;
 
 	// We will raise clusterCreated on successful cluster creation.
 	const dispatch = createEventDispatcher();
@@ -148,11 +153,11 @@
 
 	// Get a list of images from the origin, and derive a list of
 	// Kubernetes versions.
-	async function updateImages(t) {
+	async function updateImages() {
 		const results = await listImages({
-			token: t.token,
+			token: accessToken,
 			onUnauthorized: () => {
-				token.remove();
+				removeCredentials();
 			}
 		});
 
@@ -199,11 +204,11 @@
 	$: updateCPImages(allImages, version);
 
 	// Update the flavors available.
-	async function updateFlavors(t) {
+	async function updateFlavors() {
 		const results = await listFlavors({
-			token: t.token,
+			token: accessToken,
 			onUnauthorized: () => {
-				token.remove();
+				removeCredentials();
 			}
 		});
 
@@ -226,11 +231,11 @@
 	}
 
 	// Update the available SSH keypairs.
-	async function updateKeyPairs(t) {
+	async function updateKeyPairs() {
 		const results = await listKeyPairs({
-			token: t.token,
+			token: accessToken,
 			onUnauthorized: () => {
-				token.remove();
+				removeCredentials();
 			}
 		});
 
@@ -243,11 +248,11 @@
 	}
 
 	// Update the available compute AZs.
-	async function updateComputeAZs(t) {
+	async function updateComputeAZs() {
 		const results = await listComputeAvailabilityZones({
-			token: t.token,
+			token: accessToken,
 			onUnauthorized: () => {
-				token.remove();
+				removeCredentials();
 			}
 		});
 
@@ -279,11 +284,11 @@
 	}
 
 	// Update the available block storage AZs.
-	async function updateBlockStorageAZs(t) {
+	async function updateBlockStorageAZs() {
 		const results = await listBlockStorageAvailabilityZones({
-			token: t.token,
+			token: accessToken,
 			onUnauthorized: () => {
-				token.remove();
+				removeCredentials();
 			}
 		});
 
@@ -295,11 +300,11 @@
 	}
 
 	// Update the available external networks.
-	async function updateExternalNetworks(t) {
+	async function updateExternalNetworks() {
 		const results = await listExternalNetworks({
-			token: t.token,
+			token: accessToken,
 			onUnauthorized: () => {
-				token.remove();
+				removeCredentials();
 			}
 		});
 
@@ -310,11 +315,11 @@
 		externalNetworks = results;
 	}
 
-	async function updateApplicationBundles(t) {
+	async function updateApplicationBundles() {
 		const result = await listApplicationBundlesCluster({
-			token: t.token,
+			token: accessToken,
 			onUnauthorized: () => {
-				token.remove();
+				removeCredentials();
 			}
 		});
 
@@ -337,35 +342,25 @@
 		}
 	}
 
-	// id is a unique identifier for the component instance.
-	let id = Symbol();
+	const tokenUnsubscribe = token.subscribe(updateAll);
 
-	onMount(() => {
-		token.subscribe(id, updateAll);
-	});
+	onDestroy(tokenUnsubscribe);
 
-	onDestroy(() => {
-		token.unsubscribe(id);
-	});
-
-	let loaded = false;
-
-	// When we get a token
-	async function updateAll() {
-		const t = token.get();
-
-		if (t == null || t.scope == token.unscoped) {
+	async function updateAll(t) {
+		if (t == null) {
 			return;
 		}
 
+		accessToken = t;
+
 		await Promise.all([
-			updateKeyPairs(t),
-			updateImages(t),
-			updateFlavors(t),
-			updateComputeAZs(t),
-			updateBlockStorageAZs(t),
-			updateExternalNetworks(t),
-			updateApplicationBundles(t)
+			updateKeyPairs(),
+			updateImages(),
+			updateFlavors(),
+			updateComputeAZs(),
+			updateBlockStorageAZs(),
+			updateExternalNetworks(),
+			updateApplicationBundles()
 		]);
 
 		loaded = true;
@@ -410,17 +405,17 @@
 		// TODO: we should garbage collect these after cluster deprovision
 		// but that's somewhat difficult.
 		await deleteApplicationCredential(appCredName(name), {
-			token: token.get().token,
+			token: accessToken,
 			onUnauthorized: () => {
-				token.remove();
+				removeCredentials();
 			},
 			onNotFound: () => {}
 		});
 
 		let ac = await createApplicationCredential({
-			token: token.get().token,
+			token: accessToken,
 			onUnauthorized: () => {
-				token.remove();
+				removeCredentials();
 			},
 			onForbidden: (message) => {
 				if (message) {
@@ -561,14 +556,14 @@
 		}
 
 		await createCluster(controlPlane.name, {
-			token: token.get().token,
+			token: accessToken,
 			onBadRequest: (message) => {
 				if (message) {
 					errors.add(message);
 				}
 			},
 			onUnauthorized: () => {
-				token.remove();
+				removeCredentials();
 			},
 			body: body
 		});

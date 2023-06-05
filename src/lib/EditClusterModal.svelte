@@ -1,6 +1,6 @@
 <script>
-	import { onMount, onDestroy } from 'svelte';
-	import { token } from '$lib/credentials.js';
+	import { onDestroy } from 'svelte';
+	import { token, removeCredentials } from '$lib/credentials.js';
 	import { errors } from '$lib/errors.js';
 	import { createEventDispatcher } from 'svelte';
 
@@ -28,6 +28,10 @@
 	import CheckBoxField from '$lib/CheckBoxField.svelte';
 	import SliderField from '$lib/SliderField.svelte';
 	import TimeWindowField from '$lib/TimeWindowField.svelte';
+
+	let accessToken;
+
+	let loaded = false;
 
 	// cluster refers to the existing cluster.
 	export let cluster;
@@ -227,11 +231,11 @@
 
 	// Get a list of images from the origin, and derive a list of
 	// Kubernetes versions.
-	async function updateImages(t) {
+	async function updateImages() {
 		const results = await listImages({
-			token: t.token,
+			token: accessToken,
 			onUnauthorized: () => {
-				token.remove();
+				removeCredentials();
 			}
 		});
 
@@ -256,11 +260,11 @@
 	}
 
 	// Update the flavors available.
-	async function updateFlavors(t) {
+	async function updateFlavors() {
 		const results = await listFlavors({
-			token: t.token,
+			token: accessToken,
 			onUnauthorized: () => {
-				token.remove();
+				removeCredentials();
 			}
 		});
 
@@ -273,11 +277,11 @@
 	}
 
 	// Update the available SSH keypairs.
-	async function updateKeyPairs(t) {
+	async function updateKeyPairs() {
 		const results = await listKeyPairs({
-			token: t.token,
+			token: accessToken,
 			onUnauthorized: () => {
-				token.remove();
+				removeCredentials();
 			}
 		});
 
@@ -290,11 +294,11 @@
 	}
 
 	// Update the available compute AZs.
-	async function updateComputeAZs(t) {
+	async function updateComputeAZs() {
 		const results = await listComputeAvailabilityZones({
-			token: t.token,
+			token: accessToken,
 			onUnauthorized: () => {
-				token.remove();
+				removeCredentials();
 			}
 		});
 
@@ -306,11 +310,11 @@
 	}
 
 	// Update the available block storage AZs.
-	async function updateBlockStorageAZs(t) {
+	async function updateBlockStorageAZs() {
 		const results = await listBlockStorageAvailabilityZones({
-			token: t.token,
+			token: accessToken,
 			onUnauthorized: () => {
-				token.remove();
+				removeCredentials();
 			}
 		});
 
@@ -322,11 +326,11 @@
 	}
 
 	// Update the available external networks.
-	async function updateExternalNetworks(t) {
+	async function updateExternalNetworks() {
 		const results = await listExternalNetworks({
-			token: t.token,
+			token: accessToken,
 			onUnauthorized: () => {
-				token.remove();
+				removeCredentials();
 			}
 		});
 
@@ -337,11 +341,11 @@
 		externalNetworks = results;
 	}
 
-	async function updateApplicationBundles(t) {
+	async function updateApplicationBundles() {
 		const result = await listApplicationBundlesCluster({
-			token: t.token,
+			token: accessToken,
 			onUnauthorized: () => {
-				token.remove();
+				removeCredentials();
 			}
 		});
 
@@ -357,35 +361,24 @@
 			.filter((x) => !x.endOfLife || x.name == cluster.applicationBundle.name);
 	}
 
-	// id is a unique identifier for the component instance.
-	let id = Symbol();
+	const tokenUnsubscribe = token.subscribe(updateAll);
+	onDestroy(tokenUnsubscribe);
 
-	onMount(() => {
-		token.subscribe(id, updateAll);
-	});
-
-	onDestroy(() => {
-		token.unsubscribe(id);
-	});
-
-	let loaded = false;
-
-	// When we get a token
-	async function updateAll() {
-		const t = token.get();
-
-		if (t == null || t.scope == token.unscoped) {
+	async function updateAll(t) {
+		if (t == null) {
 			return;
 		}
 
+		accessToken = t;
+
 		await Promise.all([
-			updateKeyPairs(t),
-			updateImages(t),
-			updateFlavors(t),
-			updateComputeAZs(t),
-			updateBlockStorageAZs(t),
-			updateExternalNetworks(t),
-			updateApplicationBundles(t)
+			updateKeyPairs(),
+			updateImages(),
+			updateFlavors(),
+			updateComputeAZs(),
+			updateBlockStorageAZs(),
+			updateExternalNetworks(),
+			updateApplicationBundles()
 		]);
 
 		loaded = true;
@@ -554,14 +547,14 @@
 		}
 
 		await updateCluster(controlPlane.name, cluster.name, {
-			token: token.get().token,
+			token: accessToken,
 			onBadRequest: (message) => {
 				if (message) {
 					errors.add(message);
 				}
 			},
 			onUnauthorized: () => {
-				token.remove();
+				removeCredentials();
 			},
 			body: body
 		});
