@@ -848,7 +848,7 @@ s ingress and cert-manager add-ons"
 			<div class="buttons">
 				<button type="submit" disabled={!valid} on:click={submit} on:keydown={submit}>
 					<iconify-icon icon="mdi:tick" />
-					<div>Submit</div>
+					<div>Create</div>
 				</button>
 				<button on:click={close}>
 					<iconify-icon icon="mdi:close" />

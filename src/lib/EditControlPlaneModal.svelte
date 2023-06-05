@@ -165,7 +165,7 @@
 </script>
 
 <Modal {active} fixed="true">
-	<h2 class="modal-header"><iconify-icon icon="bx:edit" />Edit Control Plane</h2>
+	<h2 class="modal-header"><iconify-icon icon="bx:edit" />Update Control Plane</h2>
 	<form>
 		<dl>
 			<dt>Name</dt>
@@ -226,7 +226,7 @@
 		<div class="buttons">
 			<button type="submit" on:click={submit} on:keydown={submit}>
 				<iconify-icon icon="mdi:tick" />
-				<div>Submit</div>
+				<div>Update</div>
 			</button>
 			<button on:click={close}>
 				<iconify-icon icon="mdi:close" />

@@ -349,7 +349,7 @@
 				on:keydown={submitCreateControlPlane}
 			>
 				<iconify-icon icon="mdi:tick" />
-				<div>Submit</div>
+				<div>Create</div>
 			</button>
 			<button on:click={close}>
 				<iconify-icon icon="mdi:close" />

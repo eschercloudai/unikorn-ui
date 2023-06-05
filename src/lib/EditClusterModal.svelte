@@ -566,7 +566,7 @@
 
 <Modal {active} fixed="true">
 	{#if loaded}
-		<h2 class="modal-header"><iconify-icon icon="bx:edit" />Edit Cluster</h2>
+		<h2 class="modal-header"><iconify-icon icon="bx:edit" />Update Cluster</h2>
 		<form>
 			<dl>
 				<dt>Name</dt>
@@ -804,7 +804,7 @@
 			<div class="buttons">
 				<button type="submit" disabled={!valid} on:click={submit} on:keydown={submit}>
 					<iconify-icon icon="mdi:tick" />
-					<div>Submit</div>
+					<div>Update</div>
 				</button>
 				<button on:click={close} on:keydown={close}>
 					<iconify-icon icon="mdi:close" />
