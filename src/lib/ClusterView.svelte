@@ -181,7 +181,7 @@
 			handler: handleKubeconfig,
 			disablable: true
 		},
-		{ id: 'edit', value: 'Edit', icon: 'bx:edit', handler: handleEdit, disablable: true },
+		{ id: 'edit', value: 'Update', icon: 'bx:edit', handler: handleEdit, disablable: true },
 		{ id: 'delete', value: 'Delete', icon: 'bx:trash', handler: handleDelete }
 	];
 
