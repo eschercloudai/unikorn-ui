@@ -16,7 +16,7 @@
 
 	let image = null;
 	let flavor = null;
-	let autoscaling = false;
+	let autoscaling = true;
 	let replicas = 3;
 	let minReplicas = 0;
 	let maxReplicas = 3;

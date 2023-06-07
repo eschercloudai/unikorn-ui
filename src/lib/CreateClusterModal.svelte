@@ -14,7 +14,9 @@
 		createApplicationCredential,
 		deleteApplicationCredential,
 		createCluster,
-		listApplicationBundlesCluster
+		listApplicationBundlesCluster,
+		getServerGroup,
+		createServerGroup
 	} from '$lib/client.js';
 
 	import {
@@ -371,6 +373,10 @@
 		return `${controlPlane.status.name}-${name}`;
 	}
 
+	function serverGroupName() {
+		return `${controlPlane.status.name}-${name}-control-plane`;
+	}
+
 	const nameInvalidUnset =
 		'Name must contain only lower-case characters, numbers or hyphens (-), it must start and end with a character or number, and must be at most 63 characters.';
 	const nameInvalidUsed = 'Name already used by another cluster';
@@ -432,6 +438,31 @@
 			return;
 		}
 
+		let sg = await getServerGroup(serverGroupName(name), {
+			token: accessToken,
+			onUnauthorized: () => {
+				removeCredentials();
+			},
+			onNotFound: () => {}
+		});
+
+		if (sg == null) {
+			sg = await createServerGroup({
+				token: accessToken,
+				body: {
+					name: serverGroupName(name)
+				},
+				onUnauthorized: () => {
+					removeCredentials();
+				}
+			});
+		}
+
+		if (sg == null) {
+			active = false;
+			return;
+		}
+
 		const body = {
 			name: name,
 			applicationBundle: applicationBundle,
@@ -455,7 +486,8 @@
 				flavorName: flavor.name,
 				disk: {
 					size: disk
-				}
+				},
+				serverGroupID: sg.id
 			},
 			workloadPools: []
 		};
