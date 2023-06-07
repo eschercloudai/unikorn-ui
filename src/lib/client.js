@@ -107,6 +107,14 @@ export function deleteApplicationCredential(name, opts) {
 	return request('DELETE', `/api/v1/providers/openstack/application-credentials/${name}`, opts);
 }
 
+export function getServerGroup(name, opts) {
+	return request('GET', `/api/v1/providers/openstack/servergroups/${name}`, opts);
+}
+
+export function createServerGroup(opts) {
+	return request('POST', `/api/v1/providers/openstack/servergroups`, opts);
+}
+
 export function listComputeAvailabilityZones(opts) {
 	return request('GET', '/api/v1/providers/openstack/availability-zones/compute', opts);
 }
