@@ -111,6 +111,7 @@
 	let ingress = cluster.features && cluster.features.ingress;
 	let certManager = cluster.features && cluster.features.certManager;
 	let kubernetesDashboard = cluster.features && cluster.features.kubernetesDashboard;
+	let fileStorage = cluster.features && cluster.features.fileStorage;
 
 	$: if (kubernetesDashboard) {
 		ingress = certManager = true;
@@ -512,6 +513,18 @@
 			}
 		}
 
+		if (fileStorage) {
+			if (!body.features) {
+				body.features = {};
+			}
+
+			body.features.fileStorage = true;
+		} else {
+			if (body.features) {
+				delete body.features.fileStorage;
+			}
+		}
+
 		for (const p of workloadPools) {
 			const wp = p.object;
 
@@ -727,6 +740,13 @@
 						label="Enable Kubernetes dashboard?"
 						help="Enables Kubernetes dashboard, automatically requires ingress and cert-manager add-ons"
 						bind:checked={kubernetesDashboard}
+					/>
+
+					<CheckBoxField
+						id="file-storage"
+						label="Enable file storage?"
+						help="Enables POSIX file based persistent storage"
+						bind:checked={fileStorage}
 					/>
 				</section>
 			</details>
