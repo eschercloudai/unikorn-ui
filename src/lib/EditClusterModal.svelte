@@ -112,6 +112,7 @@
 	let certManager = cluster.features && cluster.features.certManager;
 	let kubernetesDashboard = cluster.features && cluster.features.kubernetesDashboard;
 	let fileStorage = cluster.features && cluster.features.fileStorage;
+	let prometheus = cluster.features && cluster.features.prometheus;
 
 	$: if (kubernetesDashboard) {
 		ingress = certManager = true;
@@ -465,65 +466,14 @@
 			}
 		}
 
-		if (autoscaling) {
-			if (!body.features) {
-				body.features = {};
-			}
-
-			body.features.autoscaling = true;
-		} else {
-			if (body.features) {
-				delete body.features.autoscaling;
-			}
-		}
-
-		if (ingress) {
-			if (!body.features) {
-				body.features = {};
-			}
-
-			body.features.ingress = true;
-		} else {
-			if (body.features) {
-				delete body.features.ingress;
-			}
-		}
-
-		if (certManager) {
-			if (!body.features) {
-				body.features = {};
-			}
-
-			body.features.certManager = true;
-		} else {
-			if (body.features) {
-				delete body.features.certManager;
-			}
-		}
-
-		if (kubernetesDashboard) {
-			if (!body.features) {
-				body.features = {};
-			}
-
-			body.features.kubernetesDashboard = true;
-		} else {
-			if (body.features) {
-				delete body.features.kubernetesDashboard;
-			}
-		}
-
-		if (fileStorage) {
-			if (!body.features) {
-				body.features = {};
-			}
-
-			body.features.fileStorage = true;
-		} else {
-			if (body.features) {
-				delete body.features.fileStorage;
-			}
-		}
+		body.features = {
+			autoscaling: autoscaling,
+			ingress: ingress,
+			certManager: certManager,
+			kubernetesDashboard: kubernetesDashboard,
+			fileStorage: fileStorage,
+			prometheus: prometheus
+		};
 
 		for (const p of workloadPools) {
 			const wp = p.object;
@@ -747,6 +697,13 @@
 						label="Enable file storage?"
 						help="Enables POSIX file based persistent storage"
 						bind:checked={fileStorage}
+					/>
+
+					<CheckBoxField
+						id="prometheus"
+						label="Enable Prometheus?"
+						help="Enables the Prometheus operator that can be used to provide platform monitoring"
+						bind:checked={prometheus}
 					/>
 				</section>
 			</details>
