@@ -3,6 +3,7 @@
 	import { onDestroy } from 'svelte';
 	import { createRemoteJWKSet, jwtVerify } from 'jose';
 	import { token, setCredentials } from '$lib/credentials.js';
+	import { compareAccessTokenHash } from '$lib/oidc.js';
 
 	import Base64url from 'crypto-js/enc-base64url';
 	import SHA256 from 'crypto-js/sha256';
@@ -24,11 +25,13 @@
 		showlogin = value == null;
 	}
 
-	let idps = ['OneLogin', 'OpenStack Keystone'];
-	let idp = 'OneLogin';
+	let idps = ['OpenStack Keystone', 'OneLogin'];
+	let idp = 'OpenStack Keystone';
 
 	let username = '';
 	let password = '';
+
+	let errorMsg = null;
 
 	// login does different things based on the selected IdP:
 	// * OneLogin sets up an oauth2 handshake and redirects to the Unikorn Server
@@ -54,7 +57,7 @@
 						redirect_uri: `https://${window.location.host}/oauth2/callback`,
 						code_challenge_method: 'S256',
 						code_challenge: codeChallenge,
-						scope: 'openid email picture'
+						scope: 'openid email profile'
 					});
 
 					const url = new URL(`https://${window.location.host}/api/v1/auth/oauth2/authorization`);
@@ -72,7 +75,7 @@
 						client_id: '9a719e1e-aa85-4a21-a221-324e787efd78',
 						username: username,
 						password: password,
-						scope: 'openid email picture'
+						scope: 'openid email profile'
 					});
 
 					const options = {
@@ -100,8 +103,17 @@
 						audience: '9a719e1e-aa85-4a21-a221-324e787efd78'
 					});
 
+					try {
+						compareAccessTokenHash(jwt, result.access_token);
+					} catch (error) {
+						errorMsg = error;
+						return;
+					}
+
 					// Get this from the id_token.
 					await setCredentials(result.access_token, jwt.payload.email);
+
+					errorMsg = null;
 				}
 
 				break;
@@ -113,6 +125,15 @@
 	<div class="login-modal-header">
 		<img id="logo" src="img/Horizontal_AI.png" alt="EscherCloud AI Logo" />
 	</div>
+
+	{#if errorMsg}
+		<div class="login-modal-error">
+			<iconify-icon icon="mdi:error-outline" />
+			<div class="errortext">
+				{errorMsg}
+			</div>
+		</div>
+	{/if}
 
 	<div class="form-container">
 		<form on:submit={login}>
@@ -149,7 +170,6 @@
 		display: flex;
 		flex-direction: column;
 		align-items: center;
-		margin-bottom: 1em;
 		border-bottom: 5px solid var(--brand);
 	}
 
@@ -158,6 +178,23 @@
 		padding-bottom: 2em;
 		width: 15em;
 		max-width: 20em;
+	}
+
+	.login-modal-error {
+		color: white;
+		background-color: var(--error);
+		padding: var(--padding);
+		display: flex;
+		align-items: center;
+		gap: var(--padding);
+	}
+
+	.errortext {
+		font-weight: bold;
+	}
+
+	iconify-icon {
+		font-size: 1.5rem;
 	}
 
 	form {

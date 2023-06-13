@@ -5,6 +5,7 @@
 	import { browser } from '$app/environment';
 	import { createRemoteJWKSet, jwtVerify } from 'jose';
 	import { setCredentials } from '$lib/credentials.js';
+	import { compareAccessTokenHash } from '$lib/oidc.js';
 
 	let error;
 	let description;
@@ -52,6 +53,14 @@
 					issuer: `https://${window.location.host}`,
 					audience: '9a719e1e-aa85-4a21-a221-324e787efd78'
 				});
+
+				try {
+					compareAccessTokenHash(jwt, result.access_token);
+				} catch (err) {
+					error = 'client_error';
+					description = err;
+					return;
+				}
 
 				await setCredentials(result.access_token, jwt.payload.email);
 
