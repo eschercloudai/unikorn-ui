@@ -97,6 +97,7 @@
 	let certManager = false;
 	let kubernetesDashboard = false;
 	let fileStorage = false;
+	let prometheus = false;
 
 	$: if (kubernetesDashboard) {
 		ingress = certManager = true;
@@ -490,7 +491,15 @@
 				},
 				serverGroupID: sg.id
 			},
-			workloadPools: []
+			workloadPools: [],
+			features: {
+				autoscaling: autoscaling,
+				ingress: ingress,
+				certManager: certManager,
+				kubernetesDashboard: kubernetesDashboard,
+				fileStorage: fileStorage,
+				prometheus: prometheus
+			}
 		};
 
 		if (autoUpgrade) {
@@ -533,30 +542,6 @@
 
 			if (allowedPrefixes) {
 				body.api.allowedPrefixes = allowedPrefixes.split(',');
-			}
-		}
-
-		if (autoscaling || ingress || certManager) {
-			body.features = {};
-
-			if (autoscaling) {
-				body.features.autoscaling = true;
-			}
-
-			if (ingress) {
-				body.features.ingress = true;
-			}
-
-			if (certManager) {
-				body.features.certManager = true;
-			}
-
-			if (kubernetesDashboard) {
-				body.features.kubernetesDashboard = true;
-			}
-
-			if (fileStorage) {
-				body.features.fileStorage = true;
 			}
 		}
 
@@ -822,6 +807,13 @@ s ingress and cert-manager add-ons"
 						label="Enable file storage?"
 						help="Enables POSIX file based persistent storage"
 						bind:checked={fileStorage}
+					/>
+
+					<CheckBoxField
+						id="prometheus"
+						label="Enable Prometheus?"
+						help="Enables the Prometheus operator that can be used to provide platform monitoring"
+						bind:checked={prometheus}
 					/>
 				</section>
 			</details>
