@@ -539,7 +539,7 @@
 			<SelectField
 				id="version"
 				help="Kubernetes version to provision with."
-				bind:options={versions}
+				options={versions}
 				bind:value={version}
 			/>
 
@@ -567,7 +567,7 @@
                                                 candidates, and may have undergone less rigorous testing. Versions marked
                                                 <em>End-of-Life</em> indicate the date when they will be automatically upgraded by the platform."
 							formatter={applicationBundleFormatter}
-							bind:options={applicationBundles}
+							options={applicationBundles}
 							bind:value={applicationBundle}
 						/>
 
@@ -617,7 +617,7 @@
 							help="Select the global availability zone for compute instances. You can override this on a
                                                 per-workload pool basis to improve cluster availability."
 							formatter={namedObjectFormatter}
-							bind:options={computeAZs}
+							options={computeAZs}
 							bind:value={computeAZ}
 						/>
 					</section>
@@ -643,7 +643,7 @@
                                                 security."
 							nullable="true"
 							formatter={namedObjectFormatter}
-							bind:options={keyPairs}
+							options={keyPairs}
 							bind:value={keyPair}
 						/>
 
@@ -715,7 +715,7 @@
 					id="image"
 					help="Virtual machine image to use."
 					formatter={namedObjectFormatter}
-					bind:options={images}
+					options={images}
 					bind:value={image}
 				/>
 
@@ -723,7 +723,7 @@
 					id="flavor"
 					help="Virtual machine type to use."
 					formatter={flavorFormatter}
-					bind:options={cpFlavors}
+					options={cpFlavors}
 					bind:value={flavor}
 				/>
 
