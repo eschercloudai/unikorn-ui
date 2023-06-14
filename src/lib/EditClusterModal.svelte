@@ -125,8 +125,7 @@
 	}
 
 	// When all images are available (and by implication versions), we can
-	// get the image from the cluster, derive its version, then show all images
-	// available for that version.
+	// get the image from the cluster, derive its version.
 	function changeAllImages(allImages) {
 		if (allImages.length == 0) {
 			return;
@@ -134,7 +133,6 @@
 
 		image = allImages.find((x) => x.name == cluster.controlPlane.imageName);
 		version = versions.find((x) => x == image.versions.kubernetes);
-		images = allImages.filter((x) => x.versions.kubernetes == version);
 	}
 
 	$: changeAllImages(allImages);
@@ -161,7 +159,7 @@
 
 	// Update the chosen flavor when the flavors are available.
 	function changeFlavors(flavors) {
-		if (flavors.length == 0 || flavor) {
+		if (flavors.length == 0) {
 			return;
 		}
 
@@ -172,9 +170,7 @@
 
 	// Update the application bundle when they are available.
 	function changeApplicationBundles(applicationBundles) {
-		// TODO: this second check shouldn't be necessary, why is it triggered
-		// on a select??
-		if (applicationBundles.length == 0 || applicationBundle) {
+		if (applicationBundles.length == 0) {
 			return;
 		}
 
@@ -185,7 +181,7 @@
 
 	// Update availability zones when they are available.
 	function changeComputeAZs(computeAZs) {
-		if (computeAZs.length == 0 || computeAZ) {
+		if (computeAZs.length == 0) {
 			return;
 		}
 
