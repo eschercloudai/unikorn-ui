@@ -157,7 +157,7 @@
 		id="image"
 		help="Virtual machine image to use."
 		formatter={namedObjectFormatter}
-		bind:options={images}
+		options={images}
 		bind:value={image}
 	/>
 {/if}
@@ -166,7 +166,7 @@
 	id="flavor"
 	help="Virtual machine type to use."
 	formatter={flavorFormatter}
-	bind:options={flavors}
+	options={flavors}
 	bind:value={flavor}
 />
 
@@ -231,7 +231,7 @@
 				help="Availability zone to provision the pool in."
 				formatter={namedObjectFormatter}
 				nullable="true"
-				bind:options={computeAZs}
+				options={computeAZs}
 				bind:value={computeAZ}
 			/>
 		</section>

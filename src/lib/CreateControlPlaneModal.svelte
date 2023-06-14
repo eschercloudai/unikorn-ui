@@ -307,7 +307,7 @@
                                         candidates, and may have undergone less rigorous testing. Versions marked
                                         <em>End-of-Life</em> indicate the date when they will be automatically upgraded by the platform."
 					formatter={applicationBundleFormatter}
-					bind:options={applicationBundles}
+					options={applicationBundles}
 					bind:value={applicationBundle}
 				/>
 
