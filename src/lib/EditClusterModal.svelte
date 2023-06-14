@@ -455,14 +455,14 @@
 		}
 
 		if (allowedPrefixes) {
-			if (!body.openstack.api) {
-				body.openstack.api = {};
+			if (!body.api) {
+				body.api = {};
 			}
 
-			body.openstack.api.allowedPrefixes = allowedPrefixes.split(',');
+			body.api.allowedPrefixes = allowedPrefixes.split(',');
 		} else {
-			if (body.openstack.api) {
-				delete body.openstack.api.allowedPrefixes;
+			if (body.api) {
+				delete body.api.allowedPrefixes;
 			}
 		}
 
