@@ -179,10 +179,8 @@
 		{#each controlPlanes as cp}
 			<Item>
 				<div class="header">
-					<div class="title">
-						<StatusIcon status={statusFromResource(cp.status)} />
-						<div class="name">{cp.status.name}</div>
-					</div>
+					<StatusIcon status={statusFromResource(cp.status)} />
+					<div class="name">{cp.status.name}</div>
 					<div class="widgets">
 						{#if cp.upgradable}
 							<iconify-icon class="upgrade" icon="material-symbols:upgrade-rounded" />
@@ -228,16 +226,16 @@
 	}
 	.header {
 		display: flex;
+		align-content: space-between;
+		align-items: center;
+		gap: var(--padding);
 	}
 	div.name {
 		color: var(--brand);
 		font-weight: bold;
-	}
-	div.title {
-		display: flex;
-		align-items: center;
-		gap: var(--padding);
 		flex: 1;
+		overflow: hidden;
+		text-overflow: ellipsis;
 	}
 	div.widgets {
 		display: flex;
