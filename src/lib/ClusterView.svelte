@@ -251,10 +251,8 @@
 			{#each clusters as cl}
 				<Item>
 					<div class="header">
-						<div class="title">
-							<StatusIcon status={statusFromResource(cl.status)} />
-							<div class="name">{cl.status.name}</div>
-						</div>
+						<StatusIcon status={statusFromResource(cl.status)} />
+						<div class="name">{cl.status.name}</div>
 						<div class="widgets">
 							{#if cl.upgradable}
 								<iconify-icon class="upgrade" icon="material-symbols:upgrade-rounded" />
@@ -303,16 +301,16 @@
 	}
 	.header {
 		display: flex;
+		align-content: space-between;
+		align-items: center;
+		gap: var(--padding);
 	}
 	div.name {
 		color: var(--brand);
 		font-weight: bold;
-	}
-	div.title {
-		display: flex;
-		align-items: center;
-		gap: var(--padding);
 		flex: 1;
+		overflow: hidden;
+		text-overflow: ellipsis;
 	}
 	div.widgets {
 		display: flex;
