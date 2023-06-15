@@ -26,28 +26,20 @@
 
 	// Set defaults when they are available.
 	function changeImages(images) {
-		if (images.length == 0) {
-			return;
+		if (images.length != 0) {
+			image = images[0];
 		}
-
-		// TODO: Oddly enough, this triggers when we select a new image :shrug:
-		// preserve the existing image if it's in the list.
-		if (image != null) {
-			const existing = images.find((x) => x.name == image.name);
-			if (existing) {
-				image = existing;
-				return;
-			}
-		}
-
-		image = images[0];
 	}
 
 	$: changeImages(images);
 
-	$: if (flavor == null && flavors.length != 0) {
-		flavor = flavors[0];
+	function changeFlavors(flavors) {
+		if (flavors.length != 0) {
+			flavor = flavors[0];
+		}
 	}
+
+	$: changeFlavors(flavors);
 
 	// TODO: must be unique!
 	function validateName(name) {
