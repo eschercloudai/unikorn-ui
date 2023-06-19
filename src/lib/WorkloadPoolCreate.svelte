@@ -73,7 +73,7 @@
 <TextField
 	id="name"
 	placeholder="Workload pool name"
-	help="A valid Kubernetes name, unique within the cluster."
+	help="A valid Kubernetes name, unique within the cluster.  This will present itself on Kubernetes nodes as the label <em>topology.eschercloud.ai/node-pool</em>."
 	validator={validateName}
 	invalidtext="Name must contain only lower-case characters, numbers or hyphens (-), it must start and end
 	with a character or number, and must be at most 63 characters."
