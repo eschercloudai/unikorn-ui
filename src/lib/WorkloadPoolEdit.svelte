@@ -22,7 +22,7 @@
 	let image;
 	let flavor;
 	let disk = 50;
-	let autoscaling = false;
+	let autoscaling = true;
 	let minReplicas = 0;
 	let maxReplicas = 3;
 	let labels = null;

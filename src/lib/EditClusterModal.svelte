@@ -385,9 +385,12 @@
 
 	// Roll up validity to enable creation.
 	let valid = false;
+	let hasWorkloadPools = true;
 
 	function changeWorkloadPools(workloadPools) {
-		valid = workloadPools.every((x) => x.object.valid);
+		hasWorkloadPools = workloadPools.length > 0;
+
+		valid = hasWorkloadPools && workloadPools.every((x) => x.object.valid);
 
 		// NOTE: if this is on, leave it on, unikorn-cluster-manager will
 		// just orphan the application at present, and probably cause issues.
@@ -754,6 +757,10 @@
 			{/if}
 
 			<h2>Workload Pools</h2>
+
+			{#if !hasWorkloadPools}
+				<p class="fieldlabel error">At least one workload pool is required.</p>
+			{/if}
 
 			{#each workloadPools as pool, index}
 				<section class="workloadpool">
