@@ -108,6 +108,10 @@
 	let workloadPools = [];
 	addPool();
 
+	let hasWorkloadPools = true;
+
+	$: hasWorkloadPools = workloadPools.length > 0;
+
 	// Availability zones to use.
 	let computeAZs = [];
 	let computeAZ = null;
@@ -406,7 +410,7 @@
 	}
 
 	// Roll up validity to enable creation.
-	$: valid = [nameValid].every((x) => x) && workloadPools.every((x) => x.valid);
+	$: valid = [nameValid].every((x) => x) && hasWorkloadPools && workloadPools.every((x) => x.valid);
 
 	async function submit() {
 		// Delete an existing application credential that may be
@@ -868,6 +872,10 @@ s ingress and cert-manager add-ons"
 			{/if}
 
 			<h2>Workload Pools</h2>
+
+			{#if !hasWorkloadPools}
+				<p class="fieldlabel error">At least one workload pool is required.</p>
+			{/if}
 
 			{#each workloadPools as pool, index}
 				<section class="workloadpool">
