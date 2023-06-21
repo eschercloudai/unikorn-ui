@@ -3,7 +3,6 @@
 	import { token, removeCredentials } from '$lib/credentials.js';
 	import { errors } from '$lib/errors.js';
 	import { createEventDispatcher } from 'svelte';
-	import { gte } from 'semver';
 
 	import {
 		listFlavors,
@@ -807,21 +806,19 @@ s ingress and cert-manager add-ons"
 						bind:checked={kubernetesDashboard}
 					/>
 
-					{#if gte(applicationBundle.version, '1.3.0')}
-						<CheckBoxField
-							id="file-storage"
-							label="Enable file storage?"
-							help="Enables POSIX file based persistent storage"
-							bind:checked={fileStorage}
-						/>
+					<CheckBoxField
+						id="file-storage"
+						label="Enable file storage?"
+						help="Enables POSIX file based persistent storage"
+						bind:checked={fileStorage}
+					/>
 
-						<CheckBoxField
-							id="prometheus"
-							label="Enable Prometheus?"
-							help="Enables the Prometheus operator that can be used to provide platform monitoring"
-							bind:checked={prometheus}
-						/>
-					{/if}
+					<CheckBoxField
+						id="prometheus"
+						label="Enable Prometheus?"
+						help="Enables the Prometheus operator that can be used to provide platform monitoring"
+						bind:checked={prometheus}
+					/>
 				</section>
 			</details>
 
