@@ -11,8 +11,6 @@
 		listComputeAvailabilityZones,
 		listBlockStorageAvailabilityZones,
 		listExternalNetworks,
-		createApplicationCredential,
-		deleteApplicationCredential,
 		createCluster,
 		listApplicationBundlesCluster,
 		getServerGroup,
@@ -374,11 +372,6 @@
 		loaded = true;
 	}
 
-	// Define the application credential name.
-	function appCredName() {
-		return `${controlPlane.status.name}-${name}`;
-	}
-
 	function serverGroupName() {
 		return `${controlPlane.status.name}-${name}-control-plane`;
 	}
@@ -412,38 +405,6 @@
 	$: valid = [nameValid].every((x) => x) && hasWorkloadPools && workloadPools.every((x) => x.valid);
 
 	async function submit() {
-		// Delete an existing application credential that may be
-		// in the way.
-		// TODO: we should garbage collect these after cluster deprovision
-		// but that's somewhat difficult.
-		await deleteApplicationCredential(appCredName(name), {
-			token: accessToken,
-			onUnauthorized: () => {
-				removeCredentials();
-			},
-			onNotFound: () => {}
-		});
-
-		let ac = await createApplicationCredential({
-			token: accessToken,
-			onUnauthorized: () => {
-				removeCredentials();
-			},
-			onForbidden: (message) => {
-				if (message) {
-					errors.add(message);
-				}
-			},
-			body: {
-				name: appCredName(name)
-			}
-		});
-
-		if (ac == null) {
-			active = false;
-			return;
-		}
-
 		let sg = await getServerGroup(serverGroupName(name), {
 			token: accessToken,
 			onUnauthorized: () => {
@@ -473,8 +434,6 @@
 			name: name,
 			applicationBundle: applicationBundle,
 			openstack: {
-				applicationCredentialID: ac.id,
-				applicationCredentialSecret: ac.secret,
 				computeAvailabilityZone: computeAZ.name,
 				volumeAvailabilityZone: blockStorageAZs[0].name,
 				externalNetworkID: externalNetworks[0].id
