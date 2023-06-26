@@ -99,14 +99,6 @@ export function listKeyPairs(opts) {
 	return request('GET', '/api/v1/providers/openstack/key-pairs', opts);
 }
 
-export function createApplicationCredential(opts) {
-	return request('POST', '/api/v1/providers/openstack/application-credentials', opts);
-}
-
-export function deleteApplicationCredential(name, opts) {
-	return request('DELETE', `/api/v1/providers/openstack/application-credentials/${name}`, opts);
-}
-
 export function getServerGroup(name, opts) {
 	return request('GET', `/api/v1/providers/openstack/servergroups/${name}`, opts);
 }
