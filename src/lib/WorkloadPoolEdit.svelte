@@ -34,8 +34,9 @@
 		replicas = existing.machine.replicas;
 		disk = existing.machine.disk.size;
 
+		autoscaling = existing.autoscaling ? true : false;
+
 		if (existing.autoscaling) {
-			autoscaling = true;
 			minReplicas = existing.autoscaling.minimumReplicas;
 			maxReplicas = existing.autoscaling.maximumReplicas;
 		}
@@ -190,7 +191,7 @@
 {#if autoscaling}
 	<SliderField
 		id="minReplicas"
-		help="Minimunm number of virtual machines."
+		help="Minimum number of virtual machines."
 		min="0"
 		max="50"
 		bind:value={minReplicas}
@@ -199,7 +200,7 @@
 	<!-- TODO: this should be relative to the minimum -->
 	<SliderField
 		id="maxReplicas"
-		help="Maximunm number of virtual machines."
+		help="Maximum number of virtual machines."
 		min="0"
 		max="50"
 		bind:value={maxReplicas}
