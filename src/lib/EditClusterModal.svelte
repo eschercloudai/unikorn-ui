@@ -113,6 +113,7 @@
 	let kubernetesDashboard = cluster.features && cluster.features.kubernetesDashboard;
 	let fileStorage = cluster.features && cluster.features.fileStorage;
 	let prometheus = cluster.features && cluster.features.prometheus;
+	let nvidiaOperator = cluster.features && cluster.features.nvidiaOperator;
 
 	$: if (kubernetesDashboard) {
 		ingress = certManager = true;
@@ -391,11 +392,13 @@
 
 		valid = hasWorkloadPools && workloadPools.every((x) => x.object.valid);
 
-		// NOTE: if this is on, leave it on, unikorn-cluster-manager will
-		// just orphan the application at present, and probably cause issues.
-		if (!cluster.features || !cluster.features.autoscaling) {
-			autoscaling = workloadPools.some((pool) => pool.object.autoscaling);
-		}
+		// Autoscaling is enabled if it's on for any workload pool.
+		autoscaling = workloadPools.some((pool) => pool.object.autoscaling);
+
+		// The nvidia operator is installed if any workload pool's flavor has a GPU.
+		nvidiaOperator = workloadPools.some(
+			(pool) => pool.object.flavor && pool.object.flavor.gpus != null
+		);
 	}
 
 	$: changeWorkloadPools(workloadPools);
@@ -471,7 +474,8 @@
 			certManager: certManager,
 			kubernetesDashboard: kubernetesDashboard,
 			fileStorage: fileStorage,
-			prometheus: prometheus
+			prometheus: prometheus,
+			nvidiaOperator: nvidiaOperator
 		};
 
 		for (const p of workloadPools) {
