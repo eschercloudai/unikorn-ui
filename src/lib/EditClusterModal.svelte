@@ -113,7 +113,6 @@
 	let kubernetesDashboard = cluster.features && cluster.features.kubernetesDashboard;
 	let fileStorage = cluster.features && cluster.features.fileStorage;
 	let prometheus = cluster.features && cluster.features.prometheus;
-	let nvidiaOperator = cluster.features && cluster.features.nvidiaOperator;
 
 	$: if (kubernetesDashboard) {
 		ingress = certManager = true;
@@ -394,11 +393,6 @@
 
 		// Autoscaling is enabled if it's on for any workload pool.
 		autoscaling = workloadPools.some((pool) => pool.object.autoscaling);
-
-		// The nvidia operator is installed if any workload pool's flavor has a GPU.
-		nvidiaOperator = workloadPools.some(
-			(pool) => pool.object.flavor && pool.object.flavor.gpus != null
-		);
 	}
 
 	$: changeWorkloadPools(workloadPools);
@@ -474,8 +468,7 @@
 			certManager: certManager,
 			kubernetesDashboard: kubernetesDashboard,
 			fileStorage: fileStorage,
-			prometheus: prometheus,
-			nvidiaOperator: nvidiaOperator
+			prometheus: prometheus
 		};
 
 		for (const p of workloadPools) {
@@ -515,6 +508,11 @@
 		await updateCluster(controlPlane.name, cluster.name, {
 			token: accessToken,
 			onBadRequest: (message) => {
+				if (message) {
+					errors.add(message);
+				}
+			},
+			onInternalServerError: (message) => {
 				if (message) {
 					errors.add(message);
 				}
