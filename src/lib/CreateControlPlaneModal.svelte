@@ -263,6 +263,11 @@
 					errors.add(message);
 				}
 			},
+			onInternalServerError: (message) => {
+				if (message) {
+					errors.add(message);
+				}
+			},
 			onUnauthorized: () => {
 				removeCredentials();
 			},

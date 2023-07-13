@@ -94,7 +94,6 @@
 	let kubernetesDashboard = false;
 	let fileStorage = false;
 	let prometheus = false;
-	let nvidiaOperator = false;
 
 	// The kubernetes dashboard implies ingress and cert-manager.
 	// The individual inputs are disabled below so they cannot be turned off.
@@ -104,9 +103,6 @@
 
 	// Autoscaling is enabled if it's on for any workload pool.
 	$: autoscaling = workloadPools.some((pool) => pool.autoscaling);
-
-	// The nvidia operator is installed if any workload pool's flavor has a GPU.
-	$: nvidiaOperator = workloadPools.some((pool) => pool.flavor && pool.flavor.gpus != null);
 
 	// A set of workload pools for the cluster.
 	let workloadPools = [];
@@ -438,8 +434,7 @@
 				certManager: certManager,
 				kubernetesDashboard: kubernetesDashboard,
 				fileStorage: fileStorage,
-				prometheus: prometheus,
-				nvidiaOperator: nvidiaOperator
+				prometheus: prometheus
 			}
 		};
 
@@ -521,6 +516,11 @@
 		await createCluster(controlPlane.name, {
 			token: accessToken,
 			onBadRequest: (message) => {
+				if (message) {
+					errors.add(message);
+				}
+			},
+			onInternalServerError: (message) => {
 				if (message) {
 					errors.add(message);
 				}
