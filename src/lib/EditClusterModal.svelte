@@ -104,7 +104,6 @@
 	}
 
 	let replicas = cluster.controlPlane.replicas;
-	let disk = cluster.controlPlane.disk.size;
 	let keyPair = cluster.openstack.sshKeyName;
 	let allowedPrefixes = cluster.api ? cluster.api.allowedPrefixes.join(',') : null;
 	let autoscaling = cluster.features && cluster.features.autoscaling;
@@ -113,6 +112,13 @@
 	let kubernetesDashboard = cluster.features && cluster.features.kubernetesDashboard;
 	let fileStorage = cluster.features && cluster.features.fileStorage;
 	let prometheus = cluster.features && cluster.features.prometheus;
+
+	let controlPlanePersistentStorage = cluster.controlPlane.disk != null;
+
+	let disk = 50;
+	if (controlPlanePersistentStorage) {
+		disk = cluster.controlPlane.disk.size;
+	}
 
 	$: if (kubernetesDashboard) {
 		ingress = certManager = true;
@@ -439,8 +445,17 @@
 		body.controlPlane.version = version;
 		body.controlPlane.imageName = image.name;
 		body.controlPlane.flavorName = flavor.name;
-		body.controlPlane.disk.size = disk;
 		body.workloadPools = [];
+
+		if (controlPlanePersistentStorage) {
+			if (!body.controlPlane.disk) {
+				body.controlPlane.disk = {};
+			}
+
+			body.controlPlane.disk.size = disk;
+		} else {
+			delete body.controlPlane.disk;
+		}
 
 		// Handle updates of optional fields.
 		// TODO: this feels pretty clunky...
@@ -695,8 +710,8 @@
 
 					<CheckBoxField
 						id="file-storage"
-						label="Enable file storage?"
-						help="Enables POSIX file based persistent storage"
+						label="Enable Longhorn?"
+						help="Enables Longhorn for persistent storage, includes read-write-many (RWX) support"
 						bind:checked={fileStorage}
 					/>
 
@@ -728,29 +743,44 @@
 					bind:value={flavor}
 				/>
 
-				<SliderField
-					id="disk"
-					help="The size of the root disk."
-					min="50"
-					max="2000"
-					step="50"
-					formatter={(x) => `${x}GiB`}
-					bind:value={disk}
-				/>
-
 				<details>
 					<summary>Advanced Options</summary>
 
 					<section>
+						<p>Number of virtual machines.</p>
 						<SliderField
 							id="replicas"
-							help="Number of virtual machines. The default (3) is generally cost effective while providing
-                                                high-availability."
+							help="The default (3) is generally cost effective while providing high-availability."
 							min="1"
-							max="9"
+							max="5"
 							step="2"
 							bind:value={replicas}
 						/>
+
+						<CheckBoxField
+							id="controlplane-storage"
+							label="Use persistent storage?"
+							help="Whether to use a dedicated persistent volume for
+							control plane nodes.  It is recommended to leave this
+							unchecked, as ephemeral storage provides higher performance
+							for Kubernetes' etcd database.  If left unchecked, the default ephemeral
+							storage size of {flavor.disk}GB is used.  Checking this also allows
+							you to specify the volume size.  You may wish to do this
+							to increase storage capacity."
+							bind:checked={controlPlanePersistentStorage}
+						/>
+
+						{#if controlPlanePersistentStorage}
+							<SliderField
+								id="disk"
+								help="The size of the root disk."
+								min="50"
+								max="2000"
+								step="50"
+								formatter={(x) => `${x}GiB`}
+								bind:value={disk}
+							/>
+						{/if}
 					</section>
 				</details>
 			{/if}

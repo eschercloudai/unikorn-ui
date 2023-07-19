@@ -94,6 +94,7 @@
 	let kubernetesDashboard = false;
 	let fileStorage = false;
 	let prometheus = false;
+	let controlPlanePersistentStorage = false;
 
 	// The kubernetes dashboard implies ingress and cert-manager.
 	// The individual inputs are disabled below so they cannot be turned off.
@@ -422,10 +423,7 @@
 				replicas: replicas,
 				version: version,
 				imageName: image.name,
-				flavorName: flavor.name,
-				disk: {
-					size: disk
-				}
+				flavorName: flavor.name
 			},
 			workloadPools: [],
 			features: {
@@ -437,6 +435,12 @@
 				prometheus: prometheus
 			}
 		};
+
+		if (controlPlanePersistentStorage) {
+			body.controlPlane.disk = {
+				size: disk
+			};
+		}
 
 		if (autoUpgrade) {
 			// Empty object means platform managed.
@@ -743,8 +747,8 @@ s ingress and cert-manager add-ons"
 
 					<CheckBoxField
 						id="file-storage"
-						label="Enable file storage?"
-						help="Enables POSIX file based persistent storage"
+						label="Enable Longhorn?"
+						help="Enables Longhorn for persistent storage, includes read-write-many (RWX) support"
 						bind:checked={fileStorage}
 					/>
 
@@ -776,29 +780,44 @@ s ingress and cert-manager add-ons"
 					bind:value={flavor}
 				/>
 
-				<SliderField
-					id="disk"
-					help="The size of the root disk."
-					min="50"
-					max="2000"
-					step="50"
-					formatter={(x) => `${x}GiB`}
-					bind:value={disk}
-				/>
-
 				<details>
 					<summary>Advanced Options</summary>
 
 					<section>
+						<p>Number of virtual machines.</p>
 						<SliderField
 							id="replicas"
-							help="Number of virtual machines. The default (3) is generally cost effective while providing
-                                                high-availability."
+							help=" The default (3) is generally cost effective while providing high-availability."
 							min="1"
-							max="9"
+							max="5"
 							step="2"
 							bind:value={replicas}
 						/>
+
+						<CheckBoxField
+							id="controlplane-storage"
+							label="Use persistent storage?"
+							help="Whether to use a dedicated persistent volume for
+							control plane nodes.  It is recommended to leave this
+							unchecked, as ephemeral storage provides higher performance
+							for Kubernetes' etcd database.  If left unchecked, the default ephemeral
+							storage size of {flavor.disk}GB is used.  Checking this also allows
+							you to specify the volume size.  You may wish to do this
+							to increase storage capacity."
+							bind:checked={controlPlanePersistentStorage}
+						/>
+
+						{#if controlPlanePersistentStorage}
+							<SliderField
+								id="disk"
+								help="The size of the root disk."
+								min="50"
+								max="2000"
+								step="50"
+								formatter={(x) => `${x}GiB`}
+								bind:value={disk}
+							/>
+						{/if}
 					</section>
 				</details>
 			{/if}
