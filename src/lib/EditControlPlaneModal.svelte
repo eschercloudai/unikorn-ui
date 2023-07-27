@@ -22,6 +22,8 @@
 	// We will raise controlPlaneUpdated on successful cluster update.
 	const dispatch = createEventDispatcher();
 
+	let submitting = false;
+
 	let accessToken;
 
 	// Control plane versioning support.
@@ -110,6 +112,8 @@
 	}
 
 	async function submit() {
+		submitting = true;
+
 		// Deep copy the object, bad tends to happen when you mutate
 		// something non-local.
 		let body = JSON.parse(JSON.stringify(controlPlane));
@@ -229,10 +233,17 @@
 		</details>
 
 		<div class="buttons">
-			<button type="submit" on:click={submit} on:keydown={submit}>
-				<iconify-icon icon="mdi:tick" />
-				<div>Update</div>
-			</button>
+			{#if submitting}
+				<button disabled="true">
+					<iconify-icon icon="svg-spinners:ring-resize" />
+					<div>Creating...</div>
+				</button>
+			{:else}
+				<button type="submit" on:click={submit} on:keydown={submit}>
+					<iconify-icon icon="mdi:tick" />
+					<div>Create</div>
+				</button>
+			{/if}
 			<button on:click={close}>
 				<iconify-icon icon="mdi:close" />
 				<div>Cancel</div>

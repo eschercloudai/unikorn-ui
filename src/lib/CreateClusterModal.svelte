@@ -46,6 +46,8 @@
 	// We will raise clusterCreated on successful cluster creation.
 	const dispatch = createEventDispatcher();
 
+	let submitting = false;
+
 	// name of the cluster.
 	let name = null;
 	let nameValid = false;
@@ -405,6 +407,8 @@
 	$: valid = [nameValid].every((x) => x) && hasWorkloadPools && workloadPools.every((x) => x.valid);
 
 	async function submit() {
+		submitting = true;
+
 		const body = {
 			name: name,
 			applicationBundle: applicationBundle,
@@ -517,7 +521,13 @@
 			body.workloadPools.push(pool);
 		}
 
-		await createCluster(controlPlane.name, {
+		let controlPlaneName = 'default';
+
+		if (controlPlane) {
+			controlPlaneName = controlPlane.name;
+		}
+
+		await createCluster(controlPlaneName, {
 			token: accessToken,
 			onBadRequest: (message) => {
 				if (message) {
@@ -844,10 +854,17 @@ s ingress and cert-manager add-ons"
 			</button>
 
 			<div class="buttons">
-				<button type="submit" disabled={!valid} on:click={submit} on:keydown={submit}>
-					<iconify-icon icon="mdi:tick" />
-					<div>Create</div>
-				</button>
+				{#if submitting}
+					<button disabled="true">
+						<iconify-icon icon="svg-spinners:ring-resize" />
+						<div>Creating...</div>
+					</button>
+				{:else}
+					<button type="submit" disabled={!valid} on:click={submit} on:keydown={submit}>
+						<iconify-icon icon="mdi:tick" />
+						<div>Create</div>
+					</button>
+				{/if}
 				<button on:click={close}>
 					<iconify-icon icon="mdi:close" />
 					<div>Cancel</div>

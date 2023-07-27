@@ -45,6 +45,8 @@
 	// We will raise clusterCreated on successful cluster creation.
 	const dispatch = createEventDispatcher();
 
+	let submitting = false;
+
 	// Define dynamic things from the API.
 	let versions = [];
 	let allImages = [];
@@ -404,6 +406,8 @@
 	$: changeWorkloadPools(workloadPools);
 
 	async function submit() {
+		submitting = true;
+
 		// Deep copy the object, bad tends to happen when you mutate
 		// something non-local.
 		let body = JSON.parse(JSON.stringify(cluster));
@@ -814,10 +818,17 @@
 			</button>
 
 			<div class="buttons">
-				<button type="submit" disabled={!valid} on:click={submit} on:keydown={submit}>
-					<iconify-icon icon="mdi:tick" />
-					<div>Update</div>
-				</button>
+				{#if submitting}
+					<button disabled="true">
+						<iconify-icon icon="svg-spinners:ring-resize" />
+						<div>Creating...</div>
+					</button>
+				{:else}
+					<button type="submit" disabled={!valid} on:click={submit} on:keydown={submit}>
+						<iconify-icon icon="mdi:tick" />
+						<div>Update</div>
+					</button>
+				{/if}
 				<button on:click={close} on:keydown={close}>
 					<iconify-icon icon="mdi:close" />
 					<div>Cancel</div>

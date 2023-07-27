@@ -9,7 +9,7 @@
 {:else if status == 'error'}
 	<iconify-icon class="error" icon="mdi:error-outline" />
 {:else if status == 'progressing'}
-	<iconify-icon class="progressing" icon="mdi:circle-arrows" />
+	<iconify-icon class="progressing" icon="svg-spinners:ring-resize" />
 {:else}
 	<iconify-icon class="unknown" icon="mdi:question-mark" />
 {/if}
@@ -29,20 +29,8 @@
 	}
 	.progressing {
 		color: var(--mid-grey);
-		animation-name: spin;
-		animation-duration: 5000ms;
-		animation-iteration-count: infinite;
-		animation-timing-function: linear;
 	}
 	iconify-icon {
 		font-size: var(--icon-size);
-	}
-	@keyframes spin {
-		from {
-			transform: rotate(0deg);
-		}
-		to {
-			transform: rotate(360deg);
-		}
 	}
 </style>
