@@ -4,12 +4,7 @@
 	import { errors } from '$lib/errors.js';
 	import { createEventDispatcher } from 'svelte';
 
-	import {
-		createProject,
-		getProject,
-		createControlPlane,
-		listApplicationBundlesControlPlane
-	} from '$lib/client.js';
+	import { createControlPlane, listApplicationBundlesControlPlane } from '$lib/client.js';
 
 	import { applicationBundleFormatter } from '$lib/formatters.js';
 
@@ -29,6 +24,8 @@
 
 	// We will raise clusterCreated on successful cluster creation.
 	const dispatch = createEventDispatcher();
+
+	let submitting = false;
 
 	// Control plane name.
 	let name = null;
@@ -128,100 +125,8 @@
 	// Roll up validity to enable creation.
 	$: allValid = [nameValid].every((x) => x);
 
-	// Get the project and return null if it's not ready, else return the
-	// project itself.
-	async function projectReady() {
-		const project = await getProject({
-			token: accessToken,
-			onUnauthorized: () => {
-				removeCredentials();
-			}
-		});
-
-		if (!project) {
-			return null;
-		}
-
-		if (project.status.status != 'Provisioned') {
-			return null;
-		}
-
-		return project;
-	}
-
-	// Poll the project until it becomes ready.  By default we set a ~10s
-	// timeout, which is more than enough to create a namespace!
-	function waitProjectReady() {
-		let tries = 0;
-
-		const poll = async (resolve, reject) => {
-			tries++;
-			if (tries > 10) {
-				reject(new Error('project failed to become ready'));
-				return;
-			}
-
-			const project = await projectReady();
-			if (project) {
-				resolve(project);
-				return;
-			}
-
-			setTimeout(poll, 1000, resolve, reject);
-		};
-
-		return new Promise(poll);
-	}
-
-	// Create the project and await its readiness (ability to have a CP
-	// provisioned in it).  Returns the project on success, otherwise null
-	// and it adds an error entry to explain what went wrong.
-	async function createProjectAndWait() {
-		let success = true;
-
-		await createProject({
-			token: accessToken,
-			onUnauthorized: () => {
-				success = false;
-				removeCredentials();
-			}
-		});
-
-		if (!success) {
-			return false;
-		}
-
-		try {
-			return await waitProjectReady();
-		} catch (e) {
-			errors.add(e.toString());
-		}
-
-		return null;
-	}
-
 	async function submitCreateControlPlane() {
-		let create = false;
-
-		let project = await getProject({
-			token: accessToken,
-			onUnauthorized: () => {
-				removeCredentials();
-			},
-			onNotFound: () => {
-				create = true;
-			}
-		});
-
-		if (create) {
-			console.log('project not found, creating...');
-			project = await createProjectAndWait();
-		}
-
-		if (!project) {
-			active = false;
-			return;
-		}
+		submitting = true;
 
 		const body = {
 			name: name,
@@ -347,15 +252,22 @@
 		</details>
 
 		<div class="buttons">
-			<button
-				type="submit"
-				disabled={!allValid}
-				on:click={submitCreateControlPlane}
-				on:keydown={submitCreateControlPlane}
-			>
-				<iconify-icon icon="mdi:tick" />
-				<div>Create</div>
-			</button>
+			{#if submitting}
+				<button disabled="true">
+					<iconify-icon icon="svg-spinners:ring-resize" />
+					<div>Creating...</div>
+				</button>
+			{:else}
+				<button
+					type="submit"
+					disabled={!allValid}
+					on:click={submitCreateControlPlane}
+					on:keydown={submitCreateControlPlane}
+				>
+					<iconify-icon icon="mdi:tick" />
+					<div>Create</div>
+				</button>
+			{/if}
 			<button on:click={close}>
 				<iconify-icon icon="mdi:close" />
 				<div>Cancel</div>

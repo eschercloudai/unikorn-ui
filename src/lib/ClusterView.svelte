@@ -29,7 +29,7 @@
 
 	const tokenUnsubscribe = token.subscribe(changeToken);
 
-	const ticker = setInterval(() => updateClusters(accessToken, controlPlane), 10000);
+	const ticker = setInterval(() => clustersMutated(), 10000);
 
 	onDestroy(() => {
 		clearInterval(ticker);
@@ -51,9 +51,6 @@
 			token: accessToken,
 			onUnauthorized: () => {
 				removeCredentials();
-			},
-			onNotFound: () => {
-				// no project has been created yet.
 			}
 		});
 
@@ -62,7 +59,23 @@
 		}
 
 		controlPlanes = result;
-		controlPlane = controlPlanes.length != 0 ? controlPlanes[0] : null;
+
+		let newControlPlane = null;
+
+		// If we have an existing control plane selected, then try and retain
+		// that one, it'll get annoying if we select a random one every refresh.
+		if (controlPlane) {
+			newControlPlane = controlPlanes.find((x) => x.name == controlPlane.name);
+		}
+
+		// If there is no control plane selected, then pick one, these will be
+		// sorted by name.
+		// TODO: add some session state to preserve this?
+		if (!newControlPlane && controlPlanes.length != 0) {
+			newControlPlane = controlPlanes[0];
+		}
+
+		controlPlane = newControlPlane;
 	}
 
 	$: updateControlPlanes(accessToken);
@@ -70,6 +83,22 @@
 	// TODO: clusters update should rely on application bundles, saving API traffic.
 	async function updateClusters(accessToken, controlPlane) {
 		if (accessToken == null || controlPlane == null) {
+			clusters = [];
+			return;
+		}
+
+		const result = await listClusters(controlPlane.status.name, {
+			token: accessToken,
+			onUnauthorized: () => {
+				removeCredentials();
+			}
+		});
+
+		if (result == null) {
+			return;
+		}
+
+		if (result.length == 0) {
 			clusters = [];
 			return;
 		}
@@ -87,17 +116,6 @@
 
 		const bundles = bresult.reverse().filter((x) => !x.endOfLife && !x.preview);
 
-		const result = await listClusters(controlPlane.status.name, {
-			token: accessToken,
-			onUnauthorized: () => {
-				removeCredentials();
-			}
-		});
-
-		if (result == null) {
-			return;
-		}
-
 		for (const cluster of result) {
 			if (lt(cluster.applicationBundle.version, bundles[0].version)) {
 				cluster.upgradable = true;
@@ -114,7 +132,7 @@
 			return 'progressing';
 		} else if (status.status == 'Provisioned') {
 			return 'ok';
-		} else if (['Provisioning', 'Deprovisioning', 'Updating'].includes(status.status)) {
+		} else if (['Provisioning', 'Deprovisioning'].includes(status.status)) {
 			return 'progressing';
 		} else if (['Unknown', 'Cancelled'].includes(status.status)) {
 			return 'warning';
@@ -191,8 +209,13 @@
 		createModalActive = true;
 	}
 
-	function clustersMutated() {
-		updateClusters(accessToken, controlPlane);
+	// Clusters can implictly create control planes, so update these first before
+	// listing clusters in them.  Additionally, when deleting a control plane, and
+	// doing a cascading delete, it's possible that polling for a cluster on a
+	// cached control plane will bring the control plane back to life magically!
+	// NOTE: The control plane update will trigger a reload of the clusters.
+	async function clustersMutated() {
+		await updateControlPlanes(accessToken);
 	}
 </script>
 
@@ -221,13 +244,25 @@
 		on:change={() => updateClusters(accessToken, controlPlane)}
 	>
 		{#each controlPlanes as choice}
-			<option value={choice}>{choice.status.name}</option>
+			<option value={choice}>
+				{choice.name}
+				{#if choice.status.deletionTime}
+					(Deleting...)
+				{/if}
+			</option>
 		{/each}
 	</select>
 </LabeledInput>
 
 <View>
-	{#if controlPlanes.length == 0}
+	<section class="buttons">
+		<button on:click={showCreateModal}>
+			<iconify-icon icon="material-symbols:add" />
+			<div>Create</div>
+		</button>
+	</section>
+
+	{#if controlPlanes.length == 0 || clusters.length == 0}
 		<section class="sad-kitty">
 			<img src="img/sad.png" alt="A sad kitty" />
 			<div class="attribution">
@@ -237,16 +272,17 @@
 				>
 				on Freepik
 			</div>
-			<p>No control planes found. Create one first to enable cluster creation.</p>
+
+			{#if controlPlanes.length == 0}
+				<p>
+					No control planes found. Either create a cluster to provision a default one (defaults to
+					latest version with auto-upgrade enabled), or create a control plane manually.
+				</p>
+			{:else}
+				<p>No clusters found, create one to begin!</p>
+			{/if}
 		</section>
 	{:else}
-		<section class="buttons">
-			<button on:click={showCreateModal}>
-				<iconify-icon icon="material-symbols:add" />
-				<div>Create</div>
-			</button>
-		</section>
-
 		<ItemView>
 			{#each clusters as cl}
 				<Item>
