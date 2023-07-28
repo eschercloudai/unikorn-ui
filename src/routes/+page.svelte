@@ -12,7 +12,6 @@
 	import LabeledInput from '$lib/LabeledInput.svelte';
 
 	import Breadcrumbs from '$lib/Breadcrumbs.svelte';
-	import DashboardView from '$lib/DashboardView.svelte';
 	import ControlPlaneView from '$lib/ControlPlaneView.svelte';
 	import ClusterView from '$lib/ClusterView.svelte';
 	import Errors from '$lib/Errors.svelte';
@@ -163,9 +162,7 @@
 <main class:showmenu>
 	<Breadcrumbs />
 	<Errors />
-	{#if content == 'dashboard'}
-		<DashboardView />
-	{:else if content == 'kubernetes-control-planes'}
+	{#if content == 'kubernetes-control-planes'}
 		<ControlPlaneView />
 	{:else if content == 'kubernetes-clusters'}
 		<ClusterView />
