@@ -5,22 +5,17 @@ const menu = {
 	id: 'root',
 	children: [
 		{
-			id: 'dashboard',
-			value: 'Dashboard',
-			icon: 'ri:dashboard-3-line'
-		},
-		{
 			id: 'kubernetes',
-			value: 'Kubernetes',
+			value: 'Kubernetes Service',
 			icon: 'mdi:kubernetes',
 			children: [
 				{
-					id: 'kubernetes-control-planes',
-					value: 'Control Planes'
-				},
-				{
 					id: 'kubernetes-clusters',
 					value: 'Clusters'
+				},
+				{
+					id: 'kubernetes-control-planes',
+					value: 'Control Planes'
 				}
 			]
 		}
@@ -86,7 +81,7 @@ function expand(id, root) {
 // to the selected item ID.
 export function getMenu(id) {
 	if (id == null) {
-		id = 'dashboard';
+		id = 'kubernetes-clusters';
 	}
 
 	// Apply expansion to a deep copy of the menu.
