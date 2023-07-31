@@ -1,14 +1,15 @@
-FROM node:19-alpine
+FROM node:20-alpine as build
 
-WORKDIR /usr/src/app
-
-COPY package.json package-lock.json .
-RUN npm install
+WORKDIR /app
 
 COPY . .
-RUN npm run build
 
-# Run as the node user.
-USER 1000
+RUN npm install \
+ && npm run build
 
-ENTRYPOINT ["node", "build"]
+FROM gcr.io/distroless/nodejs20:nonroot
+
+COPY --from=build /app /app
+WORKDIR /app
+
+CMD ["build"]
