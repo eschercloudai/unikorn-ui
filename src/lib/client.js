@@ -117,10 +117,6 @@ export function createProject(opts) {
 	return request('POST', `/api/v1/project`, opts);
 }
 
-export function getProject(opts) {
-	return request('GET', `/api/v1/project`, opts);
-}
-
 export function listControlPlanes(opts) {
 	return request('GET', '/api/v1/controlplanes', opts);
 }

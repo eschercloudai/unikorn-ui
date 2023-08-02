@@ -22,12 +22,43 @@ const menu = {
 	]
 };
 
+// defaultID selects the default/first-time view.
+const defaultID = 'kubernetes-clusters';
+
 // selected allows components to subscribe to menu selection updates.
-export const selected = localStorage('navigation');
+export const selected = localStorage('navigation', defaultID);
+
+// hasID is used to spot when clients have an old ID selected, but it no
+// longer exists.
+function hasID(id, root = menu) {
+	if (!root.children) {
+		return root.id == id;
+	}
+
+	for (const child of root.children) {
+		if (hasID(id, child)) {
+			return true;
+		}
+	}
+
+	return false;
+}
+
+function fixID(id) {
+	if (!hasID(id)) {
+		selected.set(defaultID);
+
+		return defaultID;
+	}
+
+	return id;
+}
 
 // returns the breadcrumb trail based on the given ID, this should
 // be called from a scubscribe.
 export function getBreadcrumbs(id, root = menu) {
+	id = fixID(id);
+
 	// Leaf node, either return the matching value, or null if no match.
 	if (!root.children) {
 		if (root.id == id) {
@@ -80,9 +111,7 @@ function expand(id, root) {
 // getMenu returns a fresh copy of the menu with parents expanded down
 // to the selected item ID.
 export function getMenu(id) {
-	if (id == null) {
-		id = 'kubernetes-clusters';
-	}
+	id = fixID(id);
 
 	// Apply expansion to a deep copy of the menu.
 	let root = JSON.parse(JSON.stringify(menu));
