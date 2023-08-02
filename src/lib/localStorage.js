@@ -3,11 +3,14 @@ import { browser } from '$app/environment';
 
 // localStorage wraps a Svelte store and persists the value in persistent storage.
 // The initial value comes from persistent storage.
-export function localStorage(key) {
-	let value;
+export function localStorage(key, defaultValue) {
+	let value = defaultValue;
 
 	if (browser) {
-		value = window.localStorage.getItem(key);
+		const storageValue = window.localStorage.getItem(key);
+		if (storageValue != null) {
+			value = storageValue;
+		}
 	}
 
 	const store = writable(value);
