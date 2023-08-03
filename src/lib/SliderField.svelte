@@ -14,6 +14,9 @@
 
 	// formatter allow values to be formatted.
 	export let formatter = null;
+
+	export let invalidText = null;
+	export let valid;
 </script>
 
 <div class="slider">
@@ -25,6 +28,9 @@
 	{/if}
 </div>
 <label for={id} class="fieldlabel">{@html help}</label>
+{#if !valid && invalidText}
+	<label for={id} class="fieldlabel error">{@html invalidText}</label>
+{/if}
 
 <style>
 	.slider {
