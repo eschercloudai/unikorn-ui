@@ -39,7 +39,7 @@ async function request(method, path, opts) {
 				opts.onNotFound(message);
 			} else if (response.status == 409 && opts.onConflict) {
 				opts.onConflict(message);
-			} else if (response.Status == 500 && opts.onInternalServerError) {
+			} else if (response.status == 500 && opts.onInternalServerError) {
 				opts.onInternalServerError(message);
 			} else {
 				console.log(

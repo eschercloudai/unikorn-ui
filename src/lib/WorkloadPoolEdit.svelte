@@ -111,7 +111,11 @@
 		return name.match(/^(?!-)[a-z0-9-]{0,62}[a-z0-9]$/);
 	}
 
-	$: valid = [nameValid].every((x) => x);
+	let maxReplicasValid = true;
+
+	$: maxReplicasValid = autoscaling ? maxReplicas > minReplicas : true;
+
+	$: valid = [nameValid, maxReplicasValid].every((x) => x);
 
 	// Roll up all the parameters in an easy to use/bind variable.
 	// On an update to any of the variables, update the object/any bindings
@@ -197,13 +201,14 @@
 		bind:value={minReplicas}
 	/>
 
-	<!-- TODO: this should be relative to the minimum -->
 	<SliderField
 		id="maxReplicas"
 		help="Maximum number of virtual machines."
 		min="0"
 		max="50"
 		bind:value={maxReplicas}
+		bind:valid={maxReplicasValid}
+		invalidText="Maximum replicas must be greater than minimum replicas"
 	/>
 {:else}
 	<SliderField

@@ -821,7 +821,7 @@
 				{#if submitting}
 					<button disabled="true">
 						<iconify-icon icon="svg-spinners:ring-resize" />
-						<div>Creating...</div>
+						<div>Updating...</div>
 					</button>
 				{:else}
 					<button type="submit" disabled={!valid} on:click={submit} on:keydown={submit}>
