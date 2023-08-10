@@ -158,9 +158,9 @@ export function updateCluster(controlPlane, cluster, opts) {
 }
 
 export function listApplicationBundlesControlPlane(opts) {
-	return request('GET', '/api/v1/applicationBundles/controlPlane', opts);
+	return request('GET', '/api/v1/applicationbundles/controlPlane', opts);
 }
 
 export function listApplicationBundlesCluster(opts) {
-	return request('GET', '/api/v1/applicationBundles/cluster', opts);
+	return request('GET', '/api/v1/applicationbundles/cluster', opts);
 }
