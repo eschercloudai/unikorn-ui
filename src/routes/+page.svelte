@@ -123,7 +123,11 @@
 
 <header>
 	<span id="hamburger" class="selectable" on:click={toggleMenu} on:keypress={toggleMenu}>
-		<iconify-icon id="hamburger-icon" icon="material-symbols:menu" />
+		{#if showmenu}
+			<iconify-icon id="hamburger-icon" icon="material-symbols:close" />
+		{:else}
+			<iconify-icon id="hamburger-icon" icon="material-symbols:menu" />
+		{/if}
 		<label for="hamburger-icon">Menu</label>
 	</span>
 	<img src="img/Horizontal_AI.png" alt="EscherCloud AI Logo" />
