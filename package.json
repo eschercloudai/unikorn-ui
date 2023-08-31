@@ -1,6 +1,6 @@
 {
-	"name": "uinikorn",
-	"version": "0.0.1",
+	"name": "unikorn-ui",
+	"version": "0.1.33",
 	"private": true,
 	"scripts": {
 		"dev": "vite dev",
