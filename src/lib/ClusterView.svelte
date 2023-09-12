@@ -37,6 +37,13 @@
 	});
 
 	function changeToken(value) {
+		// If the token changes, then we need to purge the control plane at least
+		// as that will trigger a refresh of the clusters, and doing so may provision
+		// an existing control plane in the new project.
+		controlPlanes = [];
+		controlPlane = null;
+		clusters = [];
+
 		accessToken = value;
 	}
 
