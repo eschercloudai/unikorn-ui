@@ -16,7 +16,6 @@
 		padding: var(--padding);
 		gap: var(--padding);
 		border-bottom: 1px solid var(--brand);
-		background-color: white;
 	}
 	label {
 		display: block;

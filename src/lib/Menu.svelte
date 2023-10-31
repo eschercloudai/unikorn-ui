@@ -102,4 +102,14 @@
 	div.item.highlight iconify-icon:first-child {
 		color: white;
 	}
+
+	@media (prefers-color-scheme: dark) {
+		div.item {
+			color: var(--light-grey);
+		}
+		div.item:hover {
+			color: white;
+			background-color: var(--dark-grey);
+		}
+	}
 </style>

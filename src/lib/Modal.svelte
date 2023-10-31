@@ -35,7 +35,7 @@
 		flex-direction: column;
 		align-items: stretch;
 		overflow-y: auto;
-		background-color: white;
+		background-color: var(--modal);
 	}
 
 	/* Desktop overrides */
@@ -53,7 +53,7 @@
 			max-height: 80vh;
 			border: 1px outset var(--brand);
 			border-radius: var(--radius);
-			box-shadow: var(--shadow-offset) var(--shadow-offset) var(--radius) var(--mid-grey);
+			box-shadow: 0 0 var(--radius) var(--brand-light);
 		}
 
 		.modal.fixed {
