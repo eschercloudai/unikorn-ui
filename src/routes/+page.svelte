@@ -130,56 +130,70 @@
 		{/if}
 		<label for="hamburger-icon">Menu</label>
 	</span>
-	<img src="img/Horizontal_AI.png" alt="EscherCloud AI Logo" />
+	<!--
+	 This needs to be injected into the DOM in order for the "currentColor" stuff to
+	 work, as such, the <img> will be replaced with an <svg>, and Svelte will complain
+	 about styles being unused due to no <svg> tags...
+	-->
+	<img
+		src="img/ecai.svg"
+		alt="EscherCloud AI Logo"
+		onload="SVGInject(this)"
+		style="max-height: 2em; width: auto; margin-right: 2em;"
+	/>
 </header>
 
-<nav class:showmenu>
-	<div class="user">
-		<img src="https://www.gravatar.com/avatar/{MD5(emailAddress)}" alt="User Gravatar" />
-		<span>{emailAddress}</span>
-		<iconify-icon
-			class="selectable"
-			icon="material-symbols:logout"
-			on:click={logout}
-			on:keypress={logout}
-		/>
+<div id="content">
+	<div id="content-inner" class:showmenu>
+		<nav class:showmenu>
+			<div class="user">
+				<img src="https://www.gravatar.com/avatar/{MD5(emailAddress)}" alt="User Gravatar" />
+				<span>{emailAddress}</span>
+				<iconify-icon
+					class="selectable"
+					icon="material-symbols:logout"
+					on:click={logout}
+					on:keypress={logout}
+				/>
+			</div>
+
+			<LabeledInput id="project-select" value="Project">
+				<select
+					id="project-select"
+					name="project"
+					bind:value={currentProject}
+					on:change={changeProject}
+				>
+					{#each projects as choice}
+						<option value={choice}>{choice.name}</option>
+					{/each}
+				</select>
+			</LabeledInput>
+
+			{#if menu}
+				<Menu {...menu} />
+			{/if}
+		</nav>
+
+		<main class:showmenu>
+			<Breadcrumbs />
+			<Errors />
+			{#if content == 'kubernetes-control-planes'}
+				<ControlPlaneView />
+			{:else if content == 'kubernetes-clusters'}
+				<ClusterView />
+			{/if}
+		</main>
 	</div>
-
-	<LabeledInput id="project-select" value="Project">
-		<select
-			id="project-select"
-			name="project"
-			bind:value={currentProject}
-			on:change={changeProject}
-		>
-			{#each projects as choice}
-				<option value={choice}>{choice.name}</option>
-			{/each}
-		</select>
-	</LabeledInput>
-
-	{#if menu}
-		<Menu {...menu} />
-	{/if}
-</nav>
-
-<main class:showmenu>
-	<Breadcrumbs />
-	<Errors />
-	{#if content == 'kubernetes-control-planes'}
-		<ControlPlaneView />
-	{:else if content == 'kubernetes-clusters'}
-		<ClusterView />
-	{/if}
-</main>
+</div>
 
 <style>
 	/* Global constants */
 	:global(:root) {
 		/* Brand color palette */
-		--brand: hsl(295, 21%, 48%);
-		--brand-light: hsl(295, 21%, 60%);
-		--brand-dark: hsl(295, 21%, 36%);
+		--brand: rgb(144, 97, 148);
+		--brand-light: rgb(171, 132, 174);
+		--brand-dark: rgb(108, 73, 111);
 
 		/* Generic colors */
 		--light-grey: rgb(245, 245, 245);
@@ -194,7 +208,10 @@
 		--padding-header: 4rem;
 		--icon-size: 1.5rem;
 		--nav-icon-size: 2rem;
-		--nav-width-desktop: 300px;
+		--nav-width: 100vw;
+
+		--overlay: rgba(255, 255, 255, 0.75);
+		--modal: rgb(255, 255, 255);
 	}
 
 	/* Global styles */
@@ -205,6 +222,12 @@
 	}
 	:global(html) {
 		font-family: sans-serif;
+	}
+	:global(body) {
+		background-image: url('/img/wave.svg');
+		background-repeat: no-repeat;
+		background-position: top right;
+		background-size: cover;
 	}
 	:global(h1, h2, h3, h4, h5, h6) {
 		color: var(--brand);
@@ -223,6 +246,7 @@
 		width: 100%;
 		font-size: 1rem;
 		transition: all 0.2s ease-in;
+		color: inherit;
 	}
 	:global(input[type='text'], input[type='password'], select) {
 		padding: var(--padding);
@@ -237,6 +261,7 @@
 		) {
 		outline: none;
 		box-shadow: 0 0 var(--radius) var(--brand-light);
+		color: inherit;
 	}
 	:global(input[type='text']:invalid, input[type='password']:invalid, select:invalid) {
 		box-shadow: 0 0 var(--radius) var(--error);
@@ -298,7 +323,7 @@
 		cursor: not-allowed;
 	}
 	:global(details) {
-		background-color: white;
+		background-color: var(--overlay);
 	}
 	:global(details > section) {
 		padding: var(--padding);
@@ -340,15 +365,8 @@
 		height: 100vh;
 		display: flex;
 		flex-direction: column;
+		backdrop-filter: blur(2px);
 	}
-	main {
-		background-color: var(--light-grey);
-		transition: all 0.3s ease-in-out;
-		flex: 1;
-		display: flex;
-		flex-direction: column;
-	}
-
 	/* Header/masthead styling */
 	header {
 		box-sizing: border-box;
@@ -358,11 +376,7 @@
 		border-bottom: 0.25em solid var(--brand);
 		z-index: 20;
 		text-align: center;
-		background-color: white;
-	}
-	header > img {
-		max-height: 2em;
-		margin-right: 2em;
+		background-color: var(--overlay);
 	}
 	#hamburger {
 		position: absolute;
@@ -379,24 +393,40 @@
 		font-size: 0.5em;
 	}
 
-	/* Nav styling */
-	nav {
-		position: fixed;
-		top: 3.75em;
-		height: calc(100vh - 3.75em);
-		width: 100vw;
-		overflow-y: auto;
-		z-index: 10;
+	#content {
+		width: 100%;
+		height: 100%;
+		overflow: hidden;
+	}
+
+	#content-inner {
+		width: calc(var(--nav-width) + 100%);
+		height: 100%;
+		transition: all 0.3s ease-in-out;
+		transform: translateX(calc(var(--nav-width) * -1));
+		display: flex;
+	}
+
+	#content-inner.showmenu {
+		transform: none;
+	}
+
+	main {
+		width: 100%;
+		height: 100%;
+		flex: 1;
 		display: flex;
 		flex-direction: column;
-		color: var(--mid-grey);
-		transform-origin: left;
-		transform: translateX(-100vh);
-		transition: transform 0.3s ease-in-out;
-		background-color: white;
 	}
-	nav.showmenu {
-		transform: none;
+
+	/* Nav styling */
+	nav {
+		width: var(--nav-width);
+		height: 100%;
+		overflow-y: auto;
+		display: flex;
+		flex-direction: column;
+		background-color: var(--overlay);
 	}
 
 	/* User nav element */
@@ -414,7 +444,7 @@
 		max-height: var(--nav-icon-size);
 		margin-right: var(--padding);
 		border-radius: 1em;
-		border: 1px solid black;
+		border: 1px solid currentColor;
 	}
 	.user iconify-icon {
 		font-size: var(--icon-size);
@@ -423,14 +453,34 @@
 
 	/* Desktop overrides */
 	@media only screen and (min-width: 720px) {
-		main.showmenu {
-			margin-left: var(--nav-width-desktop);
+		:global(:root) {
+			--nav-width: 300px;
+		}
+		#content-inner.showmenu {
+			width: 100%;
 		}
 		nav {
-			width: var(--nav-width-desktop);
-			transform: translateX(calc(var(--nav-width-desktop) * -1));
 			border-right: 1px solid var(--brand);
-			box-shadow: 0 var(--shadow-offset) var(--radius) var(--mid-grey);
+		}
+	}
+
+	/* Color preference overrides */
+	@media (prefers-color-scheme: dark) {
+		:global(:root) {
+			/* Brand color palette */
+			--brand: rgb(171, 90, 177);
+			--brand-light: rgb(203, 93, 215);
+			--brand-dark: rgb(116, 49, 121);
+
+			--overlay: rgba(40, 40, 40, 0.75);
+			--modal: rgb(13, 13, 28);
+		}
+		:global(body) {
+			background-color: #0d0d1c;
+			color: white;
+		}
+		:global(h1, h2, h3, h4, h5, h6) {
+			color: var(--brand-light);
 		}
 	}
 </style>

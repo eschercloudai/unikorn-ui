@@ -123,7 +123,13 @@
 
 <Modal active={showlogin} fixed="true" width="480px">
 	<div class="login-modal-header">
-		<img id="logo" src="img/Horizontal_AI.png" alt="EscherCloud AI Logo" />
+		<img
+			id="logo"
+			src="img/ecai.svg"
+			alt="EscherCloud AI Logo"
+			onload="SVGInject(this)"
+			style="padding-top: 2em; padding-bottom: 2em; width: 15em; max-width: 20em; height: auto;"
+		/>
 	</div>
 
 	{#if errorMsg}

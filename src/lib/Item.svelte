@@ -8,9 +8,9 @@
 		flex-direction: column;
 		gap: var(--padding);
 		border: 1px solid var(--dark-grey);
-		background: white;
+		background: var(--overlay);
 		border-radius: var(--radius);
-		box-shadow: var(--shadow-offset) var(--shadow-offset) var(--radius) var(--mid-grey);
+		box-shadow: 0 0 var(--radius) var(--brand-light);
 		padding: var(--padding);
 	}
 </style>

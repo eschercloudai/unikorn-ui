@@ -59,9 +59,9 @@
 		top: 0;
 		right: 0;
 		z-index: 1;
-		background-color: white;
+		background-color: var(--overlay);
 		border: 1px outset var(--dark-grey);
-		box-shadow: var(--shadow-offset) var(--shadow-offset) var(--radius) var(--mid-grey);
+		box-shadow: 0 0 var(--radius) var(--brand);
 		animation: growDown 300ms ease-in-out forwards;
 		transform-origin: top;
 	}
@@ -77,6 +77,11 @@
 		}
 		100% {
 			transform: scaleY(1);
+		}
+	}
+	@media (prefers-color-scheme: dark) {
+		div.dropdown {
+			color: var(--light-grey);
 		}
 	}
 </style>

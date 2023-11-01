@@ -244,22 +244,24 @@
 	/>
 {/if}
 
-<LabeledInput id="control-plane-select" value="Control Plane to display clusters for">
-	<select
-		id="control-plane-select"
-		bind:value={controlPlane}
-		on:change={() => updateClusters(accessToken, controlPlane)}
-	>
-		{#each controlPlanes as choice}
-			<option value={choice}>
-				{choice.name}
-				{#if choice.status.deletionTime}
-					(Deleting...)
-				{/if}
-			</option>
-		{/each}
-	</select>
-</LabeledInput>
+<div class="tools">
+	<LabeledInput id="control-plane-select" value="Control Plane to display clusters for">
+		<select
+			id="control-plane-select"
+			bind:value={controlPlane}
+			on:change={() => updateClusters(accessToken, controlPlane)}
+		>
+			{#each controlPlanes as choice}
+				<option value={choice}>
+					{choice.name}
+					{#if choice.status.deletionTime}
+						(Deleting...)
+					{/if}
+				</option>
+			{/each}
+		</select>
+	</LabeledInput>
+</div>
 
 <View>
 	<section class="buttons">
@@ -347,6 +349,9 @@
 		align-content: space-between;
 		align-items: center;
 		gap: var(--padding);
+	}
+	.tools {
+		background-color: var(--overlay);
 	}
 	div.name {
 		color: var(--brand);
