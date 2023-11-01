@@ -1,10 +1,12 @@
 <script>
+	import { portal } from 'svelte-portal';
+
 	export let active = false;
 	export let fixed = false;
 	export let width = '720px';
 </script>
 
-<div class="modal-backdrop" class:active>
+<div class="modal-backdrop" class:active use:portal={'#modal'}>
 	<div class="modal" class:fixed style="--width: {width}">
 		<slot />
 	</div>

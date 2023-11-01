@@ -16,6 +16,8 @@
 	import ClusterView from '$lib/ClusterView.svelte';
 	import Errors from '$lib/Errors.svelte';
 
+	import Portal from 'svelte-portal';
+
 	// Access token, this changing should trigger all the things.
 	let accessToken;
 
@@ -120,6 +122,9 @@
 </script>
 
 <LoginModal />
+
+<Portal target="#modal" />
+<div id="modal" />
 
 <header>
 	<span id="hamburger" class="selectable" on:click={toggleMenu} on:keypress={toggleMenu}>
