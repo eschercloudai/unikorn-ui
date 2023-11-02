@@ -21,7 +21,6 @@
 		display: flex;
 		align-items: center;
 		gap: var(--padding);
-		color: var(--dark-grey);
 		padding: var(--padding);
 		list-style: none;
 		transition: all 0.3s ease-in-out;
