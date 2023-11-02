@@ -15,7 +15,6 @@
 		align-items: stretch;
 		padding: var(--padding);
 		gap: var(--padding);
-		border-bottom: 1px solid var(--brand);
 	}
 	label {
 		display: block;

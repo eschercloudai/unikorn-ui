@@ -151,33 +151,42 @@
 <div id="content">
 	<div id="content-inner" class:showmenu>
 		<nav class:showmenu>
-			<div class="user">
-				<img src="https://www.gravatar.com/avatar/{MD5(emailAddress)}" alt="User Gravatar" />
-				<span>{emailAddress}</span>
-				<iconify-icon
-					class="selectable"
-					icon="material-symbols:logout"
-					on:click={logout}
-					on:keypress={logout}
-				/>
-			</div>
+			<section>
+				<h4>User</h4>
+				<div class="user">
+					<img src="https://www.gravatar.com/avatar/{MD5(emailAddress)}" alt="User Gravatar" />
+					<span>{emailAddress}</span>
+					<iconify-icon
+						class="selectable"
+						icon="material-symbols:logout"
+						on:click={logout}
+						on:keypress={logout}
+					/>
+				</div>
+			</section>
 
-			<LabeledInput id="project-select" value="Project">
-				<select
-					id="project-select"
-					name="project"
-					bind:value={currentProject}
-					on:change={changeProject}
-				>
-					{#each projects as choice}
-						<option value={choice}>{choice.name}</option>
-					{/each}
-				</select>
-			</LabeledInput>
+			<section>
+				<h4>Project</h4>
+				<LabeledInput id="project-select" value="Current project scope">
+					<select
+						id="project-select"
+						name="project"
+						bind:value={currentProject}
+						on:change={changeProject}
+					>
+						{#each projects as choice}
+							<option value={choice}>{choice.name}</option>
+						{/each}
+					</select>
+				</LabeledInput>
+			</section>
 
-			{#if menu}
-				<Menu {...menu} />
-			{/if}
+			<section>
+				<h4>Menu</h4>
+				{#if menu}
+					<Menu {...menu} />
+				{/if}
+			</section>
 		</nav>
 
 		<main class:showmenu>
@@ -372,23 +381,23 @@
 		flex-direction: column;
 		backdrop-filter: blur(2px);
 	}
+
 	/* Header/masthead styling */
 	header {
 		box-sizing: border-box;
 		position: sticky;
 		top: 0;
 		padding: var(--padding);
-		border-bottom: 0.25em solid var(--brand);
-		z-index: 20;
-		text-align: center;
 		background-color: var(--overlay);
+		display: flex;
+		gap: 2em;
+		align-content: center;
 	}
+
 	#hamburger {
-		position: absolute;
 		display: flex;
 		flex-direction: column;
 		align-items: center;
-		float: left;
 		color: var(--brand);
 	}
 	#hamburger > iconify-icon {
@@ -431,6 +440,7 @@
 		overflow-y: auto;
 		display: flex;
 		flex-direction: column;
+		gap: var(--padding);
 		background-color: var(--overlay);
 	}
 

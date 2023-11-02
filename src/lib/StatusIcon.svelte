@@ -33,4 +33,10 @@
 	iconify-icon {
 		font-size: var(--icon-size);
 	}
+
+	@media (prefers-color-scheme: dark) {
+		.ok {
+			color: lightgreen;
+		}
+	}
 </style>
