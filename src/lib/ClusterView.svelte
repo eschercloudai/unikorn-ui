@@ -352,6 +352,7 @@
 	}
 	.tools {
 		background-color: var(--overlay);
+		border-bottom: 1px solid var(--brand);
 	}
 	div.name {
 		color: var(--brand);
