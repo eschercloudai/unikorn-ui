@@ -28,7 +28,7 @@
 	let emailAddress = '';
 
 	// TODO: we should probably cache this in session storage.
-	let showmenu = false;
+	let showmenu;
 
 	// Menu to display.
 	let menu;
@@ -40,7 +40,11 @@
 	let desktop;
 
 	if (browser) {
-		desktop = window.matchMedia('(min-width: 720px)');
+		// TODO: unlikely but this may change due to a window resize...
+		const mql = window.matchMedia('(min-width: 720px)');
+
+		desktop = mql.matches;
+		showmenu = mql.matches;
 	}
 
 	let projects = [];
@@ -112,7 +116,7 @@
 
 	function changeMenuItem(value) {
 		// Hide the menu on mobile view, it's covering everything.
-		if (desktop && !desktop.matches) {
+		if (!desktop) {
 			showmenu = false;
 		}
 
@@ -144,7 +148,7 @@
 		src="img/ecai.svg"
 		alt="EscherCloud AI Logo"
 		onload="SVGInject(this)"
-		style="max-height: 2em; width: auto; margin-right: 2em;"
+		style="max-height: 2.1em; width: auto; margin-right: 2em;"
 	/>
 </header>
 
@@ -399,6 +403,9 @@
 		flex-direction: column;
 		align-items: center;
 		color: var(--brand);
+		/* Fixed size for when the icon updates... */
+		width: 2em;
+		height: 2em;
 	}
 	#hamburger > iconify-icon {
 		font-size: 1.5em;
@@ -482,11 +489,6 @@
 	/* Color preference overrides */
 	@media (prefers-color-scheme: dark) {
 		:global(:root) {
-			/* Brand color palette */
-			--brand: rgb(171, 90, 177);
-			--brand-light: rgb(203, 93, 215);
-			--brand-dark: rgb(116, 49, 121);
-
 			--overlay: rgba(40, 40, 40, 0.75);
 			--modal: rgb(13, 13, 28);
 		}

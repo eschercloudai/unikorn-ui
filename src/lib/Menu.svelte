@@ -5,6 +5,7 @@
 	export let value = null;
 	export let icon = null;
 	export let children = null;
+	export let link = null;
 
 	export let expanded = false;
 
@@ -34,6 +35,15 @@
 				<iconify-icon class:expanded icon="material-symbols:arrow-drop-down" />
 			{/if}
 		</div>
+	{:else if link}
+		<a href={link} target="_blank">
+			<div class="item">
+				{#if icon}
+					<iconify-icon {icon} />
+				{/if}
+				<span class:no-icon={!icon}>{value}</span>
+			</div>
+		</a>
 	{:else}
 		<div class="item selectable" class:highlight on:click={select} on:keypress={select}>
 			{#if icon}
@@ -70,6 +80,9 @@
 	}
 	div.item span {
 		flex: 1;
+	}
+	a {
+		text-decoration: none;
 	}
 	iconify-icon {
 		font-size: var(--nav-icon-size);
