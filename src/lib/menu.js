@@ -18,6 +18,12 @@ const menu = {
 					value: 'Control Planes'
 				}
 			]
+		},
+		{
+			id: 'documentation',
+			value: 'Documentation',
+			icon: 'mdi:book-open-blank-variant',
+			link: 'https://docs.eschercloud.ai'
 		}
 	]
 };
