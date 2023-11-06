@@ -293,7 +293,6 @@
 	form {
 		display: flex;
 		flex-direction: column;
-		align-items: stretch;
 		padding: var(--padding);
 		gap: var(--padding);
 	}

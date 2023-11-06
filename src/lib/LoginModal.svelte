@@ -176,7 +176,7 @@
 		display: flex;
 		flex-direction: column;
 		align-items: center;
-		border-bottom: 5px solid var(--brand);
+		background-color: var(--overlay);
 	}
 
 	.login-modal-header > img {

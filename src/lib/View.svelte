@@ -8,5 +8,6 @@
 		display: flex;
 		flex-direction: column;
 		gap: var(--padding);
+		overflow-y: scroll;
 	}
 </style>
