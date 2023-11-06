@@ -228,7 +228,7 @@
 		--nav-icon-size: 2rem;
 		--nav-width: 100vw;
 
-		--overlay: rgba(255, 255, 255, 0.75);
+		--overlay: rgba(240, 230, 230, 0.75);
 		--modal: rgb(255, 255, 255);
 	}
 
@@ -316,29 +316,31 @@
 		transform: scale(1);
 	}
 	:global(button) {
-		color: white;
 		padding: var(--padding);
 		font-weight: bold;
 		font-size: 1rem;
-		background: linear-gradient(0, var(--brand-dark) 0%, var(--brand) 50%, var(--brand-light) 100%);
-		background-size: auto 200%;
-		transition: background-position 0.2s ease-in;
+		transition: all 0.2s ease-in;
 		display: inline-flex;
 		align-items: center;
 		gap: var(--padding);
 		cursor: pointer;
+		color: currentColor;
+		background-color: var(--overlay);
 		border-radius: var(--radius);
 		border-style: none;
+		border: 1px solid var(--brand);
+		box-shadow: 0 0 var(--padding) var(--brand);
 	}
 	:global(button:hover) {
-		background-position: center bottom;
+		box-shadow: 0 0 var(--padding) var(--brand-light);
 	}
 	:global(button:focus) {
-		background-position: center bottom;
+		box-shadow: 0 0 var(--padding) var(--brand-light);
 	}
 	:global(button:disabled) {
-		background: linear-gradient(0, var(--dark-grey) 0%, var(--mid-grey) 100%);
 		cursor: not-allowed;
+		color: var(--mid-grey);
+		box-shadow: 0 0 var(--padding) var(--mid-grey);
 	}
 	:global(details) {
 		background-color: var(--overlay);
@@ -358,6 +360,7 @@
 		cursor: pointer;
 		border-radius: var(--radius) 0 0 0;
 		border: 1px solid var(--brand);
+		transition: all 0.3s ease-in-out;
 	}
 	:global(summary:hover) {
 		color: var(--brand-dark);
@@ -370,11 +373,12 @@
 	}
 	:global(.modal-header) {
 		padding: var(--padding);
-		background: linear-gradient(0, var(--brand-dark) 0%, var(--brand) 50%, var(--brand-light) 100%);
-		color: white;
 		display: inline-flex;
 		gap: var(--padding);
 		align-items: center;
+		justify-content: center;
+		background-color: var(--overlay);
+		border-bottom: 1px solid var(--brand);
 	}
 
 	/* Main styling */
@@ -497,7 +501,13 @@
 			color: white;
 		}
 		:global(h1, h2, h3, h4, h5, h6) {
+			color: white;
+		}
+		:global(summary) {
 			color: var(--brand-light);
+		}
+		:global(summary:hover) {
+			color: var(--brand);
 		}
 	}
 </style>
