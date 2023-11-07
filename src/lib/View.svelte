@@ -9,5 +9,6 @@
 		flex-direction: column;
 		gap: var(--padding);
 		overflow-y: scroll;
+		flex-grow: 1;
 	}
 </style>

@@ -236,12 +236,12 @@
 			{#if submitting}
 				<button disabled="true">
 					<iconify-icon icon="svg-spinners:ring-resize" />
-					<div>Creating...</div>
+					<div>Updating...</div>
 				</button>
 			{:else}
 				<button type="submit" on:click={submit} on:keydown={submit}>
 					<iconify-icon icon="mdi:tick" />
-					<div>Create</div>
+					<div>Update</div>
 				</button>
 			{/if}
 			<button on:click={close}>
