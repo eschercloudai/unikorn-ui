@@ -14,6 +14,7 @@
 	import Breadcrumbs from '$lib/Breadcrumbs.svelte';
 	import ControlPlaneView from '$lib/ControlPlaneView.svelte';
 	import ClusterView from '$lib/ClusterView.svelte';
+	import ApplicationView from '$lib/ApplicationView.svelte';
 	import Errors from '$lib/Errors.svelte';
 
 	import Portal from 'svelte-portal';
@@ -200,6 +201,8 @@
 				<ControlPlaneView />
 			{:else if content == 'kubernetes-clusters'}
 				<ClusterView />
+			{:else if content == 'kubernetes-applications'}
+				<ApplicationView />
 			{/if}
 		</main>
 	</div>
@@ -228,7 +231,7 @@
 		--nav-icon-size: 2rem;
 		--nav-width: 100vw;
 
-		--overlay: rgba(240, 230, 230, 0.75);
+		--overlay: rgba(240, 230, 230, 0.95);
 		--modal: rgb(255, 255, 255);
 	}
 
