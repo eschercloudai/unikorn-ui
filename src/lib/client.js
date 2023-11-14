@@ -164,3 +164,7 @@ export function listApplicationBundlesControlPlane(opts) {
 export function listApplicationBundlesCluster(opts) {
 	return request('GET', '/api/v1/applicationbundles/cluster', opts);
 }
+
+export function listApplications(opts) {
+	return request('GET', '/api/v1/applications', opts);
+}

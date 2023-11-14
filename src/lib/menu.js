@@ -10,6 +10,10 @@ const menu = {
 			icon: 'mdi:kubernetes',
 			children: [
 				{
+					id: 'kubernetes-applications',
+					value: 'Applications'
+				},
+				{
 					id: 'kubernetes-clusters',
 					value: 'Clusters'
 				},
