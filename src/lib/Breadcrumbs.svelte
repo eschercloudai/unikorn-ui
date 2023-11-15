@@ -38,7 +38,7 @@
 		white-space: nowrap;
 	}
 
-	li:before {
+	li::before {
 		position: absolute;
 		content: '';
 		border-left: 1em solid transparent;
@@ -47,12 +47,16 @@
 		right: 100%;
 	}
 
-	li:after {
+	li::after {
 		position: absolute;
 		content: '';
 		border-left: 1em solid var(--brand);
 		border-top: 1.25em solid transparent;
 		border-bottom: 1.25em solid transparent;
 		left: 100%;
+	}
+
+	li:first-child::before {
+		border: none;
 	}
 </style>
