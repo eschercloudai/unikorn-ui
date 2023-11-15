@@ -7,7 +7,7 @@
 		display: flex;
 		flex-direction: column;
 		gap: var(--padding);
-		border: 1px solid var(--dark-grey);
+		border: 1px solid var(--brand);
 		background: var(--overlay);
 		border-radius: var(--radius);
 		box-shadow: 0 0 var(--radius) var(--brand-light);

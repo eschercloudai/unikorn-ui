@@ -10,24 +10,47 @@
 	});
 </script>
 
-<div class="breadcrumbs">
+<ul>
 	{#each trail as crumb, i}
 		{#if crumb.value}
-			<div>{crumb.value}</div>
-			{#if i < trail.length - 1}
-				<iconify-icon icon="material-symbols:chevron-right" />
-			{/if}
+			<li>{crumb.value}</li>
 		{/if}
 	{/each}
-</div>
+</ul>
 
 <style>
-	div.breadcrumbs {
+	ul {
 		color: white;
-		background-color: var(--brand);
-		padding: var(--padding);
+		background-color: var(--brand-dark);
 		display: flex;
 		align-items: center;
+		gap: 1.25em;
 		overflow-x: auto;
+		min-height: 2em;
+	}
+
+	li {
+		position: relative;
+		line-height: 2.5em;
+		list-style: none;
+		background-color: var(--brand);
+		padding: 0 1em;
+		white-space: nowrap;
+	}
+
+	li:before {
+		position: absolute;
+		content: '';
+		border-left: 1em solid transparent;
+		border-top: 2.5em solid var(--brand);
+		right: 100%;
+	}
+
+	li:after {
+		position: absolute;
+		content: '';
+		border-left: 1em solid var(--brand);
+		border-top: 2.5em solid transparent;
+		left: 100%;
 	}
 </style>

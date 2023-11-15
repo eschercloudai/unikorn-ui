@@ -440,7 +440,7 @@
 	}
 
 	main {
-		width: 100%;
+		max-width: 100vw;
 		height: 100%;
 		flex: 1;
 		display: flex;
@@ -449,7 +449,7 @@
 
 	/* Nav styling */
 	nav {
-		width: var(--nav-width);
+		min-width: var(--nav-width);
 		height: 100%;
 		overflow-y: auto;
 		display: flex;
