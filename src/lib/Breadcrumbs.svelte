@@ -42,7 +42,8 @@
 		position: absolute;
 		content: '';
 		border-left: 1em solid transparent;
-		border-top: 2.5em solid var(--brand);
+		border-top: 1.25em solid var(--brand);
+		border-bottom: 1.25em solid var(--brand);
 		right: 100%;
 	}
 
@@ -50,7 +51,8 @@
 		position: absolute;
 		content: '';
 		border-left: 1em solid var(--brand);
-		border-top: 2.5em solid transparent;
+		border-top: 1.25em solid transparent;
+		border-bottom: 1.25em solid transparent;
 		left: 100%;
 	}
 </style>
