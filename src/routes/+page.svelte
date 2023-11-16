@@ -232,6 +232,7 @@
 		--nav-width: 100vw;
 
 		--overlay: rgba(240, 230, 230, 0.95);
+		--overlay-brand: rgba(234, 218, 236, 0.95);
 		--modal: rgb(255, 255, 255);
 	}
 
@@ -497,6 +498,7 @@
 	@media (prefers-color-scheme: dark) {
 		:global(:root) {
 			--overlay: rgba(40, 40, 40, 0.75);
+			--overlay-brand: rgba(50, 33, 51, 0.75);
 			--modal: rgb(13, 13, 28);
 		}
 		:global(body) {

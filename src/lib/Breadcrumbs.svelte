@@ -21,12 +21,15 @@
 <style>
 	ul {
 		color: white;
-		background-color: var(--brand-dark);
+		background-color: var(--overlay-brand);
 		display: flex;
 		align-items: center;
 		gap: 1.25em;
 		overflow-x: auto;
-		min-height: 2em;
+		min-height: 2.5em;
+		border-top: 1px solid var(--brand);
+		border-bottom: 1px solid var(--brand);
+		box-sizing: content-box;
 	}
 
 	li {

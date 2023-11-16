@@ -11,6 +11,8 @@
 
 	let applications = [];
 
+	let selected = null;
+
 	const tokenUnsubscribe = token.subscribe(changeToken);
 
 	const ticker = setInterval(() => updateApplictions(accessToken), 10000);
@@ -38,16 +40,26 @@
 				removeCredentials();
 			}
 		});
+
+		if (selected) {
+			const results = applications.filter((x) => x.name == selected.name);
+
+			selected = results[0];
+		}
 	}
 
 	$: updateApplictions(accessToken);
+
+	function select(app) {
+		selected = selected == app ? null : app;
+	}
 </script>
 
 <View>
 	<ItemView>
 		{#each applications as app}
-			<Item>
-				<div class="image-wrapper">
+			<Item selected={app == selected}>
+				<div class="image-wrapper" on:click={select(app)} on:keypress={select(app)}>
 					{@html atob(app.icon)}
 				</div>
 				<dl>
@@ -55,10 +67,21 @@
 					<dd>{app.humanReadableName}</dd>
 					<dt>Version</dt>
 					<dd>{app.version}</dd>
-					<dt>License</dt>
-					<dd>{app.license}</dd>
 				</dl>
 			</Item>
+			{#if app == selected}
+				<Item jumbo="true" selected="true">
+					<h3>Application Details</h3>
+					<dl>
+						<dt>Description</dt>
+						<dd>{app.description}</dd>
+						<dt>Documentation</dt>
+						<dd><a href={app.documentation}>{app.documentation}</a></dd>
+						<dt>License</dt>
+						<dd>{app.license}</dd>
+					</dl>
+				</Item>
+			{/if}
 		{/each}
 	</ItemView>
 </View>
