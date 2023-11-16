@@ -16,6 +16,7 @@
 		.items {
 			display: grid;
 			grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
+			grid-auto-flow: dense;
 		}
 	}
 </style>
