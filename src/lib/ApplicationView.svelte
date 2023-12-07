@@ -62,12 +62,7 @@
 				<div class="image-wrapper" on:click={select(app)} on:keypress={select(app)}>
 					{@html atob(app.icon)}
 				</div>
-				<dl>
-					<dt>Name</dt>
-					<dd>{app.humanReadableName}</dd>
-					<dt>Version</dt>
-					<dd>{app.version}</dd>
-				</dl>
+				<h5>{app.humanReadableName}</h5>
 			</Item>
 			{#if app == selected}
 				<Item jumbo="true" selected="true">
@@ -79,6 +74,25 @@
 						<dd><a href={app.documentation}>{app.documentation}</a></dd>
 						<dt>License</dt>
 						<dd>{app.license}</dd>
+						<dt>Tags</dt>
+						<dd>{app.tags.join(', ')}</dd>
+						<dt>Versions</dt>
+						<dd>
+							{#each app.versions as version}
+								<dl>
+									<dt>Version</dt>
+									<dd>{version.version}</dd>
+									{#if version.dependencies}
+										<dt>Dependencies</dt>
+										<dd>{version.dependencies.map((x) => x.name).join(', ')}</dd>
+									{/if}
+									{#if version.recommends}
+										<dt>Recommends</dt>
+										<dd>{version.recommends.map((x) => x.name).join(', ')}</dd>
+									{/if}
+								</dl>
+							{/each}
+						</dd>
 					</dl>
 				</Item>
 			{/if}
@@ -98,14 +112,34 @@
 		margin: auto;
 	}
 	dl {
-		display: grid;
-		grid-template-columns: auto 1fr;
-		grid-auto-flow: column;
-		grid-gap: calc(var(--padding) / 2) var(--padding);
-		font-size: 0.75em;
+		display: flex;
+		flex-direction: column;
+		gap: var(--padding);
+		font-size: 0.75rem;
 	}
 	dt {
 		font-weight: bold;
 		grid-column-start: 1;
+	}
+	dd {
+		display: flex;
+		flex-direction: column;
+		gap: var(--padding);
+	}
+	dd > dl {
+		border: 1px solid var(--brand);
+		border-radius: var(--radius);
+		box-shadow: 0 0 var(--radius) var(--brand-light);
+		padding: var(--padding);
+	}
+	@media only screen and (min-width: 720px) {
+		/* In desktop mode, create as many columns as possible for
+                   a specific minimum size */
+		dl {
+			display: grid;
+			grid-template-columns: auto 1fr;
+			grid-auto-flow: column;
+			grid-gap: calc(var(--padding) / 2) var(--padding);
+		}
 	}
 </style>

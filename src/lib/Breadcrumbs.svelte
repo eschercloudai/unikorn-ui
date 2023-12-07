@@ -24,7 +24,7 @@
 		background-color: var(--overlay-brand);
 		display: flex;
 		align-items: center;
-		gap: 1.25em;
+		gap: 1.125em;
 		overflow-x: auto;
 		min-height: 2.5em;
 		border-top: 1px solid var(--brand);
