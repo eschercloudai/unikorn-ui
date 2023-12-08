@@ -3,6 +3,7 @@
 	import { token, removeCredentials } from '$lib/credentials.js';
 	import { errors } from '$lib/errors.js';
 	import { createEventDispatcher } from 'svelte';
+	import { env } from '$env/dynamic/public';
 
 	import {
 		listFlavors,
@@ -88,6 +89,10 @@
 	let dnsNameservers;
 	let allowedPrefixes;
 	let sans;
+
+	let defaultNodePrefix = env.PUBLIC_NODE_PREFIX;
+	let defaultServicePrefix = env.PUBLIC_SERVICE_PREFIX;
+	let defaultPodPrefix = env.PUBLIC_POD_PREFIX;
 
 	// Whether the cluster-autoscaler add-on is provisioned.
 	let autoscaling = false;
@@ -418,9 +423,9 @@
 				externalNetworkID: externalNetworks[0].id
 			},
 			network: {
-				nodePrefix: nodePrefix ? nodePrefix : '192.168.0.0/16',
-				servicePrefix: servicePrefix ? servicePrefix : '172.16.0.0/12',
-				podPrefix: podPrefix ? podPrefix : '10.0.0.0/8',
+				nodePrefix: nodePrefix ? nodePrefix : defaultNodePrefix,
+				servicePrefix: servicePrefix ? servicePrefix : defaultServicePrefix,
+				podPrefix: podPrefix ? podPrefix : defaultPodPrefix,
 				dnsNameservers: dnsNameservers ? dnsNameservers.split(',') : ['8.8.8.8', '8.8.4.4']
 			},
 			controlPlane: {
@@ -682,21 +687,21 @@
 
 						<TextField
 							id="nodeNetwork"
-							placeholder="192.168.0.0/16"
+							placeholder={defaultNodePrefix}
 							help="IPv4 CIDR to run Kubernetes nodes in."
 							bind:value={nodePrefix}
 						/>
 
 						<TextField
 							id="podNetwork"
-							placeholder="10.0.0.0/8"
+							placeholder={defaultPodPrefix}
 							help="IPv4 CIDR to run Kubernets pods in."
 							bind:value={podPrefix}
 						/>
 
 						<TextField
 							id="serviceNetwork"
-							placeholder="172.16.0.0/12"
+							placeholder={defaultServicePrefix}
 							help="IPv4 CIDR to run Kubernetes services in."
 							bind:value={servicePrefix}
 						/>
