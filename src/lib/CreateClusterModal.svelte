@@ -696,7 +696,7 @@
 
 						<TextField
 							id="serviceNetwork"
-							placeholder="127.16.0.0/12"
+							placeholder="172.16.0.0/12"
 							help="IPv4 CIDR to run Kubernetes services in."
 							bind:value={servicePrefix}
 						/>
