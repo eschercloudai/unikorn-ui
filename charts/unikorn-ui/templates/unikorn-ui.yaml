@@ -60,6 +60,15 @@ spec:
           limits:
             cpu: 100m
             memory: 100Mi
+        env:
+        - name: PUBLIC_APPLICATION_VERSION
+          value: {{ .Chart.Version }}
+        - name: PUBLIC_NODE_PREFIX
+          value: {{ .Values.nodePrefix }}
+        - name: PUBLIC_SERVICE_PREFIX
+          value: {{ .Values.servicePrefix }}
+        - name: PUBLIC_POD_PREFIX
+          value: {{ .Values.podPrefix }}
         securityContext:
           readOnlyRootFilesystem: true
       serviceAccountName: unikorn-ui

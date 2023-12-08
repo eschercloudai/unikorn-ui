@@ -21,3 +21,12 @@ imagePullSecret:
 
 # Allows override of the global default image.
 image:
+
+# Default node prefix.
+nodePrefix: 192.168.0.0/24
+
+# Default service prefix.
+servicePrefix: 172.16.0.0/12
+
+# Default pod prefix.
+podPrefix: 10.0.0.0/8

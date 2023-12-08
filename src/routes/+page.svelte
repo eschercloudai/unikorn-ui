@@ -6,6 +6,7 @@
 	import { token, email, project, updateCredentials, removeCredentials } from '$lib/credentials.js';
 	import { getMenu, selected } from '$lib/menu.js';
 	import { listProjects } from '$lib/client.js';
+	import { env } from '$env/dynamic/public';
 
 	import Menu from '$lib/Menu.svelte';
 	import LoginModal from '$lib/LoginModal.svelte';
@@ -192,6 +193,8 @@
 					<Menu {...menu} />
 				{/if}
 			</section>
+
+			<div class="about">Version {env.PUBLIC_APPLICATION_VERSION}</div>
 		</nav>
 
 		<main class:showmenu>
@@ -479,6 +482,12 @@
 	.user iconify-icon {
 		font-size: var(--icon-size);
 		color: var(--brand);
+	}
+
+	.about {
+		font-size: 0.8em;
+		color: var(--dark-grey);
+		text-align: center;
 	}
 
 	/* Desktop overrides */
