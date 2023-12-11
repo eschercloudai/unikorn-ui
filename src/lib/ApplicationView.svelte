@@ -66,7 +66,7 @@
 			</Item>
 			{#if app == selected}
 				<Item jumbo="true" selected="true">
-					<h3>Application Details</h3>
+					<h3>{app.humanReadableName}</h3>
 					<dl>
 						<dt>Description</dt>
 						<dd>{app.description}</dd>
@@ -110,6 +110,16 @@
 		max-height: 5rem;
 		display: block;
 		margin: auto;
+	}
+	h3,
+	h5 {
+		/* Fix me with better CSS */
+		padding-left: unset;
+		padding-right: unset;
+	}
+	h5 {
+		/* Fix me with better CSS */
+		text-align: center;
 	}
 	dl {
 		display: flex;
