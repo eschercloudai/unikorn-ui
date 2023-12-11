@@ -158,7 +158,7 @@
 	<div id="content-inner" class:showmenu>
 		<nav class:showmenu>
 			<section>
-				<h4>User</h4>
+				<h3>User</h3>
 				<div class="user">
 					<img src="https://www.gravatar.com/avatar/{MD5(emailAddress)}" alt="User Gravatar" />
 					<span>{emailAddress}</span>
@@ -172,7 +172,7 @@
 			</section>
 
 			<section>
-				<h4>Project</h4>
+				<h3>Project</h3>
 				<LabeledInput id="project-select" value="Current project scope">
 					<select
 						id="project-select"
@@ -188,7 +188,7 @@
 			</section>
 
 			<section>
-				<h4>Menu</h4>
+				<h3>Menu</h3>
 				{#if menu}
 					<Menu {...menu} />
 				{/if}
@@ -256,7 +256,7 @@
 	}
 	:global(h1, h2, h3, h4, h5, h6) {
 		color: var(--brand);
-		text-align: center;
+		padding: var(--padding);
 	}
 	:global(a:link, a:visited) {
 		color: var(--brand);
@@ -383,7 +383,6 @@
 		display: inline-flex;
 		gap: var(--padding);
 		align-items: center;
-		justify-content: center;
 		background-color: var(--overlay);
 		border-bottom: 1px solid var(--brand);
 	}
@@ -487,7 +486,7 @@
 	.about {
 		font-size: 0.8em;
 		color: var(--dark-grey);
-		text-align: center;
+		padding: var(--padding);
 	}
 
 	/* Desktop overrides */
