@@ -34,12 +34,18 @@
 			return;
 		}
 
-		applications = await listApplications({
+		const result = await listApplications({
 			token: accessToken,
 			onUnauthorized: () => {
 				removeCredentials();
 			}
 		});
+
+		if (result == null) {
+			return;
+		}
+
+		applications = result;
 
 		if (selected) {
 			const results = applications.filter((x) => x.name == selected.name);
