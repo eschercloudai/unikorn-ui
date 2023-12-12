@@ -256,7 +256,6 @@
 	}
 	:global(h1, h2, h3, h4, h5, h6) {
 		color: var(--brand);
-		padding: var(--padding);
 	}
 	:global(a:link, a:visited) {
 		color: var(--brand);
@@ -351,23 +350,25 @@
 	}
 	:global(details) {
 		background-color: var(--overlay);
+		border: 1px solid var(--brand);
+		border-radius: var(--radius);
+		box-shadow: 0 0 var(--radius) var(--brand-light);
 	}
 	:global(details > section) {
-		padding: var(--padding);
-		border: 1px solid var(--brand);
-		border-top: none;
 		display: flex;
 		flex-direction: column;
 		gap: var(--padding);
+		padding: var(--padding);
 	}
 
 	:global(summary) {
-		padding: var(--padding);
 		color: var(--brand);
 		cursor: pointer;
-		border-radius: var(--radius) 0 0 0;
-		border: 1px solid var(--brand);
 		transition: all 0.3s ease-in-out;
+		display: flex;
+		gap: var(--padding);
+		align-items: center;
+		padding: var(--padding);
 	}
 	:global(summary:hover) {
 		color: var(--brand-dark);
@@ -457,15 +458,22 @@
 		overflow-y: auto;
 		display: flex;
 		flex-direction: column;
-		gap: var(--padding);
+		gap: calc(var(--padding) * 2);
 		background-color: var(--overlay);
+		padding: var(--padding);
+		padding-top: revert;
+	}
+
+	nav > section {
+		display: flex;
+		flex-direction: column;
+		gap: var(--padding);
 	}
 
 	/* User nav element */
 	.user {
 		display: flex;
 		align-items: center;
-		padding: var(--padding);
 		gap: var(--padding);
 		justify-content: space-between;
 	}
@@ -517,10 +525,10 @@
 			color: white;
 		}
 		:global(summary) {
-			color: var(--brand-light);
+			color: white;
 		}
 		:global(summary:hover) {
-			color: var(--brand);
+			color: var(--brand-light);
 		}
 	}
 </style>

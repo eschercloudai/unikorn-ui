@@ -6,6 +6,7 @@
 	import View from '$lib/View.svelte';
 	import ItemView from '$lib/ItemView.svelte';
 	import Item from '$lib/Item.svelte';
+	import Hint from '$lib/Hint.svelte';
 
 	let accessToken;
 
@@ -62,6 +63,8 @@
 </script>
 
 <View>
+	<Hint content="Click an application for more details." />
+
 	<ItemView>
 		{#each applications as app}
 			<Item selected={app == selected}>
