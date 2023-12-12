@@ -352,6 +352,7 @@
 	}
 	.tools {
 		background-color: var(--overlay);
+		padding: var(--padding);
 		border-bottom: 1px solid var(--brand);
 	}
 	div.name {

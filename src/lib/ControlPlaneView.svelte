@@ -16,6 +16,7 @@
 	import View from '$lib/View.svelte';
 	import ItemView from '$lib/ItemView.svelte';
 	import Item from '$lib/Item.svelte';
+	import Info from '$lib/Info.svelte';
 
 	let accessToken;
 
@@ -149,24 +150,18 @@
 {/if}
 
 <View>
-	<section class="blurb">
-		<p>Kubernetes control planes manage the lifecycle of Kubernetes clusters.</p>
-		<details>
-			<summary>What are Control Planes?</summary>
-			<section>
-				<p>
-					Kubernetes control planes manage Kubernetes cluster creation, updates, upgrades, and
-					deletion. A Kubernetes cluster is managed by a single control plane, providing groupings
-					of Kubernetes clusters.
-				</p>
-				<p>
-					You may group clusters based on stability e.g. production, staging, development. This
-					allows upgrades to be tested in a staging control plane before applying those changes to a
-					production one.
-				</p>
-			</section>
-		</details>
-	</section>
+	<Info summary="Click to learn more about control planes">
+		<p>
+			Kubernetes control planes manage Kubernetes cluster creation, updates, upgrades, and deletion.
+			A Kubernetes cluster is managed by a single control plane, providing groupings of Kubernetes
+			clusters.
+		</p>
+		<p>
+			You may group clusters based on stability e.g. production, staging, development. This allows
+			upgrades to be tested in a staging control plane before applying those changes to a production
+			one.
+		</p>
+	</Info>
 
 	<section class="buttons">
 		<button on:click={showCreateModal}>
@@ -255,11 +250,6 @@
 	dd span.detail {
 		font-size: 0.75rem;
 		color: var(--mid-grey);
-	}
-	.blurb {
-		display: flex;
-		flex-direction: column;
-		gap: var(--padding);
 	}
 	.buttons {
 		display: flex;

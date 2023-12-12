@@ -68,7 +68,7 @@
 <style>
 	div.item {
 		color: var(--mid-grey);
-		padding: var(--padding);
+		padding: var(--padding) 0;
 		display: flex;
 		justify-content: space-between;
 		align-items: center;
