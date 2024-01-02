@@ -57,8 +57,8 @@
 
 	$: updateApplictions(accessToken);
 
-	function select(app) {
-		selected = selected == app ? null : app;
+	function select(event) {
+		selected = selected == event.detail.context ? null : event.detail.context;
 	}
 </script>
 
@@ -67,8 +67,8 @@
 
 	<ItemView>
 		{#each applications as app}
-			<Item selected={app == selected}>
-				<div class="image-wrapper" on:click={select(app)} on:keypress={select(app)}>
+			<Item selected={app == selected} context={app} on:message={select}>
+				<div class="image-wrapper">
 					{@html atob(app.icon)}
 				</div>
 				<h5>{app.humanReadableName}</h5>
