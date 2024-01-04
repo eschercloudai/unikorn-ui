@@ -494,7 +494,6 @@
 	.about {
 		font-size: 0.8em;
 		color: var(--dark-grey);
-		padding: var(--padding);
 	}
 
 	/* Desktop overrides */

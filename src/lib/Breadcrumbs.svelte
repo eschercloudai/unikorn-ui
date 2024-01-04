@@ -21,7 +21,7 @@
 <style>
 	ul {
 		color: white;
-		background-color: var(--overlay-brand);
+		background-color: var(--overlay);
 		display: flex;
 		align-items: center;
 		gap: 1.125em;
