@@ -11,15 +11,20 @@
 		getClusterKubeconfig,
 		listApplicationBundlesCluster
 	} from '$lib/client.js';
+	import { namedObjectFormatter } from '$lib/formatters.js';
 
 	import StatusIcon from '$lib/StatusIcon.svelte';
 	import DropDownIcon from '$lib/DropDownIcon.svelte';
-	import LabeledInput from '$lib/LabeledInput.svelte';
+	import SelectField from '$lib/SelectField.svelte';
 	import CreateClusterModal from '$lib/CreateClusterModal.svelte';
 	import EditClusterModal from '$lib/EditClusterModal.svelte';
 	import View from '$lib/View.svelte';
 	import ItemView from '$lib/ItemView.svelte';
 	import Item from '$lib/Item.svelte';
+	import ToolBar from '$lib/ToolBar.svelte';
+	import Filters from '$lib/Filters.svelte';
+	import Button from '$lib/Button.svelte';
+	import Ribbon from '$lib/Ribbon.svelte';
 
 	let accessToken;
 
@@ -244,33 +249,23 @@
 	/>
 {/if}
 
-<div class="tools">
-	<LabeledInput id="control-plane-select" value="Control Plane to display clusters for">
-		<select
-			id="control-plane-select"
-			bind:value={controlPlane}
-			on:change={() => updateClusters(accessToken, controlPlane)}
-		>
-			{#each controlPlanes as choice}
-				<option value={choice}>
-					{choice.name}
-					{#if choice.status.deletionTime}
-						(Deleting...)
-					{/if}
-				</option>
-			{/each}
-		</select>
-	</LabeledInput>
-</div>
+<ToolBar>
+	<Ribbon>
+		<Button text="New" icon="material-symbols:add" on:message={showCreateModal} />
+
+		<Filters summary="Filters">
+			<SelectField
+				id="control-plane-select"
+				help="Filter clusters by control plane"
+				formatter={namedObjectFormatter}
+				options={controlPlanes}
+				bind:value={controlPlane}
+			/>
+		</Filters>
+	</Ribbon>
+</ToolBar>
 
 <View>
-	<section class="buttons">
-		<button on:click={showCreateModal}>
-			<iconify-icon icon="material-symbols:add" />
-			<div>Create</div>
-		</button>
-	</section>
-
 	{#if controlPlanes.length == 0 || clusters.length == 0}
 		<section class="sad-kitty">
 			<img src="img/sad.png" alt="A sad kitty" />
@@ -350,11 +345,6 @@
 		align-items: center;
 		gap: var(--padding);
 	}
-	.tools {
-		background-color: var(--overlay);
-		padding: var(--padding);
-		border-bottom: 1px solid var(--brand);
-	}
 	div.name {
 		color: var(--brand);
 		font-weight: bold;
@@ -396,9 +386,5 @@
 	dd span.detail {
 		font-size: 0.75rem;
 		color: var(--mid-grey);
-	}
-	.buttons {
-		display: flex;
-		gap: var(--padding);
 	}
 </style>

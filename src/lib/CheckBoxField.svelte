@@ -1,4 +1,6 @@
 <script>
+	import LabeledInput from '$lib/LabeledInput.svelte';
+
 	// ID of the field, for linking label text.
 	export let id;
 
@@ -15,11 +17,12 @@
 	export let disabled = false;
 </script>
 
-<div class="checkbox">
-	<input {id} type="checkbox" bind:checked {disabled} />
-	<span>{label}</span>
-</div>
-<label for={id} class="fieldlabel">{@html help}</label>
+<LabeledInput {id} value={help}>
+	<div class="checkbox">
+		<input {id} type="checkbox" bind:checked {disabled} />
+		<span>{label}</span>
+	</div>
+</LabeledInput>
 
 <style>
 	.checkbox {

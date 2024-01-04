@@ -17,6 +17,9 @@
 	import ItemView from '$lib/ItemView.svelte';
 	import Item from '$lib/Item.svelte';
 	import Info from '$lib/Info.svelte';
+	import ToolBar from '$lib/ToolBar.svelte';
+	import Button from '$lib/Button.svelte';
+	import Ribbon from '$lib/Ribbon.svelte';
 
 	let accessToken;
 
@@ -149,6 +152,12 @@
 	/>
 {/if}
 
+<ToolBar>
+	<Ribbon>
+		<Button text="New" icon="material-symbols:add" on:message={showCreateModal} />
+	</Ribbon>
+</ToolBar>
+
 <View>
 	<Info summary="Click to learn more about control planes">
 		<p>
@@ -162,13 +171,6 @@
 			one.
 		</p>
 	</Info>
-
-	<section class="buttons">
-		<button on:click={showCreateModal}>
-			<iconify-icon icon="material-symbols:add" />
-			<div>Create</div>
-		</button>
-	</section>
 
 	<ItemView>
 		{#each controlPlanes as cp}
@@ -250,9 +252,5 @@
 	dd span.detail {
 		font-size: 0.75rem;
 		color: var(--mid-grey);
-	}
-	.buttons {
-		display: flex;
-		gap: var(--padding);
 	}
 </style>
