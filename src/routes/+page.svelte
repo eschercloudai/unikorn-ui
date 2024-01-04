@@ -220,7 +220,7 @@
 		--brand-dark: rgb(108, 73, 111);
 
 		/* Generic colors */
-		--light-grey: rgb(245, 245, 245);
+		--light-grey: rgb(200, 200, 200);
 		--mid-grey: rgb(128, 128, 128);
 		--dark-grey: rgb(96, 96, 96);
 		--error: deeppink;
@@ -338,6 +338,7 @@
 		box-shadow: 0 0 var(--padding) var(--brand);
 	}
 	:global(button:hover) {
+		color: var(--brand-dark);
 		box-shadow: 0 0 var(--padding) var(--brand-light);
 	}
 	:global(button:focus) {
@@ -354,6 +355,9 @@
 		border-radius: var(--radius);
 		box-shadow: 0 0 var(--radius) var(--brand-light);
 	}
+	:global(details[open]) {
+		width: 100%;
+	}
 	:global(details > section) {
 		display: flex;
 		flex-direction: column;
@@ -362,7 +366,6 @@
 	}
 
 	:global(summary) {
-		color: var(--brand);
 		cursor: pointer;
 		transition: all 0.3s ease-in-out;
 		display: flex;
@@ -527,6 +530,9 @@
 			color: white;
 		}
 		:global(summary:hover) {
+			color: var(--brand-light);
+		}
+		:global(button:hover) {
 			color: var(--brand-light);
 		}
 	}

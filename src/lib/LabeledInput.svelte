@@ -5,7 +5,7 @@
 
 <div>
 	<slot />
-	<label for={id}>{value}</label>
+	<label for={id}>{@html value}</label>
 </div>
 
 <style>
@@ -19,5 +19,8 @@
 		display: block;
 		font-style: italic;
 		font-size: 0.75rem;
+	}
+	label > :global(em) {
+		font-weight: bold;
 	}
 </style>

@@ -1,4 +1,6 @@
 <script>
+	import LabeledInput from '$lib/LabeledInput.svelte';
+
 	// ID of the field, for linking label text.
 	export let id;
 
@@ -29,22 +31,10 @@
 	$: valid = validator ? validator(value) : true;
 </script>
 
-<input {id} type="password" {placeholder} {autocomplete} {required} bind:value />
-{#if help}
-	<label for={id} class="fieldlabel">{@html help}</label>
-{/if}
-{#if !valid && invalidtext}
-	<label for={id} class="fieldlabel error">{@html invalidtext}</label>
-{/if}
+<LabeledInput {id} value={help}>
+	<input {id} type="password" {placeholder} {autocomplete} {required} bind:value />
+</LabeledInput>
 
-<style>
-	:global(.fieldlabel) {
-		color: var(--mid-grey);
-		display: block;
-		font-style: italic;
-		font-size: 0.75rem;
-	}
-	:global(.fieldlabel > em) {
-		font-weight: bold;
-	}
-</style>
+{#if !valid && invalidtext}
+	<label for={id} class="error">{@html invalidtext}</label>
+{/if}

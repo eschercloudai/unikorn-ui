@@ -840,7 +840,7 @@ s ingress and cert-manager add-ons"
 			<h2>Workload Pools</h2>
 
 			{#if !hasWorkloadPools}
-				<p class="fieldlabel error">At least one workload pool is required.</p>
+				<p class="error">At least one workload pool is required.</p>
 			{/if}
 
 			{#each workloadPools as pool, index}

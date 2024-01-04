@@ -1,4 +1,6 @@
 <script>
+	import LabeledInput from '$lib/LabeledInput.svelte';
+
 	// ID of the field, for linking label text.
 	export let id;
 
@@ -19,15 +21,17 @@
 	export let valid;
 </script>
 
-<div class="slider">
-	<input {id} type="range" {min} {max} {step} bind:value />
-	{#if formatter}
-		<span>{formatter(value)}</span>
-	{:else}
-		<span>{value}</span>
-	{/if}
-</div>
-<label for={id} class="fieldlabel">{@html help}</label>
+<LabeledInput {id} value={help}>
+	<div class="slider">
+		<input {id} type="range" {min} {max} {step} bind:value />
+		{#if formatter}
+			<span>{formatter(value)}</span>
+		{:else}
+			<span>{value}</span>
+		{/if}
+	</div>
+</LabeledInput>
+
 {#if !valid && invalidText}
 	<label for={id} class="fieldlabel error">{@html invalidText}</label>
 {/if}

@@ -1,4 +1,6 @@
 <script>
+	import LabeledInput from '$lib/LabeledInput.svelte';
+
 	// ID of the field, for linking label text.
 	export let id;
 
@@ -18,16 +20,17 @@
 	export let help;
 </script>
 
-<select {id} bind:value>
-	{#if nullable}
-		<option value={null}>(None)</option>
-	{/if}
-	{#each options as o}
-		{#if formatter}
-			<option value={o}>{formatter(o)}</option>
-		{:else}
-			<option value={o}>{o}</option>
+<LabeledInput {id} value={help}>
+	<select {id} bind:value>
+		{#if nullable}
+			<option value={null}>(None)</option>
 		{/if}
-	{/each}
-</select>
-<label for={id} class="fieldlabel">{@html help}</label>
+		{#each options as o}
+			{#if formatter}
+				<option value={o}>{formatter(o)}</option>
+			{:else}
+				<option value={o}>{o}</option>
+			{/if}
+		{/each}
+	</select>
+</LabeledInput>
