@@ -29,6 +29,9 @@
 	import CheckBoxField from '$lib/CheckBoxField.svelte';
 	import SliderField from '$lib/SliderField.svelte';
 	import TimeWindowField from '$lib/TimeWindowField.svelte';
+	import Details from '$lib/Details.svelte';
+	import Button from '$lib/Button.svelte';
+	import Ribbon from '$lib/Ribbon.svelte';
 
 	// clusters allows name uniqueness checking.
 	export let clusters;
@@ -584,197 +587,182 @@
 			/>
 
 			{#if advanced}
-				<details>
-					<summary>Lifecycle (Advanced)</summary>
-					<section>
-						<p>
-							The platform will automatically upgrade clusters to provide confidence in security,
-							and periodically enable new features. This section describes those defaults and, where
-							applicable, allows you to fine tune those settings.
-						</p>
+				<Details summary="Lifecycle (Advanced)" icon="material-symbols:cycle-rounded">
+					<p>
+						The platform will automatically upgrade clusters to provide confidence in security, and
+						periodically enable new features. This section describes those defaults and, where
+						applicable, allows you to fine tune those settings.
+					</p>
 
-						<SelectField
-							id="appbundle"
-							help="Selects the cluster version. Versions marked as <em>Preview</em> are early release
+					<SelectField
+						id="appbundle"
+						help="Selects the cluster version. Versions marked as <em>Preview</em> are early release
                                                 candidates, and may have undergone less rigorous testing. Versions marked
                                                 <em>End-of-Life</em> indicate the date when they will be automatically upgraded by the platform."
-							formatter={applicationBundleFormatter}
-							options={applicationBundles}
-							bind:value={applicationBundle}
-						/>
+						formatter={applicationBundleFormatter}
+						options={applicationBundles}
+						bind:value={applicationBundle}
+					/>
 
-						<CheckBoxField
-							id="autoUpgrade"
-							label="Enable auto-upgrade?"
-							help="Enables auto-upgrade of the cluster application bundle.  When checked the default setting will be to perform upgrades randomly from Monday-Friday 00:00-07:00 UTC.  This allows support to be be readily available in the rare event of disruption."
-							bind:checked={autoUpgrade}
-						/>
+					<CheckBoxField
+						id="autoUpgrade"
+						label="Enable auto-upgrade?"
+						help="Enables auto-upgrade of the cluster application bundle.  When checked the default setting will be to perform upgrades randomly from Monday-Friday 00:00-07:00 UTC.  This allows support to be be readily available in the rare event of disruption."
+						bind:checked={autoUpgrade}
+					/>
 
-						{#if autoUpgrade}
-							<section class="autoupgrade">
-								<CheckBoxField
-									id="autoUpgradeDaysOfWeek"
-									label="Enable auto-upgrade scheduling?"
-									help="The default auto-upgrade time-windows are recommended.  If this isn't suitable for your use case, this allows the days and time-windows to be manually specified."
-									bind:checked={autoUpgradeDaysOfWeek}
-								/>
+					{#if autoUpgrade}
+						<section class="autoupgrade">
+							<CheckBoxField
+								id="autoUpgradeDaysOfWeek"
+								label="Enable auto-upgrade scheduling?"
+								help="The default auto-upgrade time-windows are recommended.  If this isn't suitable for your use case, this allows the days and time-windows to be manually specified."
+								bind:checked={autoUpgradeDaysOfWeek}
+							/>
 
-								{#if autoUpgradeDaysOfWeek}
-									{#each Object.keys(daysOfTheWeekWindows) as day}
-										<TimeWindowField
-											id="autoupgrade-{day}"
-											label="Enable {day}?"
-											bind:object={daysOfTheWeekWindows[day]}
-										/>
-									{/each}
-								{/if}
-							</section>
-						{/if}
-					</section>
-				</details>
+							{#if autoUpgradeDaysOfWeek}
+								{#each Object.keys(daysOfTheWeekWindows) as day}
+									<TimeWindowField
+										id="autoupgrade-{day}"
+										label="Enable {day}?"
+										bind:object={daysOfTheWeekWindows[day]}
+									/>
+								{/each}
+							{/if}
+						</section>
+					{/if}
+				</Details>
 
-				<details>
-					<summary>Topology (Advanced)</summary>
+				<Details summary="Topology (Advanced)" icon="tabler:topology-star-3">
+					<p>
+						Cluster topology defines top-level scheduling/placement, and allows you to explicitly
+						define availability zones in which to provision infrastructure for high-availability.
+					</p>
+					<p>By default the platform will schedule across any availabilty zone.</p>
 
-					<section>
-						<p>
-							Cluster topology defines top-level scheduling/placement, and allows you to explicitly
-							define availability zones in which to provision infrastructure for high-availability.
-						</p>
-						<p>By default the platform will schedule across any availabilty zone.</p>
-
-						<SelectField
-							id="compute-az"
-							help="Select the global availability zone for compute instances. You can override this on a
+					<SelectField
+						id="compute-az"
+						help="Select the global availability zone for compute instances. You can override this on a
 						per-workload pool basis to improve cluster availability."
-							formatter={namedObjectFormatter}
-							options={computeAZs}
-							bind:value={computeAZ}
-						/>
-					</section>
-				</details>
+						formatter={namedObjectFormatter}
+						options={computeAZs}
+						bind:value={computeAZ}
+					/>
+				</Details>
 
-				<details>
-					<summary>Networking (Advanced)</summary>
+				<Details summary="Networking (Advanced)" icon="mdi:lan">
+					<p>
+						Network settings are optional, and if not specified will yield stable and scalable
+						defaults.
+					</p>
+					<p>
+						It is possible to connect Kubernetes clusters together with virtual private networks
+						(VPNs). While this is discouraged, you must ensure that network CIDRs are globally
+						unique and do not overlap.
+					</p>
 
-					<section>
-						<p>
-							Network settings are optional, and if not specified will yield stable and scalable
-							defaults.
-						</p>
-						<p>
-							It is possible to connect Kubernetes clusters together with virtual private networks
-							(VPNs). While this is discouraged, you must ensure that network CIDRs are globally
-							unique and do not overlap.
-						</p>
-
-						<SelectField
-							id="keypair"
-							help="SSH key pair to include on each node. It is advised this not be used to improve
+					<SelectField
+						id="keypair"
+						help="SSH key pair to include on each node. It is advised this not be used to improve
 						security."
-							nullable="true"
-							formatter={namedObjectFormatter}
-							options={keyPairs}
-							bind:value={keyPair}
-						/>
+						nullable="true"
+						formatter={namedObjectFormatter}
+						options={keyPairs}
+						bind:value={keyPair}
+					/>
 
-						<TextField
-							id="dnsnameservers"
-							placeholder="8.8.8.8,8.8.4.4"
-							help="Comma separated list of DNS name servers to use."
-							bind:value={dnsNameservers}
-						/>
+					<TextField
+						id="dnsnameservers"
+						placeholder="8.8.8.8,8.8.4.4"
+						help="Comma separated list of DNS name servers to use."
+						bind:value={dnsNameservers}
+					/>
 
-						<TextField
-							id="nodeNetwork"
-							placeholder={defaultNodePrefix}
-							help="IPv4 CIDR to run Kubernetes nodes in."
-							bind:value={nodePrefix}
-						/>
+					<TextField
+						id="nodeNetwork"
+						placeholder={defaultNodePrefix}
+						help="IPv4 CIDR to run Kubernetes nodes in."
+						bind:value={nodePrefix}
+					/>
 
-						<TextField
-							id="podNetwork"
-							placeholder={defaultPodPrefix}
-							help="IPv4 CIDR to run Kubernets pods in."
-							bind:value={podPrefix}
-						/>
+					<TextField
+						id="podNetwork"
+						placeholder={defaultPodPrefix}
+						help="IPv4 CIDR to run Kubernets pods in."
+						bind:value={podPrefix}
+					/>
 
-						<TextField
-							id="serviceNetwork"
-							placeholder={defaultServicePrefix}
-							help="IPv4 CIDR to run Kubernetes services in."
-							bind:value={servicePrefix}
-						/>
+					<TextField
+						id="serviceNetwork"
+						placeholder={defaultServicePrefix}
+						help="IPv4 CIDR to run Kubernetes services in."
+						bind:value={servicePrefix}
+					/>
 
-						<TextField
-							id="allowedPrefixes"
-							placeholder="1.2.3.4/32,7.8.0.0/16"
-							help="Comma separated list of IPv4 CIDR blocks to permit access to the Kubernetes API."
-							bind:value={allowedPrefixes}
-						/>
+					<TextField
+						id="allowedPrefixes"
+						placeholder="1.2.3.4/32,7.8.0.0/16"
+						help="Comma separated list of IPv4 CIDR blocks to permit access to the Kubernetes API."
+						bind:value={allowedPrefixes}
+					/>
 
-						<TextField
-							id="sans"
-							placeholder="kubernetes.my-domain.com"
-							help="Comma separated list of X.509 subject alterative names to add to the Kubernetes API
+					<TextField
+						id="sans"
+						placeholder="kubernetes.my-domain.com"
+						help="Comma separated list of X.509 subject alterative names to add to the Kubernetes API
                                                 certificate."
-							bind:value={sans}
-						/>
-					</section>
-				</details>
+						bind:value={sans}
+					/>
+				</Details>
 			{/if}
 
-			<details>
-				<summary>Add-on Features</summary>
+			<Details summary="Add-on Features" icon="mdi:puzzle-plus-outline">
+				<p>
+					Add-on features allow the management of typical Kubernetes componenents that are not
+					included by default, but are considered standard.
+				</p>
+				<p>
+					They are not enabled by default to improve baseline security and resource utilisation.
+				</p>
 
-				<section>
-					<p>
-						Add-on features allow the management of typical Kubernetes componenents that are not
-						included by default, but are considered standard.
-					</p>
-					<p>
-						They are not enabled by default to improve baseline security and resource utilisation.
-					</p>
+				<CheckBoxField
+					id="ingress"
+					label="Enable ingress controller?"
+					help="Enables Nginx ingress controller"
+					bind:checked={ingress}
+					disabled={kubernetesDashboard}
+				/>
 
-					<CheckBoxField
-						id="ingress"
-						label="Enable ingress controller?"
-						help="Enables Nginx ingress controller"
-						bind:checked={ingress}
-						disabled={kubernetesDashboard}
-					/>
+				<CheckBoxField
+					id="cert-manager"
+					label="Enable cert-manager controller?"
+					help="Enables cert-manager TLS certificate management controller"
+					bind:checked={certManager}
+					disabled={kubernetesDashboard}
+				/>
 
-					<CheckBoxField
-						id="cert-manager"
-						label="Enable cert-manager controller?"
-						help="Enables cert-manager TLS certificate management controller"
-						bind:checked={certManager}
-						disabled={kubernetesDashboard}
-					/>
-
-					<CheckBoxField
-						id="kubernetes-dashboard"
-						label="Enable Kubernetes dashboard?"
-						help="Enables Kubernetes dashboard, automatically require
+				<CheckBoxField
+					id="kubernetes-dashboard"
+					label="Enable Kubernetes dashboard?"
+					help="Enables Kubernetes dashboard, automatically require
 s ingress and cert-manager add-ons"
-						bind:checked={kubernetesDashboard}
-					/>
+					bind:checked={kubernetesDashboard}
+				/>
 
-					<CheckBoxField
-						id="file-storage"
-						label="Enable Longhorn?"
-						help="Enables Longhorn for persistent storage, includes read-write-many (RWX) support"
-						bind:checked={fileStorage}
-					/>
+				<CheckBoxField
+					id="file-storage"
+					label="Enable Longhorn?"
+					help="Enables Longhorn for persistent storage, includes read-write-many (RWX) support"
+					bind:checked={fileStorage}
+				/>
 
-					<CheckBoxField
-						id="prometheus"
-						label="Enable Prometheus?"
-						help="Enables the Prometheus operator that can be used to provide platform monitoring"
-						bind:checked={prometheus}
-					/>
-				</section>
-			</details>
+				<CheckBoxField
+					id="prometheus"
+					label="Enable Prometheus?"
+					help="Enables the Prometheus operator that can be used to provide platform monitoring"
+					bind:checked={prometheus}
+				/>
+			</Details>
 
 			{#if advanced}
 				<h2>Control Plane</h2>
@@ -795,46 +783,42 @@ s ingress and cert-manager add-ons"
 					bind:value={flavor}
 				/>
 
-				<details>
-					<summary>Advanced Options</summary>
+				<Details summary="Advanced Options" icon="mdi:cog">
+					<p>Number of virtual machines.</p>
+					<SliderField
+						id="replicas"
+						help=" The default (3) is generally cost effective while providing high-availability."
+						min="1"
+						max="5"
+						step="2"
+						bind:value={replicas}
+					/>
 
-					<section>
-						<p>Number of virtual machines.</p>
-						<SliderField
-							id="replicas"
-							help=" The default (3) is generally cost effective while providing high-availability."
-							min="1"
-							max="5"
-							step="2"
-							bind:value={replicas}
-						/>
-
-						<CheckBoxField
-							id="controlplane-storage"
-							label="Use persistent storage?"
-							help="Whether to use a dedicated persistent volume for
+					<CheckBoxField
+						id="controlplane-storage"
+						label="Use persistent storage?"
+						help="Whether to use a dedicated persistent volume for
 							control plane nodes.  It is recommended to leave this
 							unchecked, as ephemeral storage provides higher performance
 							for Kubernetes' etcd database.  If left unchecked, the default ephemeral
 							storage size of {flavor.disk}GB is used.  Checking this also allows
 							you to specify the volume size.  You may wish to do this
 							to increase storage capacity."
-							bind:checked={controlPlanePersistentStorage}
-						/>
+						bind:checked={controlPlanePersistentStorage}
+					/>
 
-						{#if controlPlanePersistentStorage}
-							<SliderField
-								id="disk"
-								help="The size of the root disk."
-								min="50"
-								max="2000"
-								step="50"
-								formatter={(x) => `${x}GiB`}
-								bind:value={disk}
-							/>
-						{/if}
-					</section>
-				</details>
+					{#if controlPlanePersistentStorage}
+						<SliderField
+							id="disk"
+							help="The size of the root disk."
+							min="50"
+							max="2000"
+							step="50"
+							formatter={(x) => `${x}GiB`}
+							bind:value={disk}
+						/>
+					{/if}
+				</Details>
 			{/if}
 
 			<h2>Workload Pools</h2>
@@ -846,35 +830,24 @@ s ingress and cert-manager add-ons"
 			{#each workloadPools as pool, index}
 				<section class="workloadpool">
 					<WorkloadPoolCreate {flavors} {images} {computeAZs} bind:object={pool} bind:advanced />
-					<button on:click={() => removePool(index)}>
-						<iconify-icon icon="mdi:delete" />
-						<div>Remove Pool</div>
-					</button>
+					<Button
+						text="Remove Pool"
+						icon="mdi:toy-brick-minus"
+						on:message={() => removePool(index)}
+					/>
 				</section>
 			{/each}
 
-			<button on:click={addPool}>
-				<iconify-icon icon="material-symbols:add" />
-				<div>Add New Pool</div>
-			</button>
+			<Button text="Add New Pool" icon="mdi:toy-brick-plus" on:message={addPool} />
 
-			<div class="buttons">
+			<Ribbon grow="true">
 				{#if submitting}
-					<button disabled="true">
-						<iconify-icon icon="svg-spinners:ring-resize" />
-						<div>Creating...</div>
-					</button>
+					<Button text="Creating..." icon="svg-spinners:ring-resize" disabled="true" />
 				{:else}
-					<button type="submit" disabled={!valid} on:click={submit} on:keydown={submit}>
-						<iconify-icon icon="mdi:tick" />
-						<div>Create</div>
-					</button>
+					<Button text="Create" icon="mdi:tick" disabled={!valid} on:message={submit} />
 				{/if}
-				<button on:click={close}>
-					<iconify-icon icon="mdi:close" />
-					<div>Cancel</div>
-				</button>
-			</div>
+				<Button text="Cancel" icon="mdi:close" on:message={close} />
+			</Ribbon>
 		</form>
 	{:else}
 		<div class="loader">
@@ -893,11 +866,6 @@ s ingress and cert-manager add-ons"
 </Modal>
 
 <style>
-	div.buttons {
-		display: flex;
-		justify-content: center;
-		gap: var(--padding);
-	}
 	form {
 		display: flex;
 		flex-direction: column;

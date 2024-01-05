@@ -148,7 +148,6 @@
 	dd > dl {
 		border: 1px solid var(--brand);
 		border-radius: var(--radius);
-		box-shadow: 0 0 var(--radius) var(--brand-light);
 		padding: var(--padding);
 	}
 	@media only screen and (min-width: 720px) {

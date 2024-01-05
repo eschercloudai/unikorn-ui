@@ -12,6 +12,9 @@
 	import SelectField from '$lib/SelectField.svelte';
 	import CheckBoxField from '$lib/CheckBoxField.svelte';
 	import TimeWindowField from '$lib/TimeWindowField.svelte';
+	import Details from '$lib/Details.svelte';
+	import Button from '$lib/Button.svelte';
+	import Ribbon from '$lib/Ribbon.svelte';
 
 	// control planes to edit.
 	export let controlPlane;
@@ -181,74 +184,61 @@
 			<dd>{controlPlane.name}</dd>
 		</dl>
 
-		<details>
-			<summary>Lifecycle (Advanced)</summary>
+		<Details summary="Lifecycle (Advanced)" icon="material-symbols:cycle-rounded">
+			<p>
+				The platform will automatically upgrade control planes to provide confidence in security,
+				and periodically enable new features. This section describes those defaults and, where
+				applicable, allows you to fine tune those settings.
+			</p>
 
-			<section>
-				<p>
-					The platform will automatically upgrade control planes to provide confidence in security,
-					and periodically enable new features. This section describes those defaults and, where
-					applicable, allows you to fine tune those settings.
-				</p>
-
-				<SelectField
-					id="appbundle"
-					help="Selects the control plane version. Versions marked as <em>Preview</em> are early release
+			<SelectField
+				id="appbundle"
+				help="Selects the control plane version. Versions marked as <em>Preview</em> are early release
                                         candidates, and may have undergone less rigorous testing. Versions marked
                                         <em>End-of-Life</em> indicate the date when they will be automatically upgraded by the platform."
-					formatter={applicationBundleFormatter}
-					options={applicationBundles}
-					bind:value={applicationBundle}
-				/>
+				formatter={applicationBundleFormatter}
+				options={applicationBundles}
+				bind:value={applicationBundle}
+			/>
 
-				<CheckBoxField
-					id="autoUpgrade"
-					label="Enable auto-upgrade?"
-					help="Enables auto-upgrade of the control plane application bundle.  When checked the default setting will be to perform upgrades randomly from Monday-Friday 00:00-07:00 UTC.  This allows support to be be readily available in the rare event of disruption."
-					bind:checked={autoUpgrade}
-				/>
+			<CheckBoxField
+				id="autoUpgrade"
+				label="Enable auto-upgrade?"
+				help="Enables auto-upgrade of the control plane application bundle.  When checked the default setting will be to perform upgrades randomly from Monday-Friday 00:00-07:00 UTC.  This allows support to be be readily available in the rare event of disruption."
+				bind:checked={autoUpgrade}
+			/>
 
-				{#if autoUpgrade}
-					<section class="autoupgrade">
-						<CheckBoxField
-							id="autoUpgradeDaysOfWeek"
-							label="Enable auto-upgrade scheduling?"
-							help="The default auto-upgrade time-windows are recommended.  If this isn't suitable for your use case, this allows the days and time-windows to be manually specified."
-							bind:checked={autoUpgradeDaysOfWeek}
-						/>
+			{#if autoUpgrade}
+				<section class="autoupgrade">
+					<CheckBoxField
+						id="autoUpgradeDaysOfWeek"
+						label="Enable auto-upgrade scheduling?"
+						help="The default auto-upgrade time-windows are recommended.  If this isn't suitable for your use case, this allows the days and time-windows to be manually specified."
+						bind:checked={autoUpgradeDaysOfWeek}
+					/>
 
-						{#if autoUpgradeDaysOfWeek}
-							{#each Object.keys(daysOfTheWeekWindows) as day}
-								<TimeWindowField
-									id="autoupgrade-{day}"
-									label="Enable {day}?"
-									existing={getExistingDayOfWeek(day)}
-									bind:object={daysOfTheWeekWindows[day]}
-								/>
-							{/each}
-						{/if}
-					</section>
-				{/if}
-			</section>
-		</details>
-
-		<div class="buttons">
-			{#if submitting}
-				<button disabled="true">
-					<iconify-icon icon="svg-spinners:ring-resize" />
-					<div>Updating...</div>
-				</button>
-			{:else}
-				<button type="submit" on:click={submit} on:keydown={submit}>
-					<iconify-icon icon="mdi:tick" />
-					<div>Update</div>
-				</button>
+					{#if autoUpgradeDaysOfWeek}
+						{#each Object.keys(daysOfTheWeekWindows) as day}
+							<TimeWindowField
+								id="autoupgrade-{day}"
+								label="Enable {day}?"
+								existing={getExistingDayOfWeek(day)}
+								bind:object={daysOfTheWeekWindows[day]}
+							/>
+						{/each}
+					{/if}
+				</section>
 			{/if}
-			<button on:click={close}>
-				<iconify-icon icon="mdi:close" />
-				<div>Cancel</div>
-			</button>
-		</div>
+		</Details>
+
+		<Ribbon grow="true">
+			{#if submitting}
+				<Button text="Updating..." icon="svg-spinners:ring-resize" disabled="true" />
+			{:else}
+				<Button text="Update" icon="mdi:tick" on:message={submit} />
+			{/if}
+			<Button text="Cancel" icon="mdi:close" on:message={close} />
+		</Ribbon>
 	</form>
 </Modal>
 
@@ -259,11 +249,6 @@
 		align-items: stretch;
 		display: flex;
 		flex-direction: column;
-		gap: var(--padding);
-	}
-	div.buttons {
-		display: flex;
-		justify-content: center;
 		gap: var(--padding);
 	}
 	form {

@@ -61,7 +61,6 @@
 		z-index: 1;
 		background-color: var(--overlay);
 		border: 1px outset var(--dark-grey);
-		box-shadow: 0 0 var(--radius) var(--brand);
 		animation: growDown 300ms ease-in-out forwards;
 		transform-origin: top;
 	}

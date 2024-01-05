@@ -28,6 +28,9 @@
 	import CheckBoxField from '$lib/CheckBoxField.svelte';
 	import SliderField from '$lib/SliderField.svelte';
 	import TimeWindowField from '$lib/TimeWindowField.svelte';
+	import Details from '$lib/Details.svelte';
+	import Button from '$lib/Button.svelte';
+	import Ribbon from '$lib/Ribbon.svelte';
 
 	let accessToken;
 
@@ -571,9 +574,7 @@
 			/>
 
 			{#if advanced}
-				<details>
-					<summary>Lifecycle (Advanced)</summary>
-
+				<Details summary="Lifecycle (Advanced)" icon="material-symbols:cycle-rounded">
 					<section>
 						<p>
 							The platform will automatically upgrade clusters to provide confidence in security,
@@ -620,11 +621,9 @@
 							</section>
 						{/if}
 					</section>
-				</details>
+				</Details>
 
-				<details>
-					<summary>Topology (Advanced)</summary>
-
+				<Details summary="Topology (Advanced)" icon="tabler:topology-star-3">
 					<section>
 						<p>
 							Cluster topology defines top-level scheduling/placement, and allows you to explicitly
@@ -641,11 +640,9 @@
 							bind:value={computeAZ}
 						/>
 					</section>
-				</details>
+				</Details>
 
-				<details>
-					<summary>Networking (Advanced)</summary>
-
+				<Details summary="Networking (Advanced)" icon="mdi:lan">
 					<section>
 						<p>
 							Network settings are optional, and if not specified will yield stable and scalable
@@ -674,12 +671,10 @@
 							bind:value={allowedPrefixes}
 						/>
 					</section>
-				</details>
+				</Details>
 			{/if}
 
-			<details>
-				<summary>Add-on Features</summary>
-
+			<Details summary="Add-on Features" icon="mdi:puzzle-plus-outline">
 				<section>
 					<p>
 						Add-on features allow the management of typical Kubernetes componenents that are not
@@ -726,7 +721,7 @@
 						bind:checked={prometheus}
 					/>
 				</section>
-			</details>
+			</Details>
 
 			{#if advanced}
 				<h2>Control Plane</h2>
@@ -747,9 +742,7 @@
 					bind:value={flavor}
 				/>
 
-				<details>
-					<summary>Advanced Options</summary>
-
+				<Details summary="Advanced Options" icon="mdi:cog">
 					<section>
 						<p>Number of virtual machines.</p>
 						<SliderField
@@ -786,7 +779,7 @@
 							/>
 						{/if}
 					</section>
-				</details>
+				</Details>
 			{/if}
 
 			<h2>Workload Pools</h2>
@@ -805,35 +798,24 @@
 						bind:object={pool.object}
 						bind:advanced
 					/>
-					<button on:click={() => removePool(index)}>
-						<iconify-icon icon="mdi:delete" />
-						<div>Remove Pool</div>
-					</button>
+					<Button
+						text="Remove Pool"
+						icon="mdi:toy-brick-minus"
+						on:message={() => removePool(index)}
+					/>
 				</section>
 			{/each}
 
-			<button on:click={addPool}>
-				<iconify-icon icon="material-symbols:add" />
-				<div>Add New Pool</div>
-			</button>
+			<Button text="Add New Pool" icon="mdi:toy-brick-plus" on:message={addPool} />
 
-			<div class="buttons">
+			<Ribbon grow="true">
 				{#if submitting}
-					<button disabled="true">
-						<iconify-icon icon="svg-spinners:ring-resize" />
-						<div>Updating...</div>
-					</button>
+					<Button text="Updating..." icon="svg-spinners:ring-resize" disabled="true" />
 				{:else}
-					<button type="submit" disabled={!valid} on:click={submit} on:keydown={submit}>
-						<iconify-icon icon="mdi:tick" />
-						<div>Update</div>
-					</button>
+					<Button text="Update" icon="mdi:tick" disabled={!valid} on:message={submit} />
 				{/if}
-				<button on:click={close} on:keydown={close}>
-					<iconify-icon icon="mdi:close" />
-					<div>Cancel</div>
-				</button>
-			</div>
+				<Button text="Cancel" icon="mdi:close" on:message={close} />
+			</Ribbon>
 		</form>
 	{:else}
 		<div class="loader">
@@ -852,11 +834,6 @@
 </Modal>
 
 <style>
-	div.buttons {
-		display: flex;
-		justify-content: center;
-		gap: var(--padding);
-	}
 	form {
 		display: flex;
 		flex-direction: column;

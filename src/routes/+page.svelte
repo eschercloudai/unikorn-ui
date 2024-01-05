@@ -229,7 +229,7 @@
 		--radius: 0.5rem;
 		--shadow-offset: 0.25rem;
 		--padding: 0.75rem;
-		--padding-header: 4rem;
+		--padding-input: 0.5rem;
 		--icon-size: 1.5rem;
 		--nav-icon-size: 2rem;
 		--nav-width: 100vw;
@@ -255,10 +255,10 @@
 		background-size: cover;
 	}
 	:global(h1, h2, h3, h4, h5, h6) {
-		color: var(--brand);
+		color: var(--brand-dark);
 	}
 	:global(a:link, a:visited) {
-		color: var(--brand);
+		color: var(--brand-dark);
 	}
 	:global(a:hover) {
 		color: var(--brand-light);
@@ -273,7 +273,7 @@
 		color: inherit;
 	}
 	:global(input[type='text'], input[type='password'], select) {
-		padding: var(--padding);
+		padding: var(--padding-input);
 		border-bottom: 2px solid var(--brand);
 		text-overflow: ellipsis;
 	}
@@ -284,7 +284,6 @@
 			select:focus
 		) {
 		outline: none;
-		box-shadow: 0 0 var(--radius) var(--brand-light);
 		color: inherit;
 	}
 	:global(input[type='text']:invalid, input[type='password']:invalid, select:invalid) {
@@ -322,38 +321,29 @@
 		transform: scale(1);
 	}
 	:global(button) {
-		padding: var(--padding);
-		font-weight: bold;
+		padding: var(--padding-input);
 		font-size: 1rem;
 		transition: all 0.2s ease-in;
 		display: inline-flex;
 		align-items: center;
-		gap: var(--padding);
+		gap: var(--padding-input);
 		cursor: pointer;
-		color: currentColor;
-		background-color: var(--overlay);
+		color: white;
+		background-color: var(--brand);
 		border-radius: var(--radius);
 		border-style: none;
-		border: 1px solid var(--brand);
-		box-shadow: 0 0 var(--padding) var(--brand);
 	}
 	:global(button:hover) {
-		color: var(--brand-dark);
-		box-shadow: 0 0 var(--padding) var(--brand-light);
-	}
-	:global(button:focus) {
-		box-shadow: 0 0 var(--padding) var(--brand-light);
+		background-color: var(--brand-dark);
 	}
 	:global(button:disabled) {
 		cursor: not-allowed;
-		color: var(--mid-grey);
-		box-shadow: 0 0 var(--padding) var(--mid-grey);
+		background-color: var(--mid-grey);
 	}
 	:global(details) {
-		background-color: var(--overlay);
-		border: 1px solid var(--brand);
+		background-color: var(--brand);
 		border-radius: var(--radius);
-		box-shadow: 0 0 var(--radius) var(--brand-light);
+		transition: all 0.3s ease-in-out;
 	}
 	:global(details[open]) {
 		width: 100%;
@@ -362,19 +352,21 @@
 		display: flex;
 		flex-direction: column;
 		gap: var(--padding);
-		padding: var(--padding);
+		padding: var(--padding-input);
+		background-color: var(--overlay);
+		border-radius: var(--radius);
+		border: 1px solid var(--brand);
 	}
-
 	:global(summary) {
 		cursor: pointer;
-		transition: all 0.3s ease-in-out;
 		display: flex;
 		gap: var(--padding);
 		align-items: center;
-		padding: var(--padding);
+		padding: var(--padding-input);
+		color: white;
 	}
-	:global(summary:hover) {
-		color: var(--brand-dark);
+	:global(details:hover) {
+		background-color: var(--brand-dark);
 	}
 	:global(.selectable) {
 		cursor: pointer;
@@ -520,19 +512,25 @@
 		}
 		:global(body) {
 			background-color: #0d0d1c;
-			color: white;
+			color: #eee;
 		}
 		:global(h1, h2, h3, h4, h5, h6) {
-			color: white;
+			color: #eee;
 		}
-		:global(summary) {
-			color: white;
-		}
-		:global(summary:hover) {
-			color: var(--brand-light);
+		:global(button) {
+			background-color: var(--brand-dark);
 		}
 		:global(button:hover) {
-			color: var(--brand-light);
+			background-color: var(--brand);
+		}
+		:global(button:disabled) {
+			background-color: var(--mid-grey);
+		}
+		:global(details) {
+			background-color: var(--brand-dark);
+		}
+		:global(details:hover) {
+			background-color: var(--brand);
 		}
 	}
 </style>

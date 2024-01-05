@@ -55,7 +55,6 @@
 			max-height: 80vh;
 			border: 1px outset var(--brand);
 			border-radius: var(--radius);
-			box-shadow: 0 0 var(--radius) var(--brand-light);
 		}
 
 		.modal.fixed {
