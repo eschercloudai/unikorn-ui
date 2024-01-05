@@ -13,6 +13,9 @@
 	import SelectField from '$lib/SelectField.svelte';
 	import CheckBoxField from '$lib/CheckBoxField.svelte';
 	import TimeWindowField from '$lib/TimeWindowField.svelte';
+	import Details from '$lib/Details.svelte';
+	import Button from '$lib/Button.svelte';
+	import Ribbon from '$lib/Ribbon.svelte';
 
 	// list of control planes so we can validate the name is unique.
 	export let controlPlanes;
@@ -125,7 +128,7 @@
 	// Roll up validity to enable creation.
 	$: allValid = [nameValid].every((x) => x);
 
-	async function submitCreateControlPlane() {
+	async function submit() {
 		submitting = true;
 
 		const body = {
@@ -201,78 +204,61 @@
 			bind:valid={nameValid}
 		/>
 
-		<details>
-			<summary>Lifecycle (Advanced)</summary>
+		<Details summary="Lifecycle (Advanced)" icon="material-symbols:cycle-rounded">
+			<p>
+				The platform can automatically upgrade control planes to provide confidence in security, and
+				periodically enable new features. This section describes those defaults and, where
+				applicable, allows you to fine tune those settings.
+			</p>
 
-			<section>
-				<p>
-					The platform can automatically upgrade control planes to provide confidence in security,
-					and periodically enable new features. This section describes those defaults and, where
-					applicable, allows you to fine tune those settings.
-				</p>
-
-				<SelectField
-					id="appbundle"
-					help="Selects the control plane version. Versions marked as <em>Preview</em> are early release
+			<SelectField
+				id="appbundle"
+				help="Selects the control plane version. Versions marked as <em>Preview</em> are early release
                                         candidates, and may have undergone less rigorous testing. Versions marked
                                         <em>End-of-Life</em> indicate the date when they will be automatically upgraded by the platform."
-					formatter={applicationBundleFormatter}
-					options={applicationBundles}
-					bind:value={applicationBundle}
-				/>
+				formatter={applicationBundleFormatter}
+				options={applicationBundles}
+				bind:value={applicationBundle}
+			/>
 
-				<CheckBoxField
-					id="autoUpgrade"
-					label="Enable auto-upgrade?"
-					help="Enables auto-upgrade of the control plane application bundle.  When checked the default setting will be to perform upgrades randomly from Monday-Friday 00:00-07:00 UTC.  This allows support to be be readily available in the rare event of disruption."
-					bind:checked={autoUpgrade}
-				/>
+			<CheckBoxField
+				id="autoUpgrade"
+				label="Enable auto-upgrade?"
+				help="Enables auto-upgrade of the control plane application bundle.  When checked the default setting will be to perform upgrades randomly from Monday-Friday 00:00-07:00 UTC.  This allows support to be be readily available in the rare event of disruption."
+				bind:checked={autoUpgrade}
+			/>
 
-				{#if autoUpgrade}
-					<section class="autoupgrade">
-						<CheckBoxField
-							id="autoUpgradeDaysOfWeek"
-							label="Enable auto-upgrade scheduling?"
-							help="The default auto-upgrade time-windows are recommended.  If this isn't suitable for your use case, this allows the days and time-windows to be manually specified."
-							bind:checked={autoUpgradeDaysOfWeek}
-						/>
+			{#if autoUpgrade}
+				<section class="autoupgrade">
+					<CheckBoxField
+						id="autoUpgradeDaysOfWeek"
+						label="Enable auto-upgrade scheduling?"
+						help="The default auto-upgrade time-windows are recommended.  If this isn't suitable for your use case, this allows the days and time-windows to be manually specified."
+						bind:checked={autoUpgradeDaysOfWeek}
+					/>
 
-						{#if autoUpgradeDaysOfWeek}
-							{#each Object.keys(daysOfTheWeekWindows) as day}
-								<TimeWindowField
-									id="autoupgrade-{day}"
-									label="Enable {day}?"
-									bind:object={daysOfTheWeekWindows[day]}
-								/>
-							{/each}
-						{/if}
-					</section>
-				{/if}
-			</section>
-		</details>
-
-		<div class="buttons">
-			{#if submitting}
-				<button disabled="true">
-					<iconify-icon icon="svg-spinners:ring-resize" />
-					<div>Creating...</div>
-				</button>
-			{:else}
-				<button
-					type="submit"
-					disabled={!allValid}
-					on:click={submitCreateControlPlane}
-					on:keydown={submitCreateControlPlane}
-				>
-					<iconify-icon icon="mdi:tick" />
-					<div>Create</div>
-				</button>
+					{#if autoUpgradeDaysOfWeek}
+						{#each Object.keys(daysOfTheWeekWindows) as day}
+							<TimeWindowField
+								id="autoupgrade-{day}"
+								label="Enable {day}?"
+								bind:object={daysOfTheWeekWindows[day]}
+							/>
+						{/each}
+					{/if}
+				</section>
 			{/if}
-			<button on:click={close}>
-				<iconify-icon icon="mdi:close" />
-				<div>Cancel</div>
-			</button>
-		</div>
+		</Details>
+
+		<Ribbon grow="true">
+			{#if submitting}
+				<Button text="Creating..." icon="svg-spinners:ring-resize" disabled="true" />
+			{:else}
+				<Button text="Create" icon="mdi:tick" disabled={!allValid} on:message={submit} />
+			{/if}
+
+			<Button text="Cancel" icon="mdi:close" on:message={close} />
+		</Ribbon>
 	</form>
 </Modal>
 
@@ -283,11 +269,6 @@
 		align-items: stretch;
 		display: flex;
 		flex-direction: column;
-		gap: var(--padding);
-	}
-	div.buttons {
-		display: flex;
-		justify-content: center;
 		gap: var(--padding);
 	}
 	form {

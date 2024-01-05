@@ -1,5 +1,5 @@
 <section>
-	<h4><iconify-icon icon="mdi:tools" />Tools</h4>
+	<h5><iconify-icon icon="mdi:tools" />Tools</h5>
 	<slot />
 </section>
 
@@ -13,7 +13,7 @@
 		border-bottom: 1px solid var(--brand);
 	}
 
-	h4 {
+	h5 {
 		display: flex;
 		align-items: center;
 		gap: var(--padding);

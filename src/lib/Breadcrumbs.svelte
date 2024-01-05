@@ -26,7 +26,7 @@
 		align-items: center;
 		gap: 1.125em;
 		overflow-x: auto;
-		min-height: 2.5em;
+		min-height: 2em;
 		border-top: 1px solid var(--brand);
 		border-bottom: 1px solid var(--brand);
 		box-sizing: content-box;
@@ -34,7 +34,7 @@
 
 	li {
 		position: relative;
-		line-height: 2.5em;
+		line-height: 2em;
 		list-style: none;
 		background-color: var(--brand);
 		padding: 0 1em;
@@ -45,8 +45,8 @@
 		position: absolute;
 		content: '';
 		border-left: 1em solid transparent;
-		border-top: 1.25em solid var(--brand);
-		border-bottom: 1.25em solid var(--brand);
+		border-top: 1em solid var(--brand);
+		border-bottom: 1em solid var(--brand);
 		right: 100%;
 	}
 
@@ -54,8 +54,8 @@
 		position: absolute;
 		content: '';
 		border-left: 1em solid var(--brand);
-		border-top: 1.25em solid transparent;
-		border-bottom: 1.25em solid transparent;
+		border-top: 1em solid transparent;
+		border-bottom: 1em solid transparent;
 		left: 100%;
 	}
 

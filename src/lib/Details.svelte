@@ -1,10 +1,12 @@
 <script>
 	export let summary;
+
+	export let icon;
 </script>
 
 <details>
 	<summary>
-		<iconify-icon icon="mdi:filter-outline" />
+		<iconify-icon {icon} />
 		{summary}
 	</summary>
 
@@ -15,12 +17,6 @@
 
 <style>
 	details > summary {
-		font-weight: bold;
 		list-style-type: none;
-	}
-
-	iconify-icon {
-		font-size: 1.5rem;
-		color: var(--brand);
 	}
 </style>

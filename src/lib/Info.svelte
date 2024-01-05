@@ -14,9 +14,6 @@
 </details>
 
 <style>
-	details > summary {
-		list-style-type: none;
-	}
 	iconify-icon {
 		font-size: 1.5rem;
 		color: dodgerblue;

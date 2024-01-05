@@ -5,6 +5,8 @@
 
 	export let icon;
 
+	export let disabled = false;
+
 	const dispatch = createEventDispatcher();
 
 	function click() {
@@ -12,14 +14,7 @@
 	}
 </script>
 
-<button on:click={click}>
+<button on:click={click} {disabled}>
 	<iconify-icon {icon} />
 	{text}
 </button>
-
-<style>
-	iconify-icon {
-		font-size: 1.5rem;
-		color: var(--brand);
-	}
-</style>

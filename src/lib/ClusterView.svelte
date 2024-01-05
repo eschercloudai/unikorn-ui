@@ -22,7 +22,7 @@
 	import ItemView from '$lib/ItemView.svelte';
 	import Item from '$lib/Item.svelte';
 	import ToolBar from '$lib/ToolBar.svelte';
-	import Filters from '$lib/Filters.svelte';
+	import Details from '$lib/Details.svelte';
 	import Button from '$lib/Button.svelte';
 	import Ribbon from '$lib/Ribbon.svelte';
 
@@ -253,7 +253,7 @@
 	<Ribbon>
 		<Button text="New" icon="material-symbols:add" on:message={showCreateModal} />
 
-		<Filters summary="Filters">
+		<Details summary="Filters" icon="mdi:filter-outline">
 			<SelectField
 				id="control-plane-select"
 				help="Filter clusters by control plane"
@@ -261,7 +261,7 @@
 				options={controlPlanes}
 				bind:value={controlPlane}
 			/>
-		</Filters>
+		</Details>
 	</Ribbon>
 </ToolBar>
 

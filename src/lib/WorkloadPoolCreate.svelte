@@ -5,6 +5,7 @@
 	import SelectField from '$lib/SelectField.svelte';
 	import CheckBoxField from '$lib/CheckBoxField.svelte';
 	import SliderField from '$lib/SliderField.svelte';
+	import Details from '$lib/Details.svelte';
 
 	export let flavors;
 	export let images;
@@ -150,25 +151,21 @@
 {/if}
 
 {#if advanced}
-	<details>
-		<summary>Advanced Options</summary>
+	<Details summary="Advanced Options" icon="mdi:cog">
+		<TextField
+			id="labels"
+			placeholder="key1=value1,key2=value2"
+			help="Comma separated set of labels to apply to Kubernetes nodes on creation."
+			bind:value={labels}
+		/>
 
-		<section>
-			<TextField
-				id="labels"
-				placeholder="key1=value1,key2=value2"
-				help="Comma separated set of labels to apply to Kubernetes nodes on creation."
-				bind:value={labels}
-			/>
-
-			<SelectField
-				id="computeAZ"
-				help="Availability zone to provision the pool in."
-				formatter={namedObjectFormatter}
-				nullable="true"
-				options={computeAZs}
-				bind:value={computeAZ}
-			/>
-		</section>
-	</details>
+		<SelectField
+			id="computeAZ"
+			help="Availability zone to provision the pool in."
+			formatter={namedObjectFormatter}
+			nullable="true"
+			options={computeAZs}
+			bind:value={computeAZ}
+		/>
+	</Details>
 {/if}
