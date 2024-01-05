@@ -478,14 +478,13 @@
 		display: flex;
 		align-items: center;
 		gap: var(--padding);
-		justify-content: space-between;
 	}
 	.user span {
 		font-size: 0.8em;
+		flex-grow: 1;
 	}
 	.user img {
 		max-height: var(--nav-icon-size);
-		margin-right: var(--padding);
 		border-radius: 1em;
 		border: 1px solid currentColor;
 	}
