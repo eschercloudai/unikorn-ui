@@ -358,7 +358,7 @@
 		background-color: var(--overlay);
 		border-bottom-left-radius: var(--radius);
 		border-bottom-right-radius: var(--radius);
-		border: 1px solid var(--border);
+		border: 1px solid var(--brand);
 	}
 	:global(summary) {
 		cursor: pointer;
@@ -541,6 +541,9 @@
 		}
 		:global(details:hover) {
 			background-color: var(--brand);
+		}
+		:global(details > section) {
+			border: 1px solid var(--brand-dark);
 		}
 	}
 </style>
