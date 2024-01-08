@@ -25,7 +25,7 @@
 		display: flex;
 		flex-direction: column;
 		gap: var(--padding);
-		border: 1px solid var(--brand);
+		border: 1px solid var(--border);
 		background: var(--overlay);
 		border-radius: var(--radius);
 		padding: var(--padding);
@@ -37,6 +37,6 @@
 	}
 
 	.selected {
-		background: var(--overlay-brand);
+		background: var(--overlay-highlight);
 	}
 </style>

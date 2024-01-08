@@ -27,8 +27,8 @@
 		gap: 1.125em;
 		overflow-x: auto;
 		min-height: 2em;
-		border-top: 1px solid var(--brand);
-		border-bottom: 1px solid var(--brand);
+		border-top: 1px solid var(--border);
+		border-bottom: 1px solid var(--border);
 		box-sizing: content-box;
 	}
 

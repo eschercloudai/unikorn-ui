@@ -12,7 +12,7 @@
 		display: flex;
 		gap: var(--padding);
 		align-items: center;
-		border: 1px solid var(--brand);
+		border: 1px solid var(--border);
 		background: var(--overlay);
 		border-radius: var(--radius);
 		padding: var(--padding);

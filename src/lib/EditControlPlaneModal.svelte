@@ -245,7 +245,7 @@
 <style>
 	.autoupgrade {
 		padding: var(--padding);
-		border: 1px solid var(--brand);
+		border: 1px solid var(--border);
 		align-items: stretch;
 		display: flex;
 		flex-direction: column;

@@ -218,6 +218,7 @@
 		--brand: rgb(144, 97, 148);
 		--brand-light: rgb(171, 132, 174);
 		--brand-dark: rgb(108, 73, 111);
+		--border: rgb(170, 170, 170);
 
 		/* Generic colors */
 		--light-grey: rgb(200, 200, 200);
@@ -234,8 +235,8 @@
 		--nav-icon-size: 2rem;
 		--nav-width: 100vw;
 
-		--overlay: rgba(240, 230, 230, 0.95);
-		--overlay-brand: rgba(234, 218, 236, 0.95);
+		--overlay: rgba(240, 230, 240, 0.95);
+		--overlay-highlight: rgba(234, 218, 236, 0.95);
 		--modal: rgb(255, 255, 255);
 	}
 
@@ -258,6 +259,7 @@
 		color: var(--brand-dark);
 	}
 	:global(a:link, a:visited) {
+		transition: all 0.2s ease-in;
 		color: var(--brand-dark);
 	}
 	:global(a:hover) {
@@ -354,8 +356,9 @@
 		gap: var(--padding);
 		padding: var(--padding-input);
 		background-color: var(--overlay);
-		border-radius: var(--radius);
-		border: 1px solid var(--brand);
+		border-bottom-left-radius: var(--radius);
+		border-bottom-right-radius: var(--radius);
+		border: 1px solid var(--border);
 	}
 	:global(summary) {
 		cursor: pointer;
@@ -380,7 +383,7 @@
 		gap: var(--padding);
 		align-items: center;
 		background-color: var(--overlay);
-		border-bottom: 1px solid var(--brand);
+		border-bottom: 1px solid var(--border);
 	}
 
 	/* Main styling */
@@ -499,7 +502,7 @@
 			width: 100%;
 		}
 		nav {
-			border-right: 1px solid var(--brand);
+			border-right: 1px solid var(--border);
 		}
 	}
 
@@ -507,8 +510,9 @@
 	@media (prefers-color-scheme: dark) {
 		:global(:root) {
 			--overlay: rgba(40, 40, 40, 0.75);
-			--overlay-brand: rgba(50, 33, 51, 0.75);
+			--overlay-highlight: rgba(50, 33, 51, 0.75);
 			--modal: rgb(13, 13, 28);
+			--border: rgb(80, 80, 80);
 		}
 		:global(body) {
 			background-color: #0d0d1c;
@@ -516,6 +520,12 @@
 		}
 		:global(h1, h2, h3, h4, h5, h6) {
 			color: #eee;
+		}
+		:global(a:link, a:visited) {
+			color: var(--brand-light);
+		}
+		:global(a:hover) {
+			color: var(--brand-dark);
 		}
 		:global(button) {
 			background-color: var(--brand-dark);
