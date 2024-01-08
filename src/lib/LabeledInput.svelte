@@ -14,6 +14,7 @@
 		flex-direction: column;
 		align-items: stretch;
 		gap: var(--padding);
+		width: 100%;
 	}
 	label {
 		display: block;
