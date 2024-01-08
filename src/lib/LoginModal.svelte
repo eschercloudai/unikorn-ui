@@ -150,7 +150,7 @@
 			{#if idp == 'OpenStack Keystone'}
 				<TextField
 					id="username"
-					placeholder="Username"
+					help="Your username (email address)"
 					autocomplete="username"
 					required
 					bind:value={username}
@@ -158,7 +158,7 @@
 				<PasswordField
 					type="password"
 					id="password"
-					placeholder="Password"
+					help="Your user's password"
 					autocomplete="current-password"
 					required
 					bind:value={password}
@@ -213,5 +213,9 @@
 
 	.form-container {
 		padding: var(--padding);
+	}
+
+	button {
+		width: 100%;
 	}
 </style>
