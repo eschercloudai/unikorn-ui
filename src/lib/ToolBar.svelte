@@ -10,7 +10,7 @@
 		gap: var(--padding);
 		background-color: var(--overlay);
 		padding: var(--padding);
-		border-bottom: 1px solid var(--brand);
+		border-bottom: 1px solid var(--border);
 	}
 
 	h5 {

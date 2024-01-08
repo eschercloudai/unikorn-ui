@@ -53,7 +53,7 @@
 			width: auto;
 			height: auto;
 			max-height: 80vh;
-			border: 1px outset var(--brand);
+			border: 1px outset var(--border);
 			border-radius: var(--radius);
 		}
 

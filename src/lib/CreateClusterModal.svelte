@@ -893,7 +893,7 @@ s ingress and cert-manager add-ons"
 	}
 	.autoupgrade {
 		padding: var(--padding);
-		border: 1px solid var(--brand);
+		border: 1px solid var(--border);
 		align-items: stretch;
 		display: flex;
 		flex-direction: column;
@@ -901,7 +901,7 @@ s ingress and cert-manager add-ons"
 	}
 	.workloadpool {
 		padding: var(--padding);
-		border: 1px solid var(--brand);
+		border: 1px solid var(--border);
 		align-items: stretch;
 		display: flex;
 		flex-direction: column;

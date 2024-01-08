@@ -146,7 +146,7 @@
 		gap: var(--padding);
 	}
 	dd > dl {
-		border: 1px solid var(--brand);
+		border: 1px solid var(--border);
 		border-radius: var(--radius);
 		padding: var(--padding);
 	}
