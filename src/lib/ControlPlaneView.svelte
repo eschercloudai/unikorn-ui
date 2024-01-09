@@ -9,14 +9,15 @@
 		listApplicationBundlesControlPlane
 	} from '$lib/client.js';
 
-	import StatusIcon from '$lib/StatusIcon.svelte';
-	import DropDownIcon from '$lib/DropDownIcon.svelte';
-	import CreateControlPlaneModal from '$lib/CreateControlPlaneModal.svelte';
-	import EditControlPlaneModal from '$lib/EditControlPlaneModal.svelte';
+	import ControlPlaneCreateModal from '$lib/ControlPlaneCreateModal.svelte';
+	import ControlPlaneUpdateModal from '$lib/ControlPlaneUpdateModal.svelte';
 	import View from '$lib/View.svelte';
 	import ItemView from '$lib/ItemView.svelte';
 	import Item from '$lib/Item.svelte';
+	import ItemHeader from '$lib/ItemHeader.svelte';
 	import Info from '$lib/Info.svelte';
+	import Hint from '$lib/Hint.svelte';
+	import Alert from '$lib/Alert.svelte';
 	import ToolBar from '$lib/ToolBar.svelte';
 	import Button from '$lib/Button.svelte';
 	import Ribbon from '$lib/Ribbon.svelte';
@@ -24,6 +25,8 @@
 	let accessToken;
 
 	let controlPlanes = [];
+
+	let selected = null;
 
 	const tokenUnsubscribe = token.subscribe(changeToken);
 
@@ -79,6 +82,12 @@
 		}
 
 		controlPlanes = result;
+
+		if (selected) {
+			const results = controlPlanes.filter((x) => x.name == selected.name);
+
+			selected = results[0];
+		}
 	}
 
 	$: updateControlPlanes(accessToken);
@@ -119,12 +128,6 @@
 		updateControlPlanes(accessToken);
 	}
 
-	// Define the per-control plane drop down menu.
-	let dropdownItems = [
-		{ id: 'edit', value: 'Update', icon: 'bx:edit', handler: handleEdit, disablable: true },
-		{ id: 'delete', value: 'Delete', icon: 'bx:trash', handler: handleDelete }
-	];
-
 	let createModalActive = false;
 
 	function showCreateModal() {
@@ -134,10 +137,14 @@
 	function controlPlanesMutated() {
 		updateControlPlanes(accessToken);
 	}
+
+	function select(event) {
+		selected = selected == event.detail.context ? null : event.detail.context;
+	}
 </script>
 
 {#if createModalActive}
-	<CreateControlPlaneModal
+	<ControlPlaneCreateModal
 		{controlPlanes}
 		bind:active={createModalActive}
 		on:created={controlPlanesMutated}
@@ -145,7 +152,7 @@
 {/if}
 
 {#if editModalActive}
-	<EditControlPlaneModal
+	<ControlPlaneUpdateModal
 		{controlPlane}
 		bind:active={editModalActive}
 		on:updated={controlPlanesMutated}
@@ -172,85 +179,48 @@
 		</p>
 	</Info>
 
+	<Hint content="Select a control plane for more details and options." />
+
 	<ItemView>
 		{#each controlPlanes as cp}
-			<Item>
-				<div class="header">
-					<StatusIcon status={statusFromResource(cp.status)} />
-					<div class="name">{cp.status.name}</div>
-					<div class="widgets">
-						{#if cp.upgradable}
-							<iconify-icon class="upgrade" icon="material-symbols:upgrade-rounded" />
-						{/if}
-						<DropDownIcon
-							icon="mdi:dots-vertical"
-							resource={cp}
-							items={dropdownItems}
-							disabled={cp.status.status != 'Provisioned'}
-						/>
-					</div>
-				</div>
+			<Item selected={cp == selected} context={cp} on:message={select}>
+				<ItemHeader name={cp.name} status={statusFromResource(cp.status)} alert={cp.upgradable} />
 				<dl>
+					<dt>Provisioning Status:</dt>
+					<dd>{cp.status.status}</dd>
 					<dt>Age:</dt>
 					<dd>{age(cp.status.creationTime)}</dd>
-					<dt>Status:</dt>
-					<dd>{cp.status.status}</dd>
-					<dt>Version:</dt>
-					{#if cp.applicationBundle.preview}
-						<dd>{cp.applicationBundle.version} <span class="detail">(Preview)</span></dd>
-					{:else if cp.applicationBundle.endOfLife}
-						<dd>
-							{cp.applicationBundle.version}
-							<span class="detail"
-								>EOL {new Date(cp.applicationBundle.endOfLife).toDateString()}</span
-							>
-						</dd>
-					{:else}
-						<dd>{cp.applicationBundle.version}</dd>
-					{/if}
 				</dl>
 			</Item>
+			{#if cp == selected}
+				<Item jumbo="true" selected="true">
+					{#if cp.upgradable}
+						<Alert content="Upgrade available" />
+					{/if}
+					<dl>
+						<dt>Software Version:</dt>
+						{#if cp.applicationBundle.preview}
+							<dd>{cp.applicationBundle.version} <span class="detail">(Preview)</span></dd>
+						{:else if cp.applicationBundle.endOfLife}
+							<dd>
+								{cp.applicationBundle.version}
+								<span class="detail"
+									>EOL {new Date(cp.applicationBundle.endOfLife).toDateString()}</span
+								>
+							</dd>
+						{:else}
+							<dd>{cp.applicationBundle.version}</dd>
+						{/if}
+					</dl>
+
+					<hr />
+
+					<Ribbon>
+						<Button text="Update" icon="mdi:square-edit-outline" on:message={handleEdit(cp)} />
+						<Button text="Delete" icon="mdi:delete" on:message={handleDelete(cp)} />
+					</Ribbon>
+				</Item>
+			{/if}
 		{/each}
 	</ItemView>
 </View>
-
-<style>
-	iconify-icon {
-		font-size: var(--icon-size);
-	}
-	.upgrade {
-		color: var(--error);
-	}
-	.header {
-		display: flex;
-		align-content: space-between;
-		align-items: center;
-		gap: var(--padding);
-	}
-	div.name {
-		color: var(--brand);
-		font-weight: bold;
-		flex: 1;
-		overflow: hidden;
-		text-overflow: ellipsis;
-	}
-	div.widgets {
-		display: flex;
-		align-items: center;
-	}
-	dl {
-		display: grid;
-		grid-template-columns: auto 1fr;
-		grid-auto-flow: column;
-		grid-gap: calc(var(--padding) / 2) var(--padding);
-		font-size: 0.75em;
-	}
-	dt {
-		font-weight: bold;
-		grid-column-start: 1;
-	}
-	dd span.detail {
-		font-size: 0.75rem;
-		color: var(--mid-grey);
-	}
-</style>

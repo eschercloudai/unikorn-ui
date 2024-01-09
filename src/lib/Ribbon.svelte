@@ -1,20 +1,18 @@
-<script>
-	export let grow = false;
-</script>
-
-<section class:grow>
+<section>
 	<slot />
 </section>
 
 <style>
 	section {
 		display: flex;
-		flex-direction: row;
-		flex-wrap: wrap;
+		flex-direction: column;
 		gap: var(--padding-input);
 	}
 
-	section.grow > :global(button) {
-		flex-grow: 1;
+	@media only screen and (min-width: 720px) {
+		section {
+			flex-direction: row;
+			flex-wrap: wrap;
+		}
 	}
 </style>

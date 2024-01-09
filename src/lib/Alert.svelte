@@ -3,7 +3,7 @@
 </script>
 
 <section>
-	<iconify-icon icon="tabler:bulb" />
+	<iconify-icon icon="mdi:bell-alert-outline" />
 	{content}
 </section>
 

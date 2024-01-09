@@ -840,7 +840,9 @@ s ingress and cert-manager add-ons"
 
 			<Button text="Add New Pool" icon="mdi:toy-brick-plus" on:message={addPool} />
 
-			<Ribbon grow="true">
+			<hr />
+
+			<Ribbon>
 				{#if submitting}
 					<Button text="Creating..." icon="svg-spinners:ring-resize" disabled="true" />
 				{:else}

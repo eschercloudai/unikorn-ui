@@ -13,24 +13,27 @@
 	} from '$lib/client.js';
 	import { namedObjectFormatter } from '$lib/formatters.js';
 
-	import StatusIcon from '$lib/StatusIcon.svelte';
-	import DropDownIcon from '$lib/DropDownIcon.svelte';
 	import SelectField from '$lib/SelectField.svelte';
-	import CreateClusterModal from '$lib/CreateClusterModal.svelte';
-	import EditClusterModal from '$lib/EditClusterModal.svelte';
+	import ClusterCreateModal from '$lib/ClusterCreateModal.svelte';
+	import ClusterUpdateModal from '$lib/ClusterUpdateModal.svelte';
 	import View from '$lib/View.svelte';
 	import ItemView from '$lib/ItemView.svelte';
 	import Item from '$lib/Item.svelte';
+	import ItemHeader from '$lib/ItemHeader.svelte';
 	import ToolBar from '$lib/ToolBar.svelte';
 	import Details from '$lib/Details.svelte';
 	import Button from '$lib/Button.svelte';
 	import Ribbon from '$lib/Ribbon.svelte';
+	import Hint from '$lib/Hint.svelte';
+	import Alert from '$lib/Alert.svelte';
 
 	let accessToken;
 
 	let controlPlanes = [];
 	let controlPlane = null;
 	let clusters = [];
+
+	let selected = null;
 
 	const tokenUnsubscribe = token.subscribe(changeToken);
 
@@ -135,6 +138,12 @@
 		}
 
 		clusters = result;
+
+		if (selected) {
+			const results = clusters.filter((x) => x.name == selected.name);
+
+			selected = results[0];
+		}
 	}
 
 	$: updateClusters(accessToken, controlPlane);
@@ -202,19 +211,6 @@
 		updateClusters(accessToken, controlPlane);
 	}
 
-	// Define the per-control plane drop down menu.
-	let dropdownItems = [
-		{
-			id: 'kubeconfig',
-			value: 'Kubeconfig',
-			icon: 'mdi:kubernetes',
-			handler: handleKubeconfig,
-			disablable: true
-		},
-		{ id: 'edit', value: 'Update', icon: 'bx:edit', handler: handleEdit },
-		{ id: 'delete', value: 'Delete', icon: 'bx:trash', handler: handleDelete }
-	];
-
 	let createModalActive = false;
 
 	function showCreateModal() {
@@ -229,10 +225,14 @@
 	async function clustersMutated() {
 		await updateControlPlanes(accessToken);
 	}
+
+	function select(event) {
+		selected = selected == event.detail.context ? null : event.detail.context;
+	}
 </script>
 
 {#if createModalActive}
-	<CreateClusterModal
+	<ClusterCreateModal
 		{controlPlane}
 		{clusters}
 		bind:active={createModalActive}
@@ -241,7 +241,7 @@
 {/if}
 
 {#if editModalActive}
-	<EditClusterModal
+	<ClusterUpdateModal
 		{controlPlane}
 		{cluster}
 		bind:active={editModalActive}
@@ -287,74 +287,97 @@
 			{/if}
 		</section>
 	{:else}
+		<Hint content="Select a cluster for more details and options." />
+
 		<ItemView>
 			{#each clusters as cl}
-				<Item>
-					<div class="header">
-						<StatusIcon status={statusFromResource(cl.status)} />
-						<div class="name">{cl.status.name}</div>
-						<div class="widgets">
-							{#if cl.upgradable}
-								<iconify-icon class="upgrade" icon="material-symbols:upgrade-rounded" />
-							{/if}
-							<DropDownIcon
-								icon="mdi:dots-vertical"
-								resource={cl}
-								items={dropdownItems}
-								disabled={cl.status.status != 'Provisioned'}
-							/>
-						</div>
-					</div>
+				<Item selected={cl == selected} context={cl} on:message={select}>
+					<ItemHeader name={cl.name} status={statusFromResource(cl.status)} alert={cl.upgradable} />
 					<dl>
-						<dt>Age:</dt>
-						<dd>{age(cl.status.creationTime)}</dd>
-						<dt>Status:</dt>
+						<dt>Provisioning Status</dt>
 						<dd>{cl.status.status}</dd>
-						<dt>Version:</dt>
-						{#if cl.applicationBundle.preview}
-							<dd>{cl.applicationBundle.version} <span class="detail">Preview</span></dd>
-						{:else if cl.applicationBundle.endOfLife}
-							<dd>
-								{cl.applicationBundle.version}
-								<span class="detail"
-									>EOL {new Date(cl.applicationBundle.endOfLife).toDateString()}</span
-								>
-							</dd>
-						{:else}
-							<dd>{cl.applicationBundle.version}</dd>
-						{/if}
-						<dt>Kubernetes:</dt>
-						<dd>{cl.controlPlane.version}</dd>
+
+						<dt>Age</dt>
+						<dd>{age(cl.status.creationTime)}</dd>
 					</dl>
 				</Item>
+				{#if cl == selected}
+					<Item jumbo="true" selected="true">
+						{#if cl.upgradable}
+							<Alert content="Upgrade available" />
+						{/if}
+						<dl>
+							<dt>Software Version</dt>
+							{#if cl.applicationBundle.preview}
+								<dd>{cl.applicationBundle.version} <span class="detail">Preview</span></dd>
+							{:else if cl.applicationBundle.endOfLife}
+								<dd>
+									{cl.applicationBundle.version}
+									<span class="detail"
+										>EOL {new Date(cl.applicationBundle.endOfLife).toDateString()}</span
+									>
+								</dd>
+							{:else}
+								<dd>{cl.applicationBundle.version}</dd>
+							{/if}
+							<dt>Kubernetes Version</dt>
+							<dd>{cl.controlPlane.version}</dd>
+							<dt>Workload Pools</dt>
+							<dd>
+								{#each cl.workloadPools as pool}
+									<Details summary={pool.name} icon="mdi:cogs">
+										<dl>
+											{#if pool.autoscaling}
+												<dt>Minimum replicas</dt>
+												<dd>{pool.autoscaling.minimumReplicas}</dd>
+												<dt>Maximum replicas</dt>
+												<dd>{pool.autoscaling.maximumReplicas}</dd>
+											{:else}
+												<dt>Replicas</dt>
+												<dd>pool.machine.replicas</dd>
+											{/if}
+											<dt>Image</dt>
+											<dd>{pool.machine.imageName}</dd>
+											<dt>Flavor</dt>
+											<dd>{pool.machine.flavorName}</dd>
+											<dt>Disk</dt>
+											<dd>{pool.machine.disk.size}GiB</dd>
+											{#if pool.labels}
+												<dt>Labels</dt>
+												<dd>
+													{Object.keys(pool.labels)
+														.map((x) => `${x}=${pool.labels[x]}`)
+														.join(',')}
+												</dd>
+											{/if}
+										</dl>
+									</Details>
+								{/each}
+							</dd>
+						</dl>
+
+						<hr />
+
+						<Ribbon>
+							<Button
+								text="Download kubeconfig"
+								icon="mdi:kubernetes"
+								on:message={handleKubeconfig(cl)}
+							/>
+							<Button text="Update" icon="mdi:square-edit-outline" on:message={handleEdit(cl)} />
+							<Button text="Delete" icon="mdi:delete" on:message={handleDelete(cl)} />
+						</Ribbon>
+					</Item>
+				{/if}
 			{/each}
 		</ItemView>
 	{/if}
 </View>
 
 <style>
-	iconify-icon {
-		font-size: var(--icon-size);
-	}
-	.upgrade {
-		color: var(--error);
-	}
-	.header {
-		display: flex;
-		align-content: space-between;
-		align-items: center;
-		gap: var(--padding);
-	}
-	div.name {
-		color: var(--brand);
-		font-weight: bold;
-		flex: 1;
-		overflow: hidden;
-		text-overflow: ellipsis;
-	}
-	div.widgets {
-		display: flex;
-		align-items: center;
+	.detail {
+		font-size: 0.75rem;
+		color: var(--mid-grey);
 	}
 	section.sad-kitty {
 		display: flex;
@@ -371,20 +394,5 @@
 	}
 	.attribution {
 		font-size: 0.75em;
-	}
-	dl {
-		display: grid;
-		grid-template-columns: auto 1fr;
-		grid-auto-flow: column;
-		grid-gap: calc(var(--padding) / 2) var(--padding);
-		font-size: 0.75em;
-	}
-	dt {
-		font-weight: bold;
-		grid-column-start: 1;
-	}
-	dd span.detail {
-		font-size: 0.75rem;
-		color: var(--mid-grey);
 	}
 </style>

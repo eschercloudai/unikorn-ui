@@ -7,6 +7,7 @@
 	import ItemView from '$lib/ItemView.svelte';
 	import Item from '$lib/Item.svelte';
 	import Hint from '$lib/Hint.svelte';
+	import Details from '$lib/Details.svelte';
 
 	let accessToken;
 
@@ -63,7 +64,7 @@
 </script>
 
 <View>
-	<Hint content="Click an application for more details." />
+	<Hint content="Select an application for more details." />
 
 	<ItemView>
 		{#each applications as app}
@@ -75,7 +76,6 @@
 			</Item>
 			{#if app == selected}
 				<Item jumbo="true" selected="true">
-					<h3>{app.humanReadableName}</h3>
 					<dl>
 						<dt>Description</dt>
 						<dd>{app.description}</dd>
@@ -88,18 +88,18 @@
 						<dt>Versions</dt>
 						<dd>
 							{#each app.versions as version}
-								<dl>
-									<dt>Version</dt>
-									<dd>{version.version}</dd>
-									{#if version.dependencies}
-										<dt>Dependencies</dt>
-										<dd>{version.dependencies.map((x) => x.name).join(', ')}</dd>
-									{/if}
-									{#if version.recommends}
-										<dt>Recommends</dt>
-										<dd>{version.recommends.map((x) => x.name).join(', ')}</dd>
-									{/if}
-								</dl>
+								<Details summary={version.version} icon="mdi:cogs">
+									<dl>
+										{#if version.dependencies}
+											<dt>Dependencies</dt>
+											<dd>{version.dependencies.map((x) => x.name).join(', ')}</dd>
+										{/if}
+										{#if version.recommends}
+											<dt>Recommends</dt>
+											<dd>{version.recommends.map((x) => x.name).join(', ')}</dd>
+										{/if}
+									</dl>
+								</Details>
 							{/each}
 						</dd>
 					</dl>
@@ -113,14 +113,12 @@
 	.image-wrapper {
 		height: 5rem;
 	}
-
 	.image-wrapper > :global(svg) {
 		max-width: 10rem;
 		max-height: 5rem;
 		display: block;
 		margin: auto;
 	}
-	h3,
 	h5 {
 		/* Fix me with better CSS */
 		padding-left: unset;
@@ -129,35 +127,5 @@
 	h5 {
 		/* Fix me with better CSS */
 		text-align: center;
-	}
-	dl {
-		display: flex;
-		flex-direction: column;
-		gap: var(--padding);
-		font-size: 0.75rem;
-	}
-	dt {
-		font-weight: bold;
-		grid-column-start: 1;
-	}
-	dd {
-		display: flex;
-		flex-direction: column;
-		gap: var(--padding);
-	}
-	dd > dl {
-		border: 1px solid var(--border);
-		border-radius: var(--radius);
-		padding: var(--padding);
-	}
-	@media only screen and (min-width: 720px) {
-		/* In desktop mode, create as many columns as possible for
-                   a specific minimum size */
-		dl {
-			display: grid;
-			grid-template-columns: auto 1fr;
-			grid-auto-flow: column;
-			grid-gap: calc(var(--padding) / 2) var(--padding);
-		}
 	}
 </style>
