@@ -250,7 +250,9 @@
 			{/if}
 		</Details>
 
-		<Ribbon grow="true">
+		<hr />
+
+		<Ribbon>
 			{#if submitting}
 				<Button text="Creating..." icon="svg-spinners:ring-resize" disabled="true" />
 			{:else}

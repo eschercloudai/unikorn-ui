@@ -371,12 +371,29 @@
 	:global(details:hover) {
 		background-color: var(--brand-dark);
 	}
+	:global(hr) {
+		color: var(--border);
+	}
+	:global(dl) {
+		display: flex;
+		flex-direction: column;
+		gap: var(--padding);
+		font-size: 0.75rem;
+	}
+	:global(dt) {
+		font-weight: bold;
+	}
+
+	/* Global styles */
 	:global(.selectable) {
 		cursor: pointer;
 	}
 	:global(.error) {
 		color: var(--error);
 	}
+
+	/* Modal styling */
+	/* TODO: Move me! */
 	:global(.modal-header) {
 		padding: var(--padding);
 		display: inline-flex;
@@ -503,6 +520,15 @@
 		}
 		nav {
 			border-right: 1px solid var(--border);
+		}
+		:global(dl) {
+			display: grid;
+			grid-template-columns: auto 1fr;
+			grid-auto-flow: column;
+			grid-gap: calc(var(--padding) / 2) var(--padding);
+		}
+		:global(dt) {
+			grid-column-start: 1;
 		}
 	}
 

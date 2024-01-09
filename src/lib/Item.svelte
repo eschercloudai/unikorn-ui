@@ -34,6 +34,7 @@
 
 	.jumbo {
 		grid-column: 1 / -1;
+		cursor: revert;
 	}
 
 	.selected {

@@ -177,7 +177,7 @@
 </script>
 
 <Modal {active} fixed="true">
-	<h2 class="modal-header"><iconify-icon icon="bx:edit" />Update Control Plane</h2>
+	<h2 class="modal-header"><iconify-icon icon="mdi:square-edit-outline" />Update Control Plane</h2>
 	<form>
 		<dl>
 			<dt>Name</dt>
@@ -231,7 +231,9 @@
 			{/if}
 		</Details>
 
-		<Ribbon grow="true">
+		<hr />
+
+		<Ribbon>
 			{#if submitting}
 				<Button text="Updating..." icon="svg-spinners:ring-resize" disabled="true" />
 			{:else}
@@ -256,21 +258,5 @@
 		flex-direction: column;
 		padding: var(--padding);
 		gap: var(--padding);
-	}
-	dl {
-		grid-row: 2;
-		grid-column: 1 / -1;
-		margin: 0;
-		display: grid;
-		grid-template-columns: auto 1fr;
-		grid-auto-flow: column;
-		grid-gap: calc(var(--padding) / 2) var(--padding);
-	}
-	dt {
-		font-weight: bold;
-		grid-column-start: 1;
-	}
-	dd {
-		margin: 0;
 	}
 </style>
