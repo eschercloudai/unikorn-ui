@@ -16,7 +16,7 @@
 
 <style>
 	.ok {
-		color: green;
+		color: lightgreen;
 	}
 	.warning {
 		color: orange;
@@ -25,18 +25,12 @@
 		color: red;
 	}
 	.unknown {
-		color: var(--mid-grey);
+		color: var(--light-grey);
 	}
 	.progressing {
-		color: var(--mid-grey);
+		color: var(--light-grey);
 	}
 	iconify-icon {
 		font-size: var(--icon-size);
-	}
-
-	@media (prefers-color-scheme: dark) {
-		.ok {
-			color: lightgreen;
-		}
 	}
 </style>

@@ -1,8 +1,6 @@
 <script>
 	import { createEventDispatcher } from 'svelte';
 
-	export let jumbo = false;
-
 	export let selected = false;
 
 	export let context = null;
@@ -16,28 +14,55 @@
 	}
 </script>
 
-<article class="item" class:jumbo class:selected on:click={click} on:keypress={click}>
-	<slot />
+<article on:click={click} on:keypress={click}>
+	<header class:selected>
+		<slot name="header" />
+	</header>
+	<main class:selected>
+		<slot name="main" />
+	</main>
 </article>
 
 <style>
 	article {
-		display: flex;
-		flex-direction: column;
-		gap: var(--padding);
-		border: 1px solid var(--border);
-		background: var(--overlay);
-		border-radius: var(--radius);
-		padding: var(--padding);
 		cursor: pointer;
 	}
-
-	.jumbo {
-		grid-column: 1 / -1;
-		cursor: revert;
+	header {
+		color: white;
+		background-color: var(--brand);
+		padding: var(--padding-small);
+		border-top-right-radius: var(--radius);
+		border-top-left-radius: var(--radius);
+	}
+	main {
+		background-color: var(--overlay);
+		padding: var(--padding-small);
+		border: 1px solid var(--brand);
+		border-bottom-right-radius: var(--radius);
+		border-bottom-left-radius: var(--radius);
+	}
+	header.selected {
+		background-color: var(--brand-light);
+	}
+	main.selected {
+		border: 1px solid var(--brand-light);
+		background-color: var(--overlay-highlight);
 	}
 
-	.selected {
-		background: var(--overlay-highlight);
+	@media (prefers-color-scheme: dark) {
+		header {
+			color: white;
+			background-color: var(--brand-dark);
+		}
+		main {
+			background-color: var(--overlay);
+			border: 1px solid var(--brand-dark);
+		}
+		header.selected {
+			background-color: var(--brand);
+		}
+		main.selected {
+			border: 1px solid var(--brand);
+		}
 	}
 </style>

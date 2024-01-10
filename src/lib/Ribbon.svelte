@@ -6,7 +6,7 @@
 	section {
 		display: flex;
 		flex-direction: column;
-		gap: var(--padding-input);
+		gap: var(--padding-small);
 	}
 
 	@media only screen and (min-width: 720px) {
