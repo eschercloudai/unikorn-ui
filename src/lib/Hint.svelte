@@ -15,7 +15,7 @@
 		border: 1px solid var(--brand);
 		background: var(--overlay);
 		border-radius: var(--radius);
-		padding: var(--padding-input);
+		padding: var(--padding-small);
 	}
 	iconify-icon {
 		font-size: var(--icon-size);

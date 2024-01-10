@@ -230,7 +230,7 @@
 		--radius: 0.5rem;
 		--shadow-offset: 0.25rem;
 		--padding: 0.75rem;
-		--padding-input: 0.5rem;
+		--padding-small: 0.5rem;
 		--icon-size: 1.5rem;
 		--nav-icon-size: 2rem;
 		--nav-width: 100vw;
@@ -275,7 +275,7 @@
 		color: inherit;
 	}
 	:global(input[type='text'], input[type='password'], select) {
-		padding: var(--padding-input);
+		padding: var(--padding-small);
 		border-bottom: 2px solid var(--brand);
 		text-overflow: ellipsis;
 	}
@@ -323,12 +323,12 @@
 		transform: scale(1);
 	}
 	:global(button) {
-		padding: var(--padding-input);
+		padding: var(--padding-small);
 		font-size: 1rem;
 		transition: all 0.2s ease-in;
 		display: inline-flex;
 		align-items: center;
-		gap: var(--padding-input);
+		gap: var(--padding-small);
 		cursor: pointer;
 		color: white;
 		background-color: var(--brand);
@@ -354,7 +354,7 @@
 		display: flex;
 		flex-direction: column;
 		gap: var(--padding);
-		padding: var(--padding-input);
+		padding: var(--padding-small);
 		background-color: var(--overlay);
 		border-bottom-left-radius: var(--radius);
 		border-bottom-right-radius: var(--radius);
@@ -365,7 +365,7 @@
 		display: flex;
 		gap: var(--padding);
 		align-items: center;
-		padding: var(--padding-input);
+		padding: var(--padding-small);
 		color: white;
 	}
 	:global(details:hover) {

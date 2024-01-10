@@ -1,5 +1,49 @@
+<script>
+	import Item from '$lib/Item.svelte';
+	import ItemDetail from '$lib/ItemDetail.svelte';
+
+	export let items = [];
+
+	let selected = null;
+
+	// When the list of items updates, try and maintain a reference to an
+	// existing selected item;
+	function updateSelected(items) {
+		if (!selected) {
+			return;
+		}
+
+		const results = items.filter((x) => x.name == selected.name);
+
+		if (results.length == 0) {
+			return;
+		}
+
+		selected = results[0];
+	}
+
+	$: updateSelected(items);
+
+	// When an item is selected mark it as selected, unless it's the selected item
+	// the deselect it.
+	function select(event) {
+		selected = selected == event.detail.context ? null : event.detail.context;
+	}
+</script>
+
 <div class="items">
-	<slot />
+	{#each items as item}
+		<Item selected={item == selected} context={item} on:message={select}>
+			<slot name="header" slot="header" {item} />
+			<slot name="main" slot="main" {item} />
+		</Item>
+
+		{#if item == selected}
+			<ItemDetail>
+				<slot name="detail" {item} />
+			</ItemDetail>
+		{/if}
+	{/each}
 </div>
 
 <style>

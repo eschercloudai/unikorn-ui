@@ -5,15 +5,12 @@
 
 	import View from '$lib/View.svelte';
 	import ItemView from '$lib/ItemView.svelte';
-	import Item from '$lib/Item.svelte';
 	import Hint from '$lib/Hint.svelte';
 	import Details from '$lib/Details.svelte';
 
 	let accessToken;
 
 	let applications = [];
-
-	let selected = null;
 
 	const tokenUnsubscribe = token.subscribe(changeToken);
 
@@ -48,84 +45,69 @@
 		}
 
 		applications = result;
-
-		if (selected) {
-			const results = applications.filter((x) => x.name == selected.name);
-
-			selected = results[0];
-		}
 	}
 
 	$: updateApplictions(accessToken);
-
-	function select(event) {
-		selected = selected == event.detail.context ? null : event.detail.context;
-	}
 </script>
 
 <View>
 	<Hint content="Select an application for more details." />
 
-	<ItemView>
-		{#each applications as app}
-			<Item selected={app == selected} context={app} on:message={select}>
-				<div class="image-wrapper">
-					{@html atob(app.icon)}
-				</div>
-				<h5>{app.humanReadableName}</h5>
-			</Item>
-			{#if app == selected}
-				<Item jumbo="true" selected="true">
-					<dl>
-						<dt>Description</dt>
-						<dd>{app.description}</dd>
-						<dt>Documentation</dt>
-						<dd><a href={app.documentation}>{app.documentation}</a></dd>
-						<dt>License</dt>
-						<dd>{app.license}</dd>
-						<dt>Tags</dt>
-						<dd>{app.tags.join(', ')}</dd>
-						<dt>Versions</dt>
-						<dd>
-							{#each app.versions as version}
-								<Details summary={version.version} icon="mdi:cogs">
-									<dl>
-										{#if version.dependencies}
-											<dt>Dependencies</dt>
-											<dd>{version.dependencies.map((x) => x.name).join(', ')}</dd>
-										{/if}
-										{#if version.recommends}
-											<dt>Recommends</dt>
-											<dd>{version.recommends.map((x) => x.name).join(', ')}</dd>
-										{/if}
-									</dl>
-								</Details>
-							{/each}
-						</dd>
-					</dl>
-				</Item>
-			{/if}
-		{/each}
+	<ItemView items={applications}>
+		<svelte:fragment slot="header" let:item>
+			<div class="name">{item.humanReadableName}</div>
+		</svelte:fragment>
+
+		<svelte:fragment slot="main" let:item>
+			<div class="image-wrapper">
+				{@html atob(item.icon)}
+			</div>
+		</svelte:fragment>
+
+		<svelte:fragment slot="detail" let:item>
+			<dl>
+				<dt>Description</dt>
+				<dd>{item.description}</dd>
+				<dt>Documentation</dt>
+				<dd><a href={item.documentation}>{item.documentation}</a></dd>
+				<dt>License</dt>
+				<dd>{item.license}</dd>
+				<dt>Tags</dt>
+				<dd>{item.tags.join(', ')}</dd>
+				<dt>Versions</dt>
+				<dd>
+					{#each item.versions as version}
+						<Details summary={version.version} icon="mdi:cogs">
+							<dl>
+								{#if version.dependencies}
+									<dt>Dependencies</dt>
+									<dd>{version.dependencies.map((x) => x.name).join(', ')}</dd>
+								{/if}
+								{#if version.recommends}
+									<dt>Recommends</dt>
+									<dd>{version.recommends.map((x) => x.name).join(', ')}</dd>
+								{/if}
+							</dl>
+						</Details>
+					{/each}
+				</dd>
+			</dl>
+		</svelte:fragment>
 	</ItemView>
 </View>
 
 <style>
-	.image-wrapper {
+	div.name {
+		width: 100%;
+		text-align: center;
+	}
+	div.image-wrapper {
 		height: 5rem;
 	}
-	.image-wrapper > :global(svg) {
+	div.image-wrapper > :global(svg) {
 		max-width: 10rem;
 		max-height: 5rem;
 		display: block;
 		margin: auto;
-	}
-	h5 {
-		/* Fix me with better CSS */
-		padding-left: unset;
-		padding-right: unset;
-	}
-	h5 {
-		/* Fix me with better CSS */
-		text-align: center;
 	}
 </style>

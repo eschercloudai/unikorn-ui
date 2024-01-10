@@ -13,7 +13,6 @@
 	import ControlPlaneUpdateModal from '$lib/ControlPlaneUpdateModal.svelte';
 	import View from '$lib/View.svelte';
 	import ItemView from '$lib/ItemView.svelte';
-	import Item from '$lib/Item.svelte';
 	import ItemHeader from '$lib/ItemHeader.svelte';
 	import Info from '$lib/Info.svelte';
 	import Hint from '$lib/Hint.svelte';
@@ -25,8 +24,6 @@
 	let accessToken;
 
 	let controlPlanes = [];
-
-	let selected = null;
 
 	const tokenUnsubscribe = token.subscribe(changeToken);
 
@@ -82,12 +79,6 @@
 		}
 
 		controlPlanes = result;
-
-		if (selected) {
-			const results = controlPlanes.filter((x) => x.name == selected.name);
-
-			selected = results[0];
-		}
 	}
 
 	$: updateControlPlanes(accessToken);
@@ -137,10 +128,6 @@
 	function controlPlanesMutated() {
 		updateControlPlanes(accessToken);
 	}
-
-	function select(event) {
-		selected = selected == event.detail.context ? null : event.detail.context;
-	}
 </script>
 
 {#if createModalActive}
@@ -181,46 +168,50 @@
 
 	<Hint content="Select a control plane for more details and options." />
 
-	<ItemView>
-		{#each controlPlanes as cp}
-			<Item selected={cp == selected} context={cp} on:message={select}>
-				<ItemHeader name={cp.name} status={statusFromResource(cp.status)} alert={cp.upgradable} />
-				<dl>
-					<dt>Provisioning Status:</dt>
-					<dd>{cp.status.status}</dd>
-					<dt>Age:</dt>
-					<dd>{age(cp.status.creationTime)}</dd>
-				</dl>
-			</Item>
-			{#if cp == selected}
-				<Item jumbo="true" selected="true">
-					{#if cp.upgradable}
-						<Alert content="Upgrade available" />
-					{/if}
-					<dl>
-						<dt>Software Version:</dt>
-						{#if cp.applicationBundle.preview}
-							<dd>{cp.applicationBundle.version} <span class="detail">(Preview)</span></dd>
-						{:else if cp.applicationBundle.endOfLife}
-							<dd>
-								{cp.applicationBundle.version}
-								<span class="detail"
-									>EOL {new Date(cp.applicationBundle.endOfLife).toDateString()}</span
-								>
-							</dd>
-						{:else}
-							<dd>{cp.applicationBundle.version}</dd>
-						{/if}
-					</dl>
+	<ItemView items={controlPlanes}>
+		<svelte:fragment slot="header" let:item>
+			<ItemHeader
+				name={item.name}
+				status={statusFromResource(item.status)}
+				alert={item.upgradable}
+			/>
+		</svelte:fragment>
 
-					<hr />
+		<svelte:fragment slot="main" let:item>
+			<dl>
+				<dt>Provisioning Status:</dt>
+				<dd>{item.status.status}</dd>
+				<dt>Age:</dt>
+				<dd>{age(item.status.creationTime)}</dd>
+			</dl>
+		</svelte:fragment>
 
-					<Ribbon>
-						<Button text="Update" icon="mdi:square-edit-outline" on:message={handleEdit(cp)} />
-						<Button text="Delete" icon="mdi:delete" on:message={handleDelete(cp)} />
-					</Ribbon>
-				</Item>
+		<svelte:fragment slot="detail" let:item>
+			{#if item.upgradable}
+				<Alert content="Upgrade available" />
 			{/if}
-		{/each}
+			<dl>
+				<dt>Software Version:</dt>
+				{#if item.applicationBundle.preview}
+					<dd>{item.applicationBundle.version} <span class="detail">(Preview)</span></dd>
+				{:else if item.applicationBundle.endOfLife}
+					<dd>
+						{item.applicationBundle.version}
+						<span class="detail"
+							>EOL {new Date(item.applicationBundle.endOfLife).toDateString()}</span
+						>
+					</dd>
+				{:else}
+					<dd>{item.applicationBundle.version}</dd>
+				{/if}
+			</dl>
+
+			<hr />
+
+			<Ribbon>
+				<Button text="Update" icon="mdi:square-edit-outline" on:message={handleEdit(item)} />
+				<Button text="Delete" icon="mdi:delete" on:message={handleDelete(item)} />
+			</Ribbon>
+		</svelte:fragment>
 	</ItemView>
 </View>
