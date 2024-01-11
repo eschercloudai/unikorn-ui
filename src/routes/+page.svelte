@@ -235,9 +235,9 @@
 		--nav-icon-size: 2rem;
 		--nav-width: 100vw;
 
-		--overlay: rgba(240, 230, 240, 0.95);
-		--overlay-highlight: rgba(234, 218, 236, 0.95);
-		--modal: rgb(255, 255, 255);
+		--overlay: rgba(255, 255, 255, 0.9);
+		--overlay-highlight: rgba(254, 250, 255, 0.9);
+		--background: rgb(244, 229, 245);
 	}
 
 	/* Global styles */
@@ -254,6 +254,7 @@
 		background-repeat: no-repeat;
 		background-position: top right;
 		background-size: cover;
+		background-color: var(--background);
 	}
 	:global(h1, h2, h3, h4, h5, h6) {
 		color: var(--brand-dark);
@@ -342,35 +343,6 @@
 		cursor: not-allowed;
 		background-color: var(--mid-grey);
 	}
-	:global(details) {
-		background-color: var(--brand);
-		border-radius: var(--radius);
-		transition: all 0.3s ease-in-out;
-	}
-	:global(details[open]) {
-		width: 100%;
-	}
-	:global(details > section) {
-		display: flex;
-		flex-direction: column;
-		gap: var(--padding);
-		padding: var(--padding-small);
-		background-color: var(--overlay);
-		border-bottom-left-radius: var(--radius);
-		border-bottom-right-radius: var(--radius);
-		border: 1px solid var(--brand);
-	}
-	:global(summary) {
-		cursor: pointer;
-		display: flex;
-		gap: var(--padding);
-		align-items: center;
-		padding: var(--padding-small);
-		color: white;
-	}
-	:global(details:hover) {
-		background-color: var(--brand-dark);
-	}
 	:global(hr) {
 		color: var(--border);
 	}
@@ -390,17 +362,6 @@
 	}
 	:global(.error) {
 		color: var(--error);
-	}
-
-	/* Modal styling */
-	/* TODO: Move me! */
-	:global(.modal-header) {
-		padding: var(--padding);
-		display: inline-flex;
-		gap: var(--padding);
-		align-items: center;
-		background-color: var(--overlay);
-		border-bottom: 1px solid var(--border);
 	}
 
 	/* Main styling */
@@ -535,13 +496,13 @@
 	/* Color preference overrides */
 	@media (prefers-color-scheme: dark) {
 		:global(:root) {
-			--overlay: rgba(40, 40, 40, 0.75);
-			--overlay-highlight: rgba(50, 33, 51, 0.75);
-			--modal: rgb(13, 13, 28);
+			--overlay: rgba(40, 40, 40, 0.9);
+			--overlay-highlight: rgba(50, 33, 51, 0.9);
+			--background: rgb(13, 13, 28);
 			--border: rgb(80, 80, 80);
 		}
 		:global(body) {
-			background-color: #0d0d1c;
+			background-color: var(--background);
 			color: #eee;
 		}
 		:global(h1, h2, h3, h4, h5, h6) {
@@ -561,15 +522,6 @@
 		}
 		:global(button:disabled) {
 			background-color: var(--mid-grey);
-		}
-		:global(details) {
-			background-color: var(--brand-dark);
-		}
-		:global(details:hover) {
-			background-color: var(--brand);
-		}
-		:global(details > section) {
-			border: 1px solid var(--brand-dark);
 		}
 	}
 </style>

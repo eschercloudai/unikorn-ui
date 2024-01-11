@@ -51,7 +51,7 @@
 </script>
 
 <View>
-	<Hint content="Select an application for more details." />
+	<Hint>Select an application for more details.</Hint>
 
 	<ItemView items={applications}>
 		<svelte:fragment slot="header" let:item>

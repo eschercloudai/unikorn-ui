@@ -37,7 +37,8 @@
 		flex-direction: column;
 		align-items: stretch;
 		overflow-y: auto;
-		background-color: var(--modal);
+		background-color: var(--overlay);
+		backdrop-filter: blur(5px);
 	}
 
 	/* Desktop overrides */

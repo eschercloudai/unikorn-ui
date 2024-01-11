@@ -23,6 +23,8 @@
 	} from '$lib/formatters.js';
 
 	import Modal from '$lib/Modal.svelte';
+	import ModalHeader from '$lib/ModalHeader.svelte';
+	import ModalLoader from '$lib/ModalLoader.svelte';
 	import WorkloadPoolCreate from '$lib/WorkloadPoolCreate.svelte';
 	import TextField from '$lib/TextField.svelte';
 	import SelectField from '$lib/SelectField.svelte';
@@ -560,7 +562,8 @@
 
 <Modal {active} fixed="true">
 	{#if loaded}
-		<h2 class="modal-header"><iconify-icon icon="bx:edit" />Create Cluster</h2>
+		<ModalHeader text="Create Cluster" icon="mdi:pencil" />
+
 		<form>
 			<TextField
 				id="name"
@@ -852,18 +855,7 @@ s ingress and cert-manager add-ons"
 			</Ribbon>
 		</form>
 	{:else}
-		<div class="loader">
-			<div class="loader-content">
-				<h2>Loading ...</h2>
-				<img src="img/wait.png" alt="A sleepy cat" />
-				<div class="attribution">
-					<a
-						href="https://www.freepik.com/free-vector/cute-cat-sleeping-with-chick-cartoon-vector-icon-illustration-animal-nature-icon-concept-isolated_28268935.htm#query=sleeping%20cat&position=40&from_view=keyword&track=ais"
-						>Image by catalyststuff</a
-					> on Freepik
-				</div>
-			</div>
-		</div>
+		<ModalLoader />
 	{/if}
 </Modal>
 
@@ -873,25 +865,6 @@ s ingress and cert-manager add-ons"
 		flex-direction: column;
 		padding: var(--padding);
 		gap: var(--padding);
-	}
-	.loader {
-		display: flex;
-		flex-direction: column;
-		justify-content: center;
-		flex: 1;
-	}
-	.loader-content {
-		display: flex;
-		flex-direction: column;
-		align-items: center;
-		gap: var(--padding);
-		padding: var(--padding);
-	}
-	.loader-content > img {
-		max-width: 300px;
-	}
-	.attribution {
-		font-size: 0.75em;
 	}
 	.autoupgrade {
 		padding: var(--padding);

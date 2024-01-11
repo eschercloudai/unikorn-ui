@@ -9,6 +9,7 @@
 	import { applicationBundleFormatter } from '$lib/formatters.js';
 
 	import Modal from '$lib/Modal.svelte';
+	import ModalHeader from '$lib/ModalHeader.svelte';
 	import SelectField from '$lib/SelectField.svelte';
 	import CheckBoxField from '$lib/CheckBoxField.svelte';
 	import TimeWindowField from '$lib/TimeWindowField.svelte';
@@ -177,7 +178,7 @@
 </script>
 
 <Modal {active} fixed="true">
-	<h2 class="modal-header"><iconify-icon icon="mdi:square-edit-outline" />Update Control Plane</h2>
+	<ModalHeader text="Update Control Plane" icon="mdi:pencil" />
 	<form>
 		<dl>
 			<dt>Name</dt>
