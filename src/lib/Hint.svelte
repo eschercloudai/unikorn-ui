@@ -1,16 +1,14 @@
-<script>
-	export let content;
-</script>
-
 <section>
 	<iconify-icon icon="tabler:bulb" />
-	{content}
+	<div>
+		<slot />
+	</div>
 </section>
 
 <style>
 	section {
 		display: flex;
-		gap: var(--padding);
+		gap: var(--padding-small);
 		align-items: center;
 		border: 1px solid var(--brand);
 		background: var(--overlay);
@@ -18,7 +16,6 @@
 		padding: var(--padding-small);
 	}
 	iconify-icon {
-		font-size: var(--icon-size);
 		color: orange;
 	}
 </style>

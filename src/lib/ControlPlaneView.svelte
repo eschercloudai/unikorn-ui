@@ -20,6 +20,7 @@
 	import ToolBar from '$lib/ToolBar.svelte';
 	import Button from '$lib/Button.svelte';
 	import Ribbon from '$lib/Ribbon.svelte';
+	import Version from '$lib/Version.svelte';
 
 	let accessToken;
 
@@ -166,7 +167,13 @@
 		</p>
 	</Info>
 
-	<Hint content="Select a control plane for more details and options." />
+	{#if controlPlanes.length == 0}
+		<Hint>
+			No control planes found, select <em>New</em> to get started!
+		</Hint>
+	{:else}
+		<Hint>Select a control plane for more details and options.</Hint>
+	{/if}
 
 	<ItemView items={controlPlanes}>
 		<svelte:fragment slot="header" let:item>
@@ -192,25 +199,25 @@
 			{/if}
 			<dl>
 				<dt>Software Version:</dt>
-				{#if item.applicationBundle.preview}
-					<dd>{item.applicationBundle.version} <span class="detail">(Preview)</span></dd>
-				{:else if item.applicationBundle.endOfLife}
-					<dd>
-						{item.applicationBundle.version}
-						<span class="detail"
-							>EOL {new Date(item.applicationBundle.endOfLife).toDateString()}</span
-						>
-					</dd>
-				{:else}
-					<dd>{item.applicationBundle.version}</dd>
-				{/if}
+				<dd>
+					<Version
+						version={item.applicationBundle.version}
+						preview={item.applicationBundle.preview}
+						endOfLife={item.applicationBundle.endOfLife}
+					/>
+				</dd>
 			</dl>
 
 			<hr />
 
 			<Ribbon>
 				<Button text="Update" icon="mdi:square-edit-outline" on:message={handleEdit(item)} />
-				<Button text="Delete" icon="mdi:delete" on:message={handleDelete(item)} />
+				<Button
+					text="Delete"
+					icon="mdi:delete"
+					disabled={item.status.status == 'Deprovisioning'}
+					on:message={handleDelete(item)}
+				/>
 			</Ribbon>
 		</svelte:fragment>
 	</ItemView>

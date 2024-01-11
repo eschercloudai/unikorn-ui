@@ -25,6 +25,7 @@
 	import Ribbon from '$lib/Ribbon.svelte';
 	import Hint from '$lib/Hint.svelte';
 	import Alert from '$lib/Alert.svelte';
+	import Version from '$lib/Version.svelte';
 
 	let accessToken;
 
@@ -253,137 +254,98 @@
 </ToolBar>
 
 <View>
-	{#if controlPlanes.length == 0 || clusters.length == 0}
-		<section class="sad-kitty">
-			<img src="img/sad.png" alt="A sad kitty" />
-			<div class="attribution">
-				<a
-					href="https://www.freepik.com/free-vector/cute-cat-crying-cartoon-vector-icon-illustration-animal-nature-icon-concept-isolated-premium-vector_30924706.htm#query=cat%20sad&position=0&from_view=author"
-					>Image by catalyststuff</a
-				>
-				on Freepik
-			</div>
-
-			{#if controlPlanes.length == 0}
-				<p>
-					No control planes found. Either create a cluster to provision a default one (defaults to
-					latest version with auto-upgrade enabled), or create a control plane manually.
-				</p>
-			{:else}
-				<p>No clusters found, create one to begin!</p>
-			{/if}
-		</section>
+	{#if clusters.length == 0}
+		<Hint>
+			No clusters found, select <em>New</em> to get started!
+		</Hint>
 	{:else}
-		<Hint content="Select a cluster for more details and options." />
-
-		<ItemView items={clusters}>
-			<svelte:fragment slot="header" let:item>
-				<ItemHeader
-					name={item.name}
-					status={statusFromResource(item.status)}
-					alert={item.upgradable}
-				/>
-			</svelte:fragment>
-
-			<svelte:fragment slot="main" let:item>
-				<dl>
-					<dt>Provisioning Status</dt>
-					<dd>{item.status.status}</dd>
-
-					<dt>Age</dt>
-					<dd>{age(item.status.creationTime)}</dd>
-				</dl>
-			</svelte:fragment>
-
-			<svelte:fragment slot="detail" let:item>
-				{#if item.upgradable}
-					<Alert content="Upgrade available" />
-				{/if}
-				<dl>
-					<dt>Software Version</dt>
-					{#if item.applicationBundle.preview}
-						<dd>{item.applicationBundle.version} <span class="detail">Preview</span></dd>
-					{:else if item.applicationBundle.endOfLife}
-						<dd>
-							{item.applicationBundle.version}
-							<span class="detail"
-								>EOL {new Date(item.applicationBundle.endOfLife).toDateString()}</span
-							>
-						</dd>
-					{:else}
-						<dd>{item.applicationBundle.version}</dd>
-					{/if}
-					<dt>Kubernetes Version</dt>
-					<dd>{item.controlPlane.version}</dd>
-					<dt>Workload Pools</dt>
-					<dd>
-						{#each item.workloadPools as pool}
-							<Details summary={pool.name} icon="mdi:cogs">
-								<dl>
-									{#if pool.autoscaling}
-										<dt>Minimum replicas</dt>
-										<dd>{pool.autoscaling.minimumReplicas}</dd>
-										<dt>Maximum replicas</dt>
-										<dd>{pool.autoscaling.maximumReplicas}</dd>
-									{:else}
-										<dt>Replicas</dt>
-										<dd>pool.machine.replicas</dd>
-									{/if}
-									<dt>Image</dt>
-									<dd>{pool.machine.imageName}</dd>
-									<dt>Flavor</dt>
-									<dd>{pool.machine.flavorName}</dd>
-									<dt>Disk</dt>
-									<dd>{pool.machine.disk.size}GiB</dd>
-									{#if pool.labels}
-										<dt>Labels</dt>
-										<dd>
-											{Object.keys(pool.labels)
-												.map((x) => `${x}=${pool.labels[x]}`)
-												.join(',')}
-										</dd>
-									{/if}
-								</dl>
-							</Details>
-						{/each}
-					</dd>
-				</dl>
-
-				<hr />
-
-				<Ribbon>
-					<Button
-						text="Download kubeconfig"
-						icon="mdi:kubernetes"
-						on:message={handleKubeconfig(item)}
-					/>
-					<Button text="Update" icon="mdi:square-edit-outline" on:message={handleEdit(item)} />
-					<Button text="Delete" icon="mdi:delete" on:message={handleDelete(item)} />
-				</Ribbon>
-			</svelte:fragment>
-		</ItemView>
+		<Hint>Select a cluster for more details and options.</Hint>
 	{/if}
-</View>
 
-<style>
-	.detail {
-		font-size: 0.75rem;
-		color: var(--mid-grey);
-	}
-	section.sad-kitty {
-		display: flex;
-		flex-direction: column;
-		align-items: center;
-		gap: var(--padding);
-	}
-	section.sad-kitty > img {
-		max-width: 200px;
-		padding-right: 40px;
-	}
-	section.sad-kitty p {
-		color: var(--mid-grey);
-	}
-	.attribution {
-		font-size: 0.75em;
-	}
-</style>
+	<ItemView items={clusters}>
+		<svelte:fragment slot="header" let:item>
+			<ItemHeader
+				name={item.name}
+				status={statusFromResource(item.status)}
+				alert={item.upgradable}
+			/>
+		</svelte:fragment>
+
+		<svelte:fragment slot="main" let:item>
+			<dl>
+				<dt>Provisioning Status</dt>
+				<dd>{item.status.status}</dd>
+
+				<dt>Age</dt>
+				<dd>{age(item.status.creationTime)}</dd>
+			</dl>
+		</svelte:fragment>
+
+		<svelte:fragment slot="detail" let:item>
+			{#if item.upgradable}
+				<Alert content="Upgrade available" />
+			{/if}
+			<dl>
+				<dt>Software Version</dt>
+				<dd>
+					<Version
+						version={item.applicationBundle.version}
+						preview={item.applicationBundle.preview}
+						endOfLife={item.applicationBundle.endOfLife}
+					/>
+				</dd>
+				<dt>Kubernetes Version</dt>
+				<dd>{item.controlPlane.version}</dd>
+				<dt>Workload Pools</dt>
+				<dd>
+					{#each item.workloadPools as pool}
+						<Details summary={pool.name} icon="mdi:cogs">
+							<dl>
+								{#if pool.autoscaling}
+									<dt>Minimum replicas</dt>
+									<dd>{pool.autoscaling.minimumReplicas}</dd>
+									<dt>Maximum replicas</dt>
+									<dd>{pool.autoscaling.maximumReplicas}</dd>
+								{:else}
+									<dt>Replicas</dt>
+									<dd>pool.machine.replicas</dd>
+								{/if}
+								<dt>Image</dt>
+								<dd>{pool.machine.imageName}</dd>
+								<dt>Flavor</dt>
+								<dd>{pool.machine.flavorName}</dd>
+								<dt>Disk</dt>
+								<dd>{pool.machine.disk.size}GiB</dd>
+								{#if pool.labels}
+									<dt>Labels</dt>
+									<dd>
+										{Object.keys(pool.labels)
+											.map((x) => `${x}=${pool.labels[x]}`)
+											.join(',')}
+									</dd>
+								{/if}
+							</dl>
+						</Details>
+					{/each}
+				</dd>
+			</dl>
+
+			<hr />
+
+			<Ribbon>
+				<Button
+					text="Download kubeconfig"
+					icon="mdi:kubernetes"
+					on:message={handleKubeconfig(item)}
+				/>
+				<Button text="Update" icon="mdi:square-edit-outline" on:message={handleEdit(item)} />
+				<Button
+					text="Delete"
+					icon="mdi:delete"
+					disabled={item.status.status == 'Deprovisioning'}
+					on:message={handleDelete(item)}
+				/>
+			</Ribbon>
+		</svelte:fragment>
+	</ItemView>
+</View>
