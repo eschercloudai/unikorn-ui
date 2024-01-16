@@ -3,14 +3,11 @@
 	import { lt } from 'semver';
 	import { token, removeCredentials } from '$lib/credentials.js';
 	import { age } from '$lib/time.js';
-	import {
-		listControlPlanes,
-		deleteControlPlane,
-		listApplicationBundlesControlPlane
-	} from '$lib/client.js';
+	import { listControlPlanes, listApplicationBundlesControlPlane } from '$lib/client.js';
 
 	import ControlPlaneCreateModal from '$lib/ControlPlaneCreateModal.svelte';
 	import ControlPlaneUpdateModal from '$lib/ControlPlaneUpdateModal.svelte';
+	import ControlPlaneDeleteModal from '$lib/ControlPlaneDeleteModal.svelte';
 	import View from '$lib/View.svelte';
 	import ItemView from '$lib/ItemView.svelte';
 	import ItemHeader from '$lib/ItemHeader.svelte';
@@ -104,26 +101,20 @@
 	// Define dropdown callbacks.
 	let editModalActive = false;
 
-	function handleEdit(cp) {
-		controlPlane = cp;
+	function showEditModal() {
 		editModalActive = true;
-	}
-
-	async function handleDelete(cp) {
-		await deleteControlPlane(cp.name, {
-			token: accessToken,
-			onUnauthorized: () => {
-				removeCredentials();
-			}
-		});
-
-		updateControlPlanes(accessToken);
 	}
 
 	let createModalActive = false;
 
 	function showCreateModal() {
 		createModalActive = true;
+	}
+
+	let deleteModalActive = false;
+
+	function showDeleteModal() {
+		deleteModalActive = true;
 	}
 
 	function controlPlanesMutated() {
@@ -144,6 +135,14 @@
 		{controlPlane}
 		bind:active={editModalActive}
 		on:updated={controlPlanesMutated}
+	/>
+{/if}
+
+{#if deleteModalActive}
+	<ControlPlaneDeleteModal
+		{controlPlane}
+		bind:active={deleteModalActive}
+		on:deleted={controlPlanesMutated}
 	/>
 {/if}
 
@@ -175,7 +174,7 @@
 		<Hint>Select a control plane for more details and options.</Hint>
 	{/if}
 
-	<ItemView items={controlPlanes}>
+	<ItemView items={controlPlanes} bind:selected={controlPlane}>
 		<svelte:fragment slot="header" let:item>
 			<ItemHeader
 				name={item.name}
@@ -211,12 +210,17 @@
 			<hr />
 
 			<Ribbon>
-				<Button text="Update" icon="mdi:square-edit-outline" on:message={handleEdit(item)} />
+				<Button
+					text="Update"
+					icon="mdi:square-edit-outline"
+					disabled={item.status.deletionTime}
+					on:message={showEditModal}
+				/>
 				<Button
 					text="Delete"
 					icon="mdi:delete"
-					disabled={item.status.status == 'Deprovisioning'}
-					on:message={handleDelete(item)}
+					disabled={item.status.deletionTime}
+					on:message={showDeleteModal}
 				/>
 			</Ribbon>
 		</svelte:fragment>

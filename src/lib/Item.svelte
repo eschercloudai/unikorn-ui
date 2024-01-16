@@ -3,14 +3,10 @@
 
 	export let selected = false;
 
-	export let context = null;
-
 	const dispatch = createEventDispatcher();
 
 	function click() {
-		dispatch('message', {
-			context: context
-		});
+		dispatch('message', {});
 	}
 </script>
 

@@ -7,7 +7,6 @@
 	import {
 		listControlPlanes,
 		listClusters,
-		deleteCluster,
 		getClusterKubeconfig,
 		listApplicationBundlesCluster
 	} from '$lib/client.js';
@@ -16,6 +15,7 @@
 	import SelectField from '$lib/SelectField.svelte';
 	import ClusterCreateModal from '$lib/ClusterCreateModal.svelte';
 	import ClusterUpdateModal from '$lib/ClusterUpdateModal.svelte';
+	import ClusterDeleteModal from '$lib/ClusterDeleteModal.svelte';
 	import View from '$lib/View.svelte';
 	import ItemView from '$lib/ItemView.svelte';
 	import ItemHeader from '$lib/ItemHeader.svelte';
@@ -154,6 +154,8 @@
 		}
 	}
 
+	let cluster;
+
 	// Define dropdown callback handlers.
 	async function handleKubeconfig(cl) {
 		const blob = await getClusterKubeconfig(controlPlane.name, cl.name, {
@@ -182,31 +184,22 @@
 		}
 	}
 
-	// cluster defines the cluster subject to edit/details views.
-	let cluster = null;
-
 	let editModalActive = false;
 
-	function handleEdit(cl) {
-		cluster = cl;
+	function showEditModal() {
 		editModalActive = true;
-	}
-
-	async function handleDelete(cl) {
-		await deleteCluster(controlPlane.name, cl.name, {
-			token: accessToken,
-			onUnauthorized: () => {
-				removeCredentials();
-			}
-		});
-
-		updateClusters(accessToken, controlPlane);
 	}
 
 	let createModalActive = false;
 
 	function showCreateModal() {
 		createModalActive = true;
+	}
+
+	let deleteModalActive = false;
+
+	function showDeleteModal() {
+		deleteModalActive = true;
 	}
 
 	// Clusters can implictly create control planes, so update these first before
@@ -237,6 +230,15 @@
 	/>
 {/if}
 
+{#if deleteModalActive}
+	<ClusterDeleteModal
+		{controlPlane}
+		{cluster}
+		bind:active={deleteModalActive}
+		on:deleted={clustersMutated}
+	/>
+{/if}
+
 <ToolBar>
 	<Ribbon>
 		<Button text="New" icon="material-symbols:add" on:message={showCreateModal} />
@@ -262,7 +264,7 @@
 		<Hint>Select a cluster for more details and options.</Hint>
 	{/if}
 
-	<ItemView items={clusters}>
+	<ItemView items={clusters} bind:selected={cluster}>
 		<svelte:fragment slot="header" let:item>
 			<ItemHeader
 				name={item.name}
@@ -336,14 +338,20 @@
 				<Button
 					text="Download kubeconfig"
 					icon="mdi:kubernetes"
+					disabled={item.status.deletionTime}
 					on:message={handleKubeconfig(item)}
 				/>
-				<Button text="Update" icon="mdi:square-edit-outline" on:message={handleEdit(item)} />
+				<Button
+					text="Update"
+					icon="mdi:square-edit-outline"
+					disabled={item.status.deletionTime}
+					on:message={showEditModal(item)}
+				/>
 				<Button
 					text="Delete"
 					icon="mdi:delete"
-					disabled={item.status.status == 'Deprovisioning'}
-					on:message={handleDelete(item)}
+					disabled={item.status.deletionTime}
+					on:message={showDeleteModal(item)}
 				/>
 			</Ribbon>
 		</svelte:fragment>
