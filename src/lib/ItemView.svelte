@@ -4,7 +4,7 @@
 
 	export let items = [];
 
-	let selected = null;
+	export let selected = null;
 
 	// When the list of items updates, try and maintain a reference to an
 	// existing selected item;
@@ -26,14 +26,14 @@
 
 	// When an item is selected mark it as selected, unless it's the selected item
 	// the deselect it.
-	function select(event) {
-		selected = selected == event.detail.context ? null : event.detail.context;
+	function select(item) {
+		selected = selected == item ? null : item;
 	}
 </script>
 
 <div class="items">
 	{#each items as item}
-		<Item selected={item == selected} context={item} on:message={select}>
+		<Item selected={item == selected} on:message={() => select(item)}>
 			<slot name="header" slot="header" {item} />
 			<slot name="main" slot="main" {item} />
 		</Item>

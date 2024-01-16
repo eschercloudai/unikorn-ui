@@ -559,7 +559,7 @@
 		<form>
 			<dl>
 				<dt>Name</dt>
-				<dd>{controlPlane.name}</dd>
+				<dd>{cluster.name}</dd>
 			</dl>
 
 			<SelectField
