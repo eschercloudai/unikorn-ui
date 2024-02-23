@@ -18,9 +18,6 @@
 </details>
 
 <style>
-	details {
-		transition: all 0.3s ease-in-out;
-	}
 	details[open] {
 		width: 100%;
 	}
@@ -38,6 +35,7 @@
 		align-items: center;
 		padding: var(--padding-small);
 		color: white;
+		transition: all 0.3s ease-in-out;
 	}
 	summary:hover {
 		background-color: var(--brand-dark);
