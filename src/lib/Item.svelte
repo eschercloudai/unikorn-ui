@@ -29,6 +29,10 @@
 		padding: var(--padding-small);
 		border-top-right-radius: var(--radius);
 		border-top-left-radius: var(--radius);
+		transition: all 0.2s ease-in;
+	}
+	header:hover {
+		background-color: var(--brand-light);
 	}
 	main {
 		background-color: var(--overlay);
@@ -36,6 +40,10 @@
 		border: 1px solid var(--brand);
 		border-bottom-right-radius: var(--radius);
 		border-bottom-left-radius: var(--radius);
+		transition: all 0.2s ease-in;
+	}
+	header:hover + main {
+		border: 1px solid var(--brand-light);
 	}
 	header.selected {
 		background-color: var(--brand-light);
